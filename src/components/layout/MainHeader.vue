@@ -123,63 +123,72 @@ onBeforeUnmount(() => {
         </svg>
       </button>
     </nav>
-    <div
-      v-if="isMobileNavOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur"
-      @click.self="closeMobileNav"
-    >
-      <div class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-950/95 p-6 text-slate-200 shadow-2xl">
-        <div class="mb-4 flex items-center justify-between gap-4">
-          <p class="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-300">Menu</p>
-          <button
-            type="button"
-            class="rounded-full border border-slate-700 bg-slate-900/60 p-2 text-slate-300 transition hover:text-white"
-            aria-label="Close menu"
+    <Teleport to="body">
+      <div
+        v-if="isMobileNavOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center px-5 py-8"
+        @click.self="closeMobileNav"
+      >
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md"></div>
+        <div
+          class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-[#0b152b]/95 p-8 text-slate-100 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
+        >
+          <div class="mb-8 flex items-center justify-between">
+            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-300">Menu</p>
+            <button
+              type="button"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-300 transition hover:border-slate-500 hover:text-white"
+              aria-label="Close menu"
+              @click="closeMobileNav"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <nav class="space-y-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-200">
+            <template v-for="link in navLinks" :key="`mobile-${link.label}`">
+              <RouterLink
+                v-if="link.target === 'route'"
+                :to="link.to"
+                :class="[
+                  'block rounded-2xl px-5 py-4 transition',
+                  isActive(link)
+                    ? 'bg-slate-800/80 text-white shadow-[inset_0_0_0_1px_rgba(94,234,212,0.4)]'
+                    : 'hover:bg-slate-800/60 hover:text-white',
+                ]"
+                @click="closeMobileNav"
+              >
+                {{ link.label }}
+              </RouterLink>
+              <a
+                v-else
+                :href="link.href"
+                class="block rounded-2xl px-5 py-4 transition hover:bg-slate-800/60 hover:text-white"
+                @click="closeMobileNav"
+              >
+                {{ link.label }}
+              </a>
+            </template>
+          </nav>
+          <RouterLink
+            v-if="!isAuthenticated"
+            to="/login"
+            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
             @click="closeMobileNav"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            Sign in Account
+          </RouterLink>
+          <button
+            v-else
+            type="button"
+            class="mt-10 w-full rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200 transition hover:border-red-400 hover:text-red-300"
+            @click="handleSignOut"
+          >
+            Sign out
           </button>
         </div>
-        <nav class="space-y-3 text-sm font-medium">
-          <template v-for="link in navLinks" :key="`mobile-${link.label}`">
-            <RouterLink
-              v-if="link.target === 'route'"
-              :to="link.to"
-              :class="[
-                'block rounded-xl px-4 py-3 transition',
-                isActive(link) ? 'bg-slate-800/80 text-white' : 'hover:bg-slate-800/60 hover:text-white',
-              ]"
-            >
-              {{ link.label }}
-            </RouterLink>
-            <a
-              v-else
-              :href="link.href"
-              class="block rounded-xl px-4 py-3 transition hover:bg-slate-800/60 hover:text-white"
-            >
-              {{ link.label }}
-            </a>
-          </template>
-        </nav>
-        <RouterLink
-          v-if="!isAuthenticated"
-          to="/login"
-          class="mt-6 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
-          @click="closeMobileNav"
-        >
-          Sign in Account
-        </RouterLink>
-        <button
-          v-else
-          type="button"
-          class="mt-6 w-full rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition hover:border-red-400 hover:text-red-300"
-          @click="handleSignOut"
-        >
-          Sign out
-        </button>
       </div>
-    </div>
+    </Teleport>
   </header>
 </template>
