@@ -1,1 +1,144 @@
 @import "tailwindcss";
+
+:root {
+  --brand-50: #e6f2f9;
+  --brand-100: #c7e1f3;
+  --brand-200: #98c6e7;
+  --brand-300: #6ba8d6;
+  --brand-400: #3f89c2;
+  --brand-500: #096b9f;
+  --brand-500-rgb: 9, 107, 159;
+  --brand-400-rgb: 63, 137, 194;
+  --brand-300-rgb: 107, 168, 214;
+}
+
+@font-face {
+  font-family: "Pavia";
+  src: url("/fonts/Pavia.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "Pavia", "Inter", sans-serif;
+  background-color: #020617;
+  color: #cbd5f5;
+}
+
+.font-display,
+.font-body,
+body * {
+  font-family: inherit;
+}
+
+.btn-order-glow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--brand-100);
+  border-radius: 9999px;
+  border: 1px solid rgba(var(--brand-500-rgb), 0.35);
+  background:
+    radial-gradient(circle at top left, rgba(var(--brand-300-rgb), 0.25), rgba(15, 23, 42, 0.2)),
+    rgba(15, 23, 42, 0.85);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 0 0 18px rgba(var(--brand-500-rgb), 0.14);
+}
+
+.btn-order-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    rgba(var(--brand-400-rgb), 0.65),
+    rgba(var(--brand-300-rgb), 0.25),
+    rgba(var(--brand-400-rgb), 0.65)
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: -1;
+}
+
+.btn-order-glow:hover,
+.btn-order-glow:focus-visible {
+  color: #0f172a;
+  background: rgba(206, 232, 246, 0.9);
+  border-color: rgba(var(--brand-400-rgb), 0.65);
+  box-shadow:
+    0 0 25px rgba(var(--brand-500-rgb), 0.3),
+    0 5px 22px rgba(var(--brand-400-rgb), 0.25);
+  transform: translateY(-2px);
+}
+
+.btn-order-glow:hover::after,
+.btn-order-glow:focus-visible::after {
+  opacity: 1;
+}
+
+.btn-order-glow svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  gap: 0.3rem;
+  padding: 12px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--brand-500-rgb), 0.95),
+    rgba(var(--brand-400-rgb), 0.95)
+  );
+  border: 1px solid rgba(var(--brand-500-rgb), 0.45);
+  box-shadow: 0 12px 28px rgba(var(--brand-500-rgb), 0.25);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(var(--brand-500-rgb), 0.65);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--brand-400-rgb), 1),
+    rgba(4, 64, 96, 0.95)
+  );
+  box-shadow: 0 16px 32px rgba(var(--brand-500-rgb), 0.35);
+  outline: none;
+}
+
+.shadow-glow {
+  box-shadow:
+    0 25px 75px rgba(var(--brand-500-rgb), 0.12),
+    0 10px 35px rgba(var(--brand-400-rgb), 0.18);
+}
+
+.chat-support-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
