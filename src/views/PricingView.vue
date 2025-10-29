@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
-import { generateCheckoutDetails, type CheckoutDetails } from '../services/paywayService';
+import {
+  generateCheckoutDetails,
+  checkBakongPaymentStatus,
+  type CheckoutDetails,
+  type PaymentStatus,
+  type PaymentStatusResult,
+} from '../services/paywayService';
+
+const merchantName = import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB';
 
 type AudienceKey = 'local' | 'foreigner';
 
@@ -154,6 +162,167 @@ const isGeneratingCheckout = ref(false);
 const paymentError = ref<string | null>(null);
 const checkoutDetails = ref<CheckoutDetails | null>(null);
 
+const POLL_INTERVAL_MS = 3000;
+const paymentStatus = ref<PaymentStatus>('UNPAID');
+const lastStatusResult = ref<PaymentStatusResult | null>(null);
+const statusCheckError = ref<string | null>(null);
+const isPollingStatus = ref(false);
+const remainingSeconds = ref(0);
+const pollingTimerId = ref<ReturnType<typeof setInterval> | null>(null);
+const countdownTimerId = ref<ReturnType<typeof setInterval> | null>(null);
+
+const stopPolling = () => {
+  if (pollingTimerId.value !== null) {
+    clearInterval(pollingTimerId.value);
+    pollingTimerId.value = null;
+  }
+};
+
+const stopCountdown = () => {
+  if (countdownTimerId.value !== null) {
+    clearInterval(countdownTimerId.value);
+    countdownTimerId.value = null;
+  }
+};
+
+const resetPaymentTracking = () => {
+  stopPolling();
+  stopCountdown();
+  paymentStatus.value = 'UNPAID';
+  remainingSeconds.value = 0;
+  statusCheckError.value = null;
+  isPollingStatus.value = false;
+  lastStatusResult.value = null;
+};
+
+const startPaymentTracking = (details: CheckoutDetails) => {
+  resetPaymentTracking();
+
+  const expirationTimestamp = details.expirationTimestamp;
+  const md5 = details.md5?.trim();
+
+  const updateRemainingSeconds = () => {
+    const secondsLeft = Math.max(0, Math.round((expirationTimestamp - Date.now()) / 1000));
+    remainingSeconds.value = secondsLeft;
+
+    if (secondsLeft <= 0) {
+      stopCountdown();
+      if (paymentStatus.value !== 'PAID') {
+        stopPolling();
+      }
+    }
+  };
+
+  updateRemainingSeconds();
+  if (remainingSeconds.value > 0) {
+    countdownTimerId.value = setInterval(updateRemainingSeconds, 1000);
+  }
+
+  if (!md5) {
+    statusCheckError.value = 'Unable to monitor payment status (missing transaction hash).';
+    return;
+  }
+
+  const poll = async () => {
+    if (paymentStatus.value === 'PAID') {
+      return;
+    }
+
+    if (remainingSeconds.value <= 0) {
+      stopPolling();
+      return;
+    }
+
+    isPollingStatus.value = true;
+    try {
+      const result = await checkBakongPaymentStatus(md5);
+      lastStatusResult.value = result;
+      statusCheckError.value = null;
+      paymentStatus.value = result.status;
+
+      if (result.status === 'PAID') {
+        updateRemainingSeconds();
+        stopPolling();
+        stopCountdown();
+      }
+    } catch (error) {
+      statusCheckError.value =
+        error instanceof Error ? error.message : 'Unable to check Bakong payment status. Please try again.';
+    } finally {
+      isPollingStatus.value = false;
+    }
+  };
+
+  void poll();
+  pollingTimerId.value = setInterval(() => {
+    void poll();
+  }, POLL_INTERVAL_MS);
+};
+
+const isQrExpired = computed(() => remainingSeconds.value <= 0 && !!checkoutDetails.value);
+
+const countdownLabel = computed(() => {
+  if (!checkoutDetails.value) {
+    return 'Preparing payment...';
+  }
+
+  if (remainingSeconds.value <= 0) {
+    return 'QR expired';
+  }
+
+  const minutes = Math.floor(remainingSeconds.value / 60);
+  const seconds = remainingSeconds.value % 60;
+  return `QR valid for ${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+const statusLabelClass = computed(() => {
+  if (paymentStatus.value === 'PAID') {
+    return 'text-emerald-600';
+  }
+  if (isQrExpired.value) {
+    return 'text-red-500';
+  }
+  if (statusCheckError.value) {
+    return 'text-amber-500';
+  }
+  return 'text-slate-600';
+});
+
+const statusLabel = computed(() => {
+  if (paymentStatus.value === 'PAID') {
+    return 'Payment received.';
+  }
+  if (isQrExpired.value) {
+    return 'QR expired';
+  }
+  if (statusCheckError.value) {
+    return statusCheckError.value;
+  }
+  if (isPollingStatus.value) {
+    return 'Checking payment status...';
+  }
+  return 'Waiting for payment...';
+});
+
+const transactionHash = computed(() => checkoutDetails.value?.md5 ?? null);
+
+const lastCheckedLabel = computed(() => {
+  if (!lastStatusResult.value) {
+    return null;
+  }
+
+  try {
+    const formatted = new Intl.DateTimeFormat(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date(lastStatusResult.value.checkedAt));
+    return `Last checked ${formatted}`;
+  } catch {
+    return null;
+  }
+});
+
 const highlightedPlanId = computed(() => selectedPlanId.value ?? planIdFromQuery.value ?? null);
 const selectedPlan = computed(() => (selectedPlanId.value ? planMap.get(selectedPlanId.value) ?? null : null));
 
@@ -172,6 +341,7 @@ const syncPlanQuery = (planId: string | null) => {
 };
 
 const openPaymentModal = (planId: string) => {
+  resetPaymentTracking();
   selectedPlanId.value = planId;
   checkoutDetails.value = null;
   paymentError.value = null;
@@ -182,6 +352,7 @@ const openPaymentModal = (planId: string) => {
 const closeAllModals = () => {
   isPaymentModalOpen.value = false;
   isQrModalOpen.value = false;
+  resetPaymentTracking();
   checkoutDetails.value = null;
   paymentError.value = null;
   selectedPlanId.value = null;
@@ -215,6 +386,24 @@ watchEffect(() => {
   }
 });
 
+watch(checkoutDetails, (details) => {
+  if (details) {
+    startPaymentTracking(details);
+  } else {
+    resetPaymentTracking();
+  }
+});
+
+watch(isQrModalOpen, (open) => {
+  if (!open) {
+    resetPaymentTracking();
+  }
+});
+
+onBeforeUnmount(() => {
+  resetPaymentTracking();
+});
+
 const selectAudience = (value: AudienceKey) => {
   audience.value = value;
 };
@@ -233,6 +422,8 @@ const requestCheckout = async () => {
     return;
   }
 
+  resetPaymentTracking();
+  checkoutDetails.value = null;
   isGeneratingCheckout.value = true;
   paymentError.value = null;
 
@@ -256,10 +447,7 @@ const requestCheckout = async () => {
 };
 
 const continueToCheckout = () => {
-  if (!checkoutDetails.value) {
-    return;
-  }
-  window.open(checkoutDetails.value.url, '_blank', 'noopener');
+  // No action needed, user should scan the QR code
 };
 </script>
 
@@ -382,7 +570,7 @@ const continueToCheckout = () => {
           </p>
           <button
             type="button"
-            class="mt-10 flex w-full items-center justify-center gap-3 rounded-full bg-[#23bdee]/20 px-6 py-4 text-base font-semibold text-[#23bdee] transition hover:bg-[#23bdee]/30 disabled:cursor-not-allowed disabled:opacity-60"
+              class="mt-10 flex w-full items-center justify-center gap-3 rounded-full bg-[#23bdee]/20 px-6 py-4 text-base font-semibold text-[#23bdee] transition hover:bg-[#23bdee]/30 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="isGeneratingCheckout"
             @click="requestCheckout"
           >
@@ -391,7 +579,7 @@ const continueToCheckout = () => {
             >
               PAY
             </span>
-            {{ isGeneratingCheckout ? 'Preparing payment...' : 'Pay with ABA PayWay' }}
+            {{ isGeneratingCheckout ? 'Preparing payment...' : 'Pay with Bakong KHQR' }}
           </button>
         </div>
       </div>
@@ -416,26 +604,52 @@ const continueToCheckout = () => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <div class="mx-auto inline-flex rounded-full bg-[#ff3b5b] px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white">
-            ABA KHQR
+          <div class="text-center">
+            <h2 class="text-4xl font-bold text-red-600 mb-2">KHQR</h2>
+            <p class="text-xl font-semibold text-slate-900">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
           </div>
+          
           <div class="mt-6 text-center">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">{{ selectedPlan.name }}</p>
-            <p class="mt-4 text-3xl font-bold text-slate-900">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
-            <p class="text-sm text-slate-500">{{ selectedPlan.cadence }}</p>
+            <div class="mx-auto h-16 mb-4 bg-blue-500 text-white flex items-center justify-center rounded-lg">
+              KHQR
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-4">{{ merchantName }}</h3>
           </div>
-          <div class="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-inner">
-            <img :src="checkoutDetails.qrCode" alt="ABA PayWay QR code" class="mx-auto h-48 w-48 rounded-xl bg-white p-3 shadow" />
+
+          <div class="mt-4">
+            <div class="relative bg-white p-6 rounded-lg shadow-lg">
+              <img 
+                :src="checkoutDetails.qrCode" 
+                alt="Bakong KHQR code" 
+                class="mx-auto w-full"
+              />
+              <div class="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">$</div>
+              </div>
+            </div>
           </div>
-          <p class="mt-6 text-center text-sm text-slate-500">
-            Scan with ABA Mobile or any KHQR compatible banking app to confirm your payment instantly.
-          </p>
+
+          <div class="mt-8 text-center">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">{{ merchantName }}</h3>
+            <p class="text-sm text-slate-500">{{ countdownLabel }}</p>
+            <p class="text-sm font-medium mt-2" :class="statusLabelClass">{{ statusLabel }}</p>
+            <p v-if="lastCheckedLabel" class="mt-1 text-xs text-slate-400">
+              {{ lastCheckedLabel }}
+            </p>
+            <p v-if="transactionHash" class="mt-2 text-xs text-slate-400 break-all">
+              Transaction hash: {{ transactionHash }}
+            </p>
+          </div>
           <button
             type="button"
-            class="mt-8 w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-emerald-400"
+            class="mt-8 w-full rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] transition"
+            :class="paymentStatus === 'PAID'
+              ? 'bg-emerald-500 text-white hover:bg-emerald-400'
+              : 'bg-slate-300 text-slate-500 cursor-not-allowed'"
+            :disabled="paymentStatus !== 'PAID'"
             @click="continueToCheckout"
           >
-            Continue to this plan checkout
+            {{ paymentStatus === 'PAID' ? 'Continue to this plan checkout' : 'Waiting for payment confirmation' }}
           </button>
         </div>
       </div>

@@ -35,9 +35,10 @@ declare module 'bakong-khqr' {
       code: number;
       message?: string | null;
     };
-    data: {
+    data?: {
       qr: string;
-    };
+      md5?: string;
+    } | null;
   }
 
   export class BakongKHQR {

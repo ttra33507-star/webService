@@ -1,0 +1,329 @@
+import QRCode from 'qrcode';
+import { BakongKHQR, khqrData, IndividualInfo } from 'bakong-khqr';
+
+// Using Bakong KHQR for payments
+const paywayBaseUrl = import.meta.env.VITE_PAYWAY_URL ?? 'https://bakong-qr.nbc.gov.kh/api/v1/';
+// Trim environment values and treat empty strings as unset so fallbacks work correctly.
+const bakongToken = (import.meta.env.VITE_BAKONG_TOKEN ?? '').toString().trim();
+const phoneNumber = (import.meta.env.VITE_PHONE_NUMBER ?? '').toString().trim();
+// If VITE_BAKONG_ACCOUNT_ID is empty string, fall back to phoneNumber.
+const bakongAccountId = ((import.meta.env.VITE_BAKONG_ACCOUNT_ID ?? '').toString().trim()) || phoneNumber;
+const merchantName = (import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB').toString().trim();
+const merchantCity = import.meta.env.VITE_MERCHANT_CITY ?? 'Phnom Penh';
+const merchantCategoryCode = import.meta.env.VITE_MERCHANT_CATEGORY_CODE ?? '5999';
+// Only supporting individual accounts for now
+const merchantId = import.meta.env.VITE_MERCHANT_ID ?? 'C4HUB001';
+const acquiringBank = import.meta.env.VITE_ACQUIRING_BANK ?? 'ABA';
+const khqrExpiryMinutes = Number.parseInt(import.meta.env.VITE_KHQR_EXPIRY_MINUTES ?? '15', 10);
+
+const khqrClient = new BakongKHQR();
+
+interface CheckoutParams {
+  planId?: string;
+  amount?: number;
+  currency?: string;
+}
+
+const extractKhqrValue = (response: unknown) => {
+  if (!response || typeof response !== 'object') {
+    console.error('Invalid response:', response);
+    return undefined;
+  }
+
+  // First try to get the data property
+  const responseData = (response as { data?: unknown }).data;
+  
+  if (responseData && typeof responseData === 'object') {
+    // Try to get direct QR string from data
+    const qrData = responseData as { qr?: string };
+    if (typeof qrData.qr === 'string' && qrData.qr.trim()) {
+      return qrData.qr.trim();
+    }
+  }
+
+  // If no data.qr, try other known properties
+  const candidateObj = response as { 
+    qr?: string;
+    qrString?: string;
+    payload?: string;
+  };
+
+  // Check each possible property
+  if (typeof candidateObj.qr === 'string' && candidateObj.qr.trim()) {
+    return candidateObj.qr.trim();
+  }
+
+  if (typeof candidateObj.qrString === 'string' && candidateObj.qrString.trim()) {
+    return candidateObj.qrString.trim();
+  }
+
+  if (typeof candidateObj.payload === 'string' && candidateObj.payload.trim()) {
+    return candidateObj.payload.trim();
+  }
+
+  // If we get here, log what we received to help debug
+  console.error('Unable to extract QR value from response:', JSON.stringify(response, null, 2));
+  return undefined;
+};
+
+const getKhqrCurrency = (code: string) => {
+  const normalized = code.trim().toUpperCase();
+
+  // Log the currency code for debugging
+  console.log('Converting currency code:', normalized);
+
+  let currencyCode;
+  switch (normalized) {
+    case 'USD':
+      currencyCode = khqrData.currency.usd;
+      break;
+    case 'KHR':
+      currencyCode = khqrData.currency.khr;
+      break;
+    default:
+      currencyCode = undefined;
+  }
+
+  // Log the result
+  console.log('Mapped currency code:', currencyCode);
+  return currencyCode;
+};
+
+const buildKhqrPayload = ({ planId, amount = 0, currency = 'USD' }: Required<CheckoutParams>) => {
+  // Validate required configuration
+  if (!bakongAccountId) {
+    console.error('Bakong Account ID missing');
+    throw new Error('Payment configuration missing. Please set VITE_BAKONG_ACCOUNT_ID or VITE_PHONE_NUMBER.');
+  }
+
+  if (!merchantName) {
+    console.error('Merchant Name missing');
+    throw new Error('Payment configuration missing. Please set VITE_MERCHANT_NAME.');
+  }
+
+  // Validate amount
+  if (amount <= 0) {
+    console.error('Invalid amount:', amount);
+    throw new Error('Invalid payment amount. Amount must be greater than 0.');
+  }
+
+  // Ensure phone number is in correct format (remove +855 if present)
+  const formattedPhone = phoneNumber.replace(/^\+855/, '0');
+
+  // Log configuration for debugging
+  console.log('Payment Configuration:', {
+    bakongAccountId,
+    merchantName,
+    merchantCity,
+    merchantId,
+    acquiringBank,
+    amount,
+    currency,
+    phoneNumber: formattedPhone
+  });
+
+  const mappedCurrency = getKhqrCurrency(currency);
+
+  if (!mappedCurrency) {
+    throw new Error(`Unsupported currency "${currency}" for KHQR generation.`);
+  }
+
+  // Format the amount as integer (in cents/smallest currency unit)
+  const amountInCents = Math.round(amount * 100);
+  
+  // Create expiration timestamp in YYYYMMDDHHMMSS format (local time)
+  const expirationDate = new Date(Date.now() + (khqrExpiryMinutes * 60 * 1000));
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  
+  const formattedExpiration = 
+    expirationDate.getFullYear().toString() +
+    pad(expirationDate.getMonth() + 1) +
+    pad(expirationDate.getDate()) +
+    pad(expirationDate.getHours()) +
+    pad(expirationDate.getMinutes()) +
+    pad(expirationDate.getSeconds());
+  
+  const optional = {
+    amount: amount.toString(), // Use original amount, not cents
+    currency: mappedCurrency,
+    billNumber: planId,
+    merchantCategoryCode: merchantCategoryCode || '5999',
+    mobileNumber: phoneNumber.replace(/^\+855/, '0'),
+    terminalLabel: merchantName,
+    storeLabel: merchantName,
+    purpose: `Payment for ${planId}`,
+    expirationTimestamp: formattedExpiration,
+  };
+
+  try {
+    // Create the info for KHQR generation
+    const info = {
+      bakongAccountId,
+      merchantName,
+      merchantCity,
+      phoneNumber: phoneNumber.replace(/^\+855/, '0'),
+      amount: optional.amount,
+      currency: optional.currency,
+      billNumber: optional.billNumber,
+      expiry: optional.expirationTimestamp
+    };
+
+    console.log('Creating KHQR with info:', info);
+
+    // Create IndividualInfo instance with validated data
+    // Removed unused code
+
+    // Generate KHQR with proper info object
+    try {
+    console.log('Generating KHQR with params:', {
+      account: bakongAccountId,
+      merchant: merchantName,
+      city: merchantCity,
+      optional: {
+        amount: optional.amount,
+        currency: optional.currency,
+        expiry: optional.expirationTimestamp,
+        phone: optional.mobileNumber
+      }
+    });
+
+    const info = new IndividualInfo(
+      bakongAccountId,
+      merchantName,
+      merchantCity,
+      optional
+    );
+
+    const result = khqrClient.generateIndividual(info);
+    console.log('KHQR Generation Result:', result);
+
+    if (result.status.code !== 0) {
+      throw new Error(result.status.message ?? 'Unable to generate KHQR payload.');
+    }
+
+    const qrValue = extractKhqrValue(result);
+
+    if (!qrValue) {
+      console.error('Bakong SDK returned unexpected payload:', result);
+      throw new Error('Bakong SDK returned an empty KHQR payload.');
+    }
+
+    return qrValue;
+  } catch (error) {
+    console.error('Error generating KHQR:', error);
+    throw error;
+  }
+  } catch (error) {
+    console.error('Error generating KHQR:', error);
+    throw error;
+  }
+  console.log('Generating KHQR with info:', {
+    bakongAccountId,
+    merchantName,
+    merchantCity,
+    optional
+  });
+  
+  const result = khqrClient.generateIndividual(info);
+
+  if (result.status.code !== 0) {
+    console.error('KHQR generation failed with status:', result.status);
+    throw new Error(result.status.message ?? 'Unable to generate KHQR payload.');
+  }
+
+  const qrValue = extractKhqrValue(result);
+  
+  if (!qrValue) {
+    console.error('KHQR generation returned empty result:', result);
+    throw new Error('Generated KHQR payload is empty.');
+  }
+
+  if (!qrValue) {
+    console.error('Bakong SDK returned unexpected payload', result);
+    throw new Error('Bakong SDK returned an empty KHQR payload.');
+  }
+
+  return qrValue;
+};
+
+const buildCheckoutUrl = ({ planId, amount, currency }: CheckoutParams = {}) => {
+  const url = new URL(paywayBaseUrl);
+
+  if (bakongToken) {
+    url.searchParams.set('token', bakongToken);
+  }
+
+  if (phoneNumber) {
+    url.searchParams.set('phone', phoneNumber);
+  }
+
+  if (planId) {
+    url.searchParams.set('plan', planId);
+  }
+
+  if (typeof amount === 'number') {
+    url.searchParams.set('amount', amount.toFixed(2));
+  }
+
+  if (currency) {
+    url.searchParams.set('currency', currency);
+  }
+
+  return url.toString();
+};
+
+export const startCheckout = (planId?: string) => {
+  const url = buildCheckoutUrl({ planId });
+
+  if (!bakongToken || !phoneNumber) {
+    // eslint-disable-next-line no-alert
+    alert('Payment details are not configured. Please set VITE_BAKONG_TOKEN and VITE_PHONE_NUMBER.');
+    return;
+  }
+
+  window.location.href = url;
+};
+
+export const generateCheckoutDetails = async (params: Required<CheckoutParams>) => {
+  if (!bakongToken || !phoneNumber) {
+    throw new Error('Payment configuration missing. Please check VITE_BAKONG_TOKEN and VITE_PHONE_NUMBER.');
+  }
+
+  const url = buildCheckoutUrl(params);
+  let khqrPayload;
+  try {
+    khqrPayload = buildKhqrPayload(params);
+  } catch (error) {
+    console.error('Failed to generate KHQR payload:', error);
+    throw new Error('Unable to generate payment QR code. Please check your configuration.');
+  }
+
+  let qrCode: string;
+  try {
+    if (!khqrPayload) {
+      throw new Error('KHQR payload is required for QR code generation');
+    }
+    qrCode = await QRCode.toDataURL(khqrPayload, {
+      margin: 1,
+      width: 320,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF',
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to generate KHQR image.';
+    if (message === 'Invalid data') {
+      throw new Error('Unable to render KHQR. Please recheck Bakong configuration and plan details.');
+    }
+    throw new Error(message);
+  }
+
+  return {
+    url,
+    khqrPayload,
+    qrCode,
+  };
+};
+
+export type CheckoutDetails = Awaited<ReturnType<typeof generateCheckoutDetails>>;
