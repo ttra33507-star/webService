@@ -9,6 +9,7 @@ import {
   type PaymentStatus,
   type PaymentStatusResult,
 } from '../services/paywayService';
+import Swal from 'sweetalert2';
 
 const merchantName = import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB';
 
@@ -30,7 +31,7 @@ const plansByAudience: Record<AudienceKey, Plan[]> = {
     {
       id: 'local-1m',
       name: '1 Month',
-      amount: 9.99,
+      amount: 0.01,
       currency: 'USD',
       cadence: '/month',
       features: [
@@ -164,6 +165,7 @@ const checkoutDetails = ref<CheckoutDetails | null>(null);
 
 const POLL_INTERVAL_MS = 3000;
 const paymentStatus = ref<PaymentStatus>('UNPAID');
+const hasShownPaidAlert = ref(false);
 const lastStatusResult = ref<PaymentStatusResult | null>(null);
 const statusCheckError = ref<string | null>(null);
 const isPollingStatus = ref(false);
@@ -189,6 +191,7 @@ const resetPaymentTracking = () => {
   stopPolling();
   stopCountdown();
   paymentStatus.value = 'UNPAID';
+  hasShownPaidAlert.value = false;
   remainingSeconds.value = 0;
   statusCheckError.value = null;
   isPollingStatus.value = false;
@@ -397,6 +400,18 @@ watch(checkoutDetails, (details) => {
 watch(isQrModalOpen, (open) => {
   if (!open) {
     resetPaymentTracking();
+  }
+});
+
+watch(paymentStatus, (status) => {
+  if (status === 'PAID' && !hasShownPaidAlert.value) {
+    hasShownPaidAlert.value = true;
+    void Swal.fire({
+      icon: 'success',
+      title: 'Thank you!',
+      text: 'We received your payment successfully.',
+      confirmButtonText: 'Continue',
+    });
   }
 });
 
