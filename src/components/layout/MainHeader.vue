@@ -18,7 +18,11 @@ const navLinks: NavLink[] = [
 ];
 
 const isMobileNavOpen = ref(false);
+const isProfileDropdownOpen = ref(false);
+const profileMenuRef = ref<HTMLElement | null>(null);
+const profileButtonRef = ref<HTMLElement | null>(null);
 const { isAuthenticated, signOut } = useAuth();
+let ignoreNextOutsideClick = false;
 
 const isActive = (link: NavLink) => {
   if (link.target !== 'route') {
@@ -31,19 +35,51 @@ const closeMobileNav = () => {
   isMobileNavOpen.value = false;
 };
 
+const closeProfileDropdown = () => {
+  isProfileDropdownOpen.value = false;
+};
+
 const toggleMobileNav = () => {
   isMobileNavOpen.value = !isMobileNavOpen.value;
 };
 
+const toggleProfileDropdown = () => {
+  const willOpen = !isProfileDropdownOpen.value;
+  isProfileDropdownOpen.value = willOpen;
+  if (willOpen) {
+    ignoreNextOutsideClick = true;
+  }
+};
+
 const handleSignOut = () => {
   signOut();
+  closeProfileDropdown();
   closeMobileNav();
 };
 
 const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     closeMobileNav();
+    closeProfileDropdown();
   }
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as Node | null;
+  if (!target) {
+    return;
+  }
+  if (ignoreNextOutsideClick) {
+    ignoreNextOutsideClick = false;
+    return;
+  }
+  if (profileButtonRef.value?.contains(target)) {
+    return;
+  }
+  if (profileMenuRef.value?.contains(target)) {
+    return;
+  }
+  closeProfileDropdown();
 };
 
 watch(isMobileNavOpen, (open) => {
@@ -54,15 +90,24 @@ watch(
   () => route.path,
   () => {
     closeMobileNav();
+    closeProfileDropdown();
   },
 );
 
+watch(isAuthenticated, (authed) => {
+  if (!authed) {
+    closeProfileDropdown();
+  }
+});
+
 onMounted(() => {
   window.addEventListener('keydown', handleEscape);
+  window.addEventListener('click', handleClickOutside);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleEscape);
+  window.removeEventListener('click', handleClickOutside);
   document.body.classList.remove('overflow-hidden');
 });
 </script>
@@ -100,16 +145,61 @@ onBeforeUnmount(() => {
           to="/login"
           class="inline-flex items-center rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
         >
-          Sign in Account
+          Sign in Accounts
         </RouterLink>
-        <button
-          v-else
-          type="button"
-          class="inline-flex items-center rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition hover:border-red-400 hover:text-red-300"
-          @click="handleSignOut"
-        >
-          Sign out
-        </button>
+        <div v-else class="relative">
+          <button
+            ref="profileButtonRef"
+            type="button"
+            class="inline-flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition hover:border-[#23bdee] hover:text-white"
+            :aria-expanded="isProfileDropdownOpen"
+            aria-haspopup="menu"
+            @click.stop="toggleProfileDropdown"
+          >
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-[#23bdee]/20 text-sm font-semibold text-[#23bdee]"
+            >
+              AC
+            </span>
+            <span class="hidden sm:inline">Accounts</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 transition"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              :class="isProfileDropdownOpen ? 'rotate-180 text-[#23bdee]' : 'text-slate-400'"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <div
+            v-if="isProfileDropdownOpen"
+            ref="profileMenuRef"
+            class="absolute right-0 z-20 mt-3 w-56 rounded-3xl border border-slate-800/80 bg-[#0c152e] p-3 text-left shadow-[0_25px_60px_rgba(5,14,32,0.6)]"
+          >
+            <RouterLink
+              to="/account"
+              class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/60 hover:text-white"
+              @click="closeProfileDropdown"
+            >
+              Profile
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
+              </svg>
+            </RouterLink>
+            <button
+              type="button"
+              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-white"
+              @click="handleSignOut"
+            >
+              Sign out
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
       <button
         type="button"
@@ -177,16 +267,24 @@ onBeforeUnmount(() => {
             class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
             @click="closeMobileNav"
           >
-            Sign in Account
+            Sign in Accounts
           </RouterLink>
-          <button
-            v-else
-            type="button"
-            class="mt-10 w-full rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200 transition hover:border-red-400 hover:text-red-300"
-            @click="handleSignOut"
-          >
-            Sign out
-          </button>
+          <div v-else class="mt-10 space-y-3">
+            <RouterLink
+              to="/account"
+              class="flex w-full justify-center rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200 transition hover:border-[#23bdee] hover:text-white"
+              @click="closeMobileNav"
+            >
+              Accounts Profile
+            </RouterLink>
+            <button
+              type="button"
+              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-red-200 transition hover:border-red-300 hover:text-white"
+              @click="handleSignOut"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
     </Teleport>

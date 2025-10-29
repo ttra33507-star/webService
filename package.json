@@ -16,8 +16,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "sweetalert2": "^11.14.2",
+    "html-to-image": "^1.11.13",
     "qrcode": "^1.5.4",
+    "sweetalert2": "^11.14.2",
     "tailwindcss": "^4.1.16",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3"

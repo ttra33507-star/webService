@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/LoginView.vue'),
     },
+    {
+      path: '/account',
+      name: 'account',
+      component: () => import('../views/ProfileView.vue'),
+    },
   ],
   scrollBehavior() {
     return { top: 0 };

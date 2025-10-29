@@ -75,6 +75,7 @@ app.post('/bakong/status', async (req, res) => {
   const url = `${API_BASE}/check_transaction_by_md5`;
 
   try {
+    console.log('[bakong-server] Posting to Bakong', { url, md5 });
     const response = await axios.post(
       url,
       { md5 },
@@ -89,6 +90,11 @@ app.post('/bakong/status', async (req, res) => {
     );
 
     const payload = response.data ?? {};
+    console.log('[bakong-server] Bakong response received', {
+      status: response.status,
+      responseCode: payload.responseCode,
+      errorCode: payload.errorCode,
+    });
     const bakongResponseCode =
       typeof payload.responseCode === 'number' ? payload.responseCode : response.status;
     const bakongErrorCode =
@@ -139,4 +145,3 @@ app.post('/bakong/status', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`[bakong-server] listening on http://localhost:${PORT}`);
 });
-

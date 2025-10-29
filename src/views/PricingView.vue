@@ -12,6 +12,7 @@ import {
 import Swal from 'sweetalert2';
 
 const merchantName = import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB';
+const acquiringBankName = (import.meta.env.VITE_ACQUIRING_BANK ?? '').toString().trim() || null;
 
 type AudienceKey = 'local' | 'foreigner';
 
@@ -129,6 +130,22 @@ const formatPrice = (amount: number, currency: string) =>
     currency,
   }).format(amount);
 
+interface ReceiptDetails {
+  planName: string;
+  planAmountLabel: string;
+  amountPaidLabel: string;
+  currency: string;
+  merchantName: string;
+  merchantBank?: string | null;
+  transactionHash?: string | null;
+  reference?: string | null;
+  paidAtLabel?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  feeLabel?: string | null;
+  rawData?: Record<string, unknown> | null;
+}
+
 const route = useRoute();
 const router = useRouter();
 const { isAuthenticated } = useAuth();
@@ -162,6 +179,9 @@ const isQrModalOpen = ref(false);
 const isGeneratingCheckout = ref(false);
 const paymentError = ref<string | null>(null);
 const checkoutDetails = ref<CheckoutDetails | null>(null);
+const isReceiptModalOpen = ref(false);
+const receiptDetails = ref<ReceiptDetails | null>(null);
+const receiptContentRef = ref<HTMLElement | null>(null);
 
 const POLL_INTERVAL_MS = 3000;
 const paymentStatus = ref<PaymentStatus>('UNPAID');
@@ -196,6 +216,186 @@ const resetPaymentTracking = () => {
   statusCheckError.value = null;
   isPollingStatus.value = false;
   lastStatusResult.value = null;
+};
+
+const toRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+
+const getNestedValue = (source: Record<string, unknown> | null, path: string) => {
+  if (!source) {
+    return undefined;
+  }
+  return path.split('.').reduce<unknown>((acc, key) => {
+    if (acc && typeof acc === 'object' && !Array.isArray(acc)) {
+      return (acc as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, source);
+};
+
+const readStringField = (source: Record<string, unknown> | null, candidates: string[]): string | null => {
+  for (const path of candidates) {
+    const value = getNestedValue(source, path);
+    if (value == null) {
+      continue;
+    }
+    const text = typeof value === 'string' ? value.trim() : value instanceof Date ? value.toISOString() : String(value).trim();
+    if (text) {
+      return text;
+    }
+  }
+  return null;
+};
+
+const readNumberField = (source: Record<string, unknown> | null, candidates: string[]): number | null => {
+  for (const path of candidates) {
+    const value = getNestedValue(source, path);
+    if (value == null) {
+      continue;
+    }
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const numeric = Number(value.replace?.(/,/g, '') ?? value);
+      if (!Number.isNaN(numeric)) {
+        return numeric;
+      }
+    }
+  }
+  return null;
+};
+
+const parseTimestampCandidate = (value: unknown): Date | null => {
+  if (value == null) {
+    return null;
+  }
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+  if (typeof value === 'number') {
+    const millis = value > 1e12 ? value : value > 1e9 ? value * 1000 : value;
+    const date = new Date(millis);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric)) {
+      return parseTimestampCandidate(numeric);
+    }
+    const date = new Date(trimmed);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  return null;
+};
+
+const formatReceiptTimestamp = (value: unknown): string | null => {
+  const date = parseTimestampCandidate(value);
+  if (!date) {
+    return null;
+  }
+  const formatOptions: Intl.DateTimeFormatOptions = {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  };
+  const locales = ['km-KH', undefined] as const;
+  for (const locale of locales) {
+    try {
+      return new Intl.DateTimeFormat(locale, formatOptions).format(date);
+    } catch {
+      continue;
+    }
+  }
+  return date.toISOString();
+};
+
+const buildReceiptDetailsSnapshot = (
+  plan: Plan | null,
+  checkout: CheckoutDetails | null,
+  statusResult: PaymentStatusResult | null,
+): ReceiptDetails | null => {
+  if (!plan && !checkout && !statusResult) {
+    return null;
+  }
+
+  const planCurrency = plan?.currency ?? checkout?.currency ?? 'USD';
+  const planAmount = plan?.amount ?? checkout?.amount ?? readNumberField(toRecord(statusResult?.data ?? null), ['amount']) ?? 0;
+  const planAmountLabel = formatPrice(planAmount, planCurrency);
+
+  const rawData = toRecord(statusResult?.data ?? null);
+  const amountPaid =
+    readNumberField(rawData, ['amount', 'transactionAmount', 'totalAmount', 'paidAmount']) ?? planAmount;
+  const amountPaidLabel = formatPrice(amountPaid, planCurrency);
+  const rawPayload = toRecord(statusResult?.raw ?? null);
+  const transactionHash =
+    checkout?.md5 ??
+    readStringField(rawData, ['md5', 'transactionMd5', 'hash', 'transactionHash', 'transaction_md5']) ??
+    readStringField(rawPayload, ['data.md5', 'md5', 'hash']) ??
+    null;
+
+  const reference =
+    readStringField(rawData, ['referenceNo', 'reference', 'billNumber', 'transactionReference', 'bill_no']) ??
+    checkout?.khqrPayload ??
+    null;
+
+  const customerName = readStringField(rawData, [
+    'consumerName',
+    'payerName',
+    'customerName',
+    'senderName',
+    'fromAccountName',
+  ]);
+
+  const customerPhone = readStringField(rawData, [
+    'consumerMobileNumber',
+    'payerPhone',
+    'phoneNumber',
+    'fromAccount',
+  ]);
+
+  const paidAtLabel =
+    formatReceiptTimestamp(
+      readStringField(rawData, [
+        'transactionDateTime',
+        'transactionDate',
+        'transactionTime',
+        'paymentDateTime',
+        'paymentTime',
+      ]) ??
+        readNumberField(rawData, ['transactionTimestamp', 'transactionTime', 'timestamp']) ??
+        statusResult?.checkedAt,
+    ) ?? formatReceiptTimestamp(Date.now());
+
+  const feeLabel = (() => {
+    const feeNumber = readNumberField(rawData, ['feeAmount', 'fee', 'charges']);
+    if (feeNumber == null) {
+      return null;
+    }
+    return `${feeNumber > 0 ? '+' : ''}${formatPrice(feeNumber, planCurrency)}`;
+  })();
+
+  const merchantBank =
+    readStringField(rawData, ['merchantBankName', 'merchantBank', 'receivingBank']) ?? acquiringBankName;
+
+  return {
+    planName: plan?.name ?? 'Selected Plan',
+    planAmountLabel,
+    amountPaidLabel,
+    currency: planCurrency,
+    merchantName,
+    merchantBank,
+    transactionHash,
+    reference,
+    paidAtLabel,
+    customerName,
+    customerPhone,
+    feeLabel,
+    rawData,
+  };
 };
 
 const startPaymentTracking = (details: CheckoutDetails) => {
@@ -348,6 +548,8 @@ const openPaymentModal = (planId: string) => {
   selectedPlanId.value = planId;
   checkoutDetails.value = null;
   paymentError.value = null;
+  receiptDetails.value = null;
+  isReceiptModalOpen.value = false;
   isPaymentModalOpen.value = true;
   syncPlanQuery(planId);
 };
@@ -355,9 +557,11 @@ const openPaymentModal = (planId: string) => {
 const closeAllModals = () => {
   isPaymentModalOpen.value = false;
   isQrModalOpen.value = false;
+  isReceiptModalOpen.value = false;
   resetPaymentTracking();
   checkoutDetails.value = null;
   paymentError.value = null;
+  receiptDetails.value = null;
   selectedPlanId.value = null;
   syncPlanQuery(null);
 };
@@ -398,19 +602,43 @@ watch(checkoutDetails, (details) => {
 });
 
 watch(isQrModalOpen, (open) => {
-  if (!open) {
+  if (!open && paymentStatus.value !== 'PAID' && !isReceiptModalOpen.value) {
     resetPaymentTracking();
+    checkoutDetails.value = null;
+    paymentError.value = null;
   }
 });
 
 watch(paymentStatus, (status) => {
   if (status === 'PAID' && !hasShownPaidAlert.value) {
     hasShownPaidAlert.value = true;
+    const planSnapshot =
+      selectedPlan.value ?? (selectedPlanId.value ? planMap.get(selectedPlanId.value) ?? null : null);
+    const checkoutSnapshot = checkoutDetails.value;
+    const statusSnapshot = lastStatusResult.value;
+    receiptDetails.value = buildReceiptDetailsSnapshot(planSnapshot ?? null, checkoutSnapshot, statusSnapshot);
+
+    stopPolling();
+    stopCountdown();
+    isPaymentModalOpen.value = false;
+    isQrModalOpen.value = false;
+    syncPlanQuery(null);
+    selectedPlanId.value = null;
+
     void Swal.fire({
       icon: 'success',
       title: 'Thank you!',
-      text: 'We received your payment successfully.',
-      confirmButtonText: 'Continue',
+      text: 'We received your payment successfully. Your receipt is ready to download.',
+      confirmButtonText: 'View receipt',
+      allowOutsideClick: false,
+    }).then(() => {
+      if (receiptDetails.value) {
+        isReceiptModalOpen.value = true;
+      } else {
+        resetPaymentTracking();
+        checkoutDetails.value = null;
+        paymentError.value = null;
+      }
     });
   }
 });
@@ -424,6 +652,7 @@ const selectAudience = (value: AudienceKey) => {
 };
 
 const handleGetStarted = (planId: string) => {
+  console.log('[Bakong] User clicked "Get Started"', { planId });
   if (!isAuthenticated.value) {
     router.push({ name: 'login', query: { redirect: '/plans', plan: planId } });
     return;
@@ -441,14 +670,24 @@ const requestCheckout = async () => {
   checkoutDetails.value = null;
   isGeneratingCheckout.value = true;
   paymentError.value = null;
+  isPaymentModalOpen.value = false;
+  syncPlanQuery(null);
 
   try {
-    checkoutDetails.value = await generateCheckoutDetails({
+    const payload = {
       planId: plan.id,
       amount: plan.amount,
       currency: plan.currency,
+    };
+    console.log('[Bakong] Preparing checkout payload', payload);
+    const checkout = await generateCheckoutDetails(payload);
+    checkoutDetails.value = checkout;
+    console.log('[Bakong] Checkout details generated', {
+      khqrPayloadPreview: checkout.khqrPayload.slice(0, 32),
+      md5: checkout.md5,
+      creationTimestamp: checkout.creationTimestamp,
+      expirationTimestamp: checkout.expirationTimestamp,
     });
-    isPaymentModalOpen.value = false;
     isQrModalOpen.value = true;
   } catch (error) {
     if (error instanceof Error) {
@@ -456,6 +695,15 @@ const requestCheckout = async () => {
     } else {
       paymentError.value = 'Unable to prepare payment right now. Please try again.';
     }
+    void Swal.fire({
+      icon: 'error',
+      title: 'Unable to prepare payment',
+      text: paymentError.value ?? 'Please try again.',
+    }).then(() => {
+      if (paymentError.value) {
+        isPaymentModalOpen.value = true;
+      }
+    });
   } finally {
     isGeneratingCheckout.value = false;
   }
@@ -463,6 +711,105 @@ const requestCheckout = async () => {
 
 const continueToCheckout = () => {
   // No action needed, user should scan the QR code
+};
+
+const closeReceiptModal = () => {
+  isReceiptModalOpen.value = false;
+  receiptDetails.value = null;
+  checkoutDetails.value = null;
+  paymentError.value = null;
+  resetPaymentTracking();
+};
+
+const createReceiptDocumentHtml = () => {
+  const receipt = receiptContentRef.value;
+  if (!receipt) {
+    return null;
+  }
+
+  return `<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <title>Bakong Receipt</title>
+      <style>
+        :root {
+          color-scheme: light;
+        }
+        * {
+          box-sizing: border-box;
+        }
+        body {
+          margin: 0;
+          padding: 24px;
+          background: #f5f7fb;
+          font-family: 'Inter', 'Noto Sans Khmer', system-ui, sans-serif;
+          color: #0f172a;
+        }
+        .receipt-wrapper {
+          max-width: 420px;
+          margin: 0 auto;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="receipt-wrapper">
+        ${receipt.outerHTML}
+      </div>
+    </body>
+  </html>`;
+};
+
+const downloadReceipt = async () => {
+  const receipt = receiptContentRef.value;
+  if (!receipt) {
+    return;
+  }
+
+  try {
+    const { toPng } = await import('html-to-image');
+    const dataUrl = await toPng(receipt, {
+      cacheBust: true,
+      pixelRatio: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
+      backgroundColor: '#0c152e',
+    });
+
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `bakong-receipt-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Unable to export receipt as PNG:', error);
+    void Swal.fire({
+      icon: 'error',
+      title: 'Unable to download receipt',
+      text: 'Please try again or take a screenshot instead.',
+    });
+  }
+};
+
+const printReceipt = () => {
+  const html = createReceiptDocumentHtml();
+  if (!html) {
+    return;
+  }
+
+  const printWindow = window.open('', '_blank', 'width=480,height=720');
+  if (!printWindow) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Unable to open print window',
+      text: 'Please allow pop-ups for this site and try again.',
+    });
+    return;
+  }
+
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
 };
 </script>
 
@@ -666,6 +1013,116 @@ const continueToCheckout = () => {
           >
             {{ paymentStatus === 'PAID' ? 'Continue to this plan checkout' : 'Waiting for payment confirmation' }}
           </button>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div
+        v-if="isReceiptModalOpen && receiptDetails"
+        class="fixed inset-0 z-50 flex items-center justify-center px-4"
+        @click.self="closeReceiptModal"
+      >
+        <div class="absolute inset-0 bg-slate-950/75 backdrop-blur" />
+        <div
+          class="relative w-full max-w-xl rounded-[2.75rem] border border-[#1d2b4f] bg-[#050d22] px-10 py-12 text-slate-100 shadow-[0_45px_120px_rgba(4,12,32,0.85)]"
+        >
+          <button
+            type="button"
+            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-300 transition hover:text-white"
+            aria-label="Close receipt modal"
+            @click="closeReceiptModal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <div ref="receiptContentRef" class="rounded-[2.5rem] border border-[#2a3c68] bg-[#0c152e] p-9 text-white shadow-[0_25px_80px_rgba(7,20,56,0.55)]">
+            <div class="flex flex-wrap items-center gap-4">
+              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-lg font-bold text-white shadow-inner shadow-red-500/40">
+                KH
+              </div>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.45em] text-slate-300/90">KHQR Receipt</p>
+                <p class="mt-1 text-lg font-semibold text-white">{{ receiptDetails.merchantName }}</p>
+                <p class="text-2xl font-bold text-red-600">{{ receiptDetails.amountPaidLabel }}</p>
+              </div>
+            </div>
+
+            <div class="my-6 border-t border-dashed border-white/15"></div>
+
+            <div class="grid grid-cols-[auto,1fr] gap-y-4 gap-x-8 text-sm">
+              <template v-if="receiptDetails.planName">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Plan</span>
+                <span class="font-semibold text-white">{{ receiptDetails.planName }}</span>
+              </template>
+              <template v-if="receiptDetails.planAmountLabel">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Plan amount</span>
+                <span class="font-semibold text-white">{{ receiptDetails.planAmountLabel }}</span>
+              </template>
+              <template v-if="receiptDetails.reference">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Reference</span>
+                <span class="max-w-[260px] break-all font-medium text-white/90">{{ receiptDetails.reference }}</span>
+              </template>
+              <template v-if="receiptDetails.transactionHash">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Transaction hash</span>
+                <span class="max-w-[260px] break-all font-medium text-white/90">{{ receiptDetails.transactionHash }}</span>
+              </template>
+              <template v-if="receiptDetails.paidAtLabel">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Completed at</span>
+                <span class="font-medium text-white/90">{{ receiptDetails.paidAtLabel }}</span>
+              </template>
+              <template v-if="receiptDetails.customerName">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Customer</span>
+                <span class="font-medium text-white/90">{{ receiptDetails.customerName }}</span>
+              </template>
+              <template v-if="receiptDetails.customerPhone">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Phone</span>
+                <span class="font-medium text-white/90">{{ receiptDetails.customerPhone }}</span>
+              </template>
+              <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Merchant</span>
+              <span class="font-medium text-white/90">{{ receiptDetails.merchantName }}</span>
+              <template v-if="receiptDetails.merchantBank">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Receiving bank</span>
+                <span class="font-medium text-white/90">{{ receiptDetails.merchantBank }}</span>
+              </template>
+              <template v-if="receiptDetails.feeLabel">
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Fee</span>
+                <span class="font-medium text-white/90">{{ receiptDetails.feeLabel }}</span>
+              </template>
+            </div>
+
+            <div class="mt-6 border-t border-dashed border-white/15"></div>
+
+            <p class="mt-4 text-xs text-slate-300/80">
+              Save this receipt for your records. Generated automatically after payment confirmation from Bakong.
+            </p>
+          </div>
+
+          <div class="mt-8 flex flex-col gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-white sm:flex-row">
+            <button
+              type="button"
+              class="flex-1 rounded-full border border-slate-600 bg-[#23bdee]/20 px-5 py-3 text-[#23bdee] transition hover:bg-[#23bdee]/30 hover:text-white"
+              @click="downloadReceipt"
+            >
+              Download Receipt
+            </button>
+            <button
+              type="button"
+              class="flex-1 rounded-full border border-slate-600 bg-slate-800/60 px-5 py-3 text-slate-200 transition hover:bg-slate-700/70 hover:text-white"
+              @click="printReceipt"
+            >
+              Print
+            </button>
+            <button
+              type="button"
+              class="flex-1 rounded-full border border-slate-700 bg-transparent px-5 py-3 text-slate-300 transition hover:bg-slate-800/60 hover:text-white"
+              @click="closeReceiptModal"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </Teleport>
