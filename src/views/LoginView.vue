@@ -1,15 +1,31 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
+import { requestPasswordToken, fetchUserProfile } from '../services/authService';
 
 const email = ref('');
 const password = ref('');
 const isSubmitting = ref(false);
+const authError = ref<string | null>(null);
 
 const route = useRoute();
 const router = useRouter();
-const { signIn, isAuthenticated } = useAuth();
+const { signIn, isAuthenticated, rememberAccount, recentAccounts } = useAuth();
+
+if (recentAccounts.value.length > 0) {
+  email.value = recentAccounts.value[0] ?? '';
+}
+
+watch(
+  recentAccounts,
+  (accounts) => {
+    if (!email.value && accounts.length > 0) {
+      email.value = accounts[0] ?? '';
+    }
+  },
+  { immediate: false },
+);
 
 const navigateAfterAuth = () => {
   const redirect = route.query.redirect;
@@ -33,17 +49,47 @@ const navigateAfterAuth = () => {
   router.push('/');
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (isSubmitting.value) {
     return;
   }
   isSubmitting.value = true;
+  authError.value = null;
 
-  // Simulated authentication; integrate real API here.
-  signIn(`${email.value || 'member'}-${Date.now()}`);
-  isSubmitting.value = false;
+  try {
+    const username = email.value.trim();
+    const userPassword = password.value;
+    const tokenResponse = await requestPasswordToken(username, userPassword);
+    const profile = await fetchUserProfile(tokenResponse.access_token);
 
-  navigateAfterAuth();
+    const expiresAt =
+      typeof tokenResponse.expires_in === 'number' && Number.isFinite(tokenResponse.expires_in)
+        ? Date.now() + tokenResponse.expires_in * 1000
+        : null;
+
+    signIn({
+      accessToken: tokenResponse.access_token,
+      refreshToken: tokenResponse.refresh_token ?? null,
+      tokenType: tokenResponse.token_type ?? 'Bearer',
+      scope: tokenResponse.scope ?? null,
+      expiresAt,
+      receivedAt: Date.now(),
+      user: profile,
+      raw: {
+        token: tokenResponse,
+        profile,
+      },
+    });
+
+    rememberAccount(username);
+    password.value = '';
+    navigateAfterAuth();
+  } catch (error) {
+    authError.value =
+      error instanceof Error ? error.message : 'Unable to sign in. Please try again.';
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
@@ -87,6 +133,13 @@ const handleSubmit = () => {
           {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
         </button>
       </form>
+
+      <p
+        v-if="authError"
+        class="mt-5 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200"
+      >
+        {{ authError }}
+      </p>
 
       <p v-if="isAuthenticated" class="mt-6 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200">
         You are already signed in. <button type="button" class="underline transition hover:text-white" @click="navigateAfterAuth">Continue</button>

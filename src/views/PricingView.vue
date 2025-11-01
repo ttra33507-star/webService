@@ -674,10 +674,16 @@ const requestCheckout = async () => {
   syncPlanQuery(null);
 
   try {
+    const uniqueSuffix =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID().slice(0, 8)
+        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const orderId = `${plan.id}-${uniqueSuffix}`;
     const payload = {
       planId: plan.id,
       amount: plan.amount,
       currency: plan.currency,
+      orderId,
     };
     console.log('[Bakong] Preparing checkout payload', payload);
     const checkout = await generateCheckoutDetails(payload);
@@ -687,6 +693,7 @@ const requestCheckout = async () => {
       md5: checkout.md5,
       creationTimestamp: checkout.creationTimestamp,
       expirationTimestamp: checkout.expirationTimestamp,
+      orderId: checkout.orderId,
     });
     isQrModalOpen.value = true;
   } catch (error) {

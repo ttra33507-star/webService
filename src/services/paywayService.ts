@@ -1,417 +1,445 @@
-import QRCode from 'qrcode';
 import { isAxiosError } from 'axios';
-import { BakongKHQR, khqrData, IndividualInfo, MerchantInfo } from 'bakong-khqr';
+import QRCode from 'qrcode';
 import httpClient from '../api/httpClient';
 
-// Bakong API configuration
-const phoneNumber = (import.meta.env.VITE_PHONE_NUMBER ?? '').toString().trim();
-const bakongAccountId = ((import.meta.env.VITE_BAKONG_ACCOUNT_ID ?? '').toString().trim()) || phoneNumber;
-const merchantName = (import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB').toString().trim();
-const merchantCity = import.meta.env.VITE_MERCHANT_CITY ?? 'Phnom Penh';
-const merchantCategoryCode = import.meta.env.VITE_MERCHANT_CATEGORY_CODE ?? '5999';
-const merchantId = (import.meta.env.VITE_MERCHANT_ID ?? '').toString().trim();
-const acquiringBank = (import.meta.env.VITE_ACQUIRING_BANK ?? '').toString().trim();
-const khqrAccountType = ((import.meta.env.VITE_KHQR_ACCOUNT_TYPE ?? 'individual').toString().trim().toLowerCase() || 'individual') as 'individual' | 'merchant';
-const configuredExpiryMinutes = Number.parseInt(
-  (import.meta.env.VITE_KHQR_EXPIRY_MINUTES ?? '2').toString().trim(),
-  10,
-);
-const khqrExpiryMinutes =
-  Number.isFinite(configuredExpiryMinutes) && configuredExpiryMinutes > 0
-    ? configuredExpiryMinutes
-    : 2;
-const khqrClient = new BakongKHQR();
+const DEFAULT_STATUS_BASE_URL = 'https://api.c4techhub.com';
+const DEFAULT_EXPIRY_MINUTES = (() => {
+  const raw = (import.meta.env.VITE_KHQR_EXPIRY_MINUTES ?? '15').toString().trim();
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 15;
+})();
+const DEFAULT_EXPIRY_SECONDS = DEFAULT_EXPIRY_MINUTES * 60;
 
-interface CheckoutParams {
-  planId?: string;
-  amount?: number;
-  currency?: string;
-}
-
-interface KhqrGenerationResult {
-  payload: string;
-  md5?: string;
-  creationTimestamp: number;
-  expirationTimestamp: number;
-}
-
-interface BackendPaymentStatusResponse {
-  status?: PaymentStatus;
-  responseCode?: number;
-  errorCode?: number | null;
-  data?: Record<string, unknown> | null;
-  raw?: unknown;
-  checkedAt?: number;
-  message?: string;
-}
-
-const getKhqrCurrency = (code: string) => {
-  const normalized = code.trim().toUpperCase();
-  console.log('Converting currency code:', normalized);
-
-  let currencyCode;
-  switch (normalized) {
-    case 'USD':
-      currencyCode = khqrData.currency.usd;
-      break;
-    case 'KHR':
-      currencyCode = khqrData.currency.khr;
-      break;
-    default:
-      currencyCode = undefined;
+const sanitizeBaseUrl = (value: unknown): string => {
+  if (typeof value !== 'string') {
+    return '';
   }
-
-  console.log('Mapped currency code:', currencyCode);
-  return currencyCode;
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+  return trimmed.replace(/\/+$/, '');
 };
 
-const KHQR_LIMITS = {
-  billNumber: 25,
-  mobileNumber: 25,
-  storeLabel: 25,
-  terminalLabel: 25,
-  purposeOfTransaction: 25,
-  merchantCategoryCode: 4,
-} as const;
-
-const sanitizeOptionalField = (value: unknown, maxLength: number, fieldName: string): string | undefined => {
-  if (value == null) {
-    return undefined;
+const resolveStatusBaseUrl = () => {
+  const configured = sanitizeBaseUrl(import.meta.env.VITE_KHQR_STATUS_BASE_URL);
+  if (configured) {
+    return configured;
   }
-
-  const stringValue = value.toString().trim();
-  if (!stringValue) {
-    return undefined;
-  }
-
-  if (stringValue.length <= maxLength) {
-    return stringValue;
-  }
-
-  const truncated = stringValue.slice(0, maxLength);
-  console.warn(`Truncating KHQR ${fieldName} to ${maxLength} characters.`, {
-    original: stringValue,
-    truncated,
-  });
-  return truncated;
+  return DEFAULT_STATUS_BASE_URL;
 };
 
-const readStringCandidate = (value: unknown): string | undefined => {
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    return trimmed || undefined;
-  }
+const toRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
 
-  if (value == null) {
+const getNestedValue = (source: Record<string, unknown> | null, path: string) => {
+  if (!source) {
     return undefined;
   }
-
-  if (value instanceof String) {
-    const primitive = value.valueOf().trim();
-    return primitive || undefined;
-  }
-
-  if (typeof value === 'number' || typeof value === 'bigint') {
-    const numeric = String(value);
-    return numeric ? numeric : undefined;
-  }
-
-  if (typeof (value as { toString?: () => string }).toString === 'function') {
-    const textual = (value as { toString: () => string }).toString().trim();
-    if (textual && textual !== '[object Object]') {
-      return textual;
+  return path.split('.').reduce<unknown>((acc, key) => {
+    if (acc && typeof acc === 'object' && !Array.isArray(acc)) {
+      return (acc as Record<string, unknown>)[key];
     }
-  }
-
-  return undefined;
+    return undefined;
+  }, source);
 };
 
-const extractStringField = (response: unknown, candidateKeys: string[]): string | undefined => {
-  const visited = new Set<unknown>();
-
-  const normalise = (candidate: unknown): string | undefined => {
-    const direct = readStringCandidate(candidate);
-    if (direct) {
-      return direct;
+const readStringField = (source: Record<string, unknown> | null, fields: string[]): string | null => {
+  for (const field of fields) {
+    const value = getNestedValue(source, field);
+    if (value == null) {
+      continue;
     }
-
-    if (candidate == null || typeof candidate !== 'object') {
-      return undefined;
-    }
-
-    if (visited.has(candidate)) {
-      return undefined;
-    }
-    visited.add(candidate);
-
-    const record = candidate as Record<string, unknown> & { getData?: () => unknown };
-
-    for (const key of candidateKeys) {
-      if (key === 'getData' && typeof record.getData === 'function') {
-        const result = record.getData();
-        const extracted = normalise(result);
-        if (extracted) {
-          return extracted;
-        }
-        continue;
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed) {
+        return trimmed;
       }
+      continue;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString();
+    }
+    const stringified = String(value).trim();
+    if (stringified) {
+      return stringified;
+    }
+  }
+  return null;
+};
 
-      if (Object.prototype.hasOwnProperty.call(record, key)) {
-        const value = record[key];
-        const extracted = normalise(value);
-        if (extracted) {
-          return extracted;
-        }
+const readNumberField = (source: Record<string, unknown> | null, fields: string[]): number | null => {
+  for (const field of fields) {
+    const value = getNestedValue(source, field);
+    if (value == null) {
+      continue;
+    }
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const sanitized = value.replace?.(/,/g, '') ?? value;
+      const parsed = Number(sanitized);
+      if (Number.isFinite(parsed)) {
+        return parsed;
       }
     }
+  }
+  return null;
+};
 
-    return undefined;
-  };
-
-  const value = normalise(response);
-  if (value) {
+const parseTimestamp = (value: unknown): number | null => {
+  if (value == null) {
+    return null;
+  }
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.getTime();
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    if (value > 1e12) {
+      return value;
+    }
+    if (value > 1e9) {
+      return value * 1000;
+    }
     return value;
   }
-
-  try {
-    console.error(`Unable to extract ${candidateKeys.join('/') ?? 'value'} from response:`, JSON.stringify(response, null, 2));
-  } catch {
-    console.error(`Unable to extract ${candidateKeys.join('/') ?? 'value'} from response:`, response);
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric)) {
+      return parseTimestamp(numeric);
+    }
+    const parsed = new Date(trimmed);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.getTime();
   }
-  return undefined;
+  return null;
 };
 
-const extractKhqrValue = (response: unknown): string | undefined =>
-  extractStringField(response, ['qr', 'qrString', 'payload', 'data', 'getData']);
+const ensureDataUrl = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  if (/^data:/i.test(trimmed) || /^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  const base64Candidate = trimmed.replace(/\s+/g, '');
+  if (!base64Candidate) {
+    return null;
+  }
+  const isBase64 = /^[A-Za-z0-9+/=]+$/.test(base64Candidate);
+  if (!isBase64) {
+    return null;
+  }
+  return `data:image/png;base64,${base64Candidate}`;
+};
 
-const extractKhqrMd5 = (response: unknown): string | undefined =>
-  extractStringField(response, ['md5', 'data', 'getData']);
+const normaliseCurrency = (value: unknown, fallback: string): string => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed) {
+      return trimmed.toUpperCase();
+    }
+  }
+  return fallback.toUpperCase();
+};
 
-const requestPaymentStatus = async (md5: string): Promise<BackendPaymentStatusResponse> => {
-  try {
-    const { data } = await httpClient.post<BackendPaymentStatusResponse>('/bakong/status', { md5 });
-    return data;
-  } catch (error) {
-    if (isAxiosError<BackendPaymentStatusResponse>(error)) {
+const normaliseAmount = (value: unknown, fallback: number): number => {
+  const numeric = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : Number.NaN;
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return numeric;
+  }
+  return fallback;
+};
+
+export type PaymentStatus =
+  | 'UNPAID'
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'PAID'
+  | 'FAILED'
+  | 'EXPIRED'
+  | 'CANCELLED'
+  | 'UNKNOWN';
+
+const normalisePaymentStatus = (value: unknown): PaymentStatus | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const normalized = value.trim().toUpperCase();
+  if (!normalized) {
+    return null;
+  }
+  switch (normalized) {
+    case 'PAID':
+    case 'SUCCESS':
+    case 'SUCCESSFUL':
+    case 'COMPLETED':
+    case 'SETTLED':
+      return 'PAID';
+    case 'UNPAID':
+    case 'NOT_PAID':
+      return 'UNPAID';
+    case 'PENDING':
+    case 'WAITING':
+    case 'IN_PROGRESS':
+    case 'INPROGRESS':
+    case 'CREATED':
+    case 'QUEUE':
+    case 'INIT':
+    case 'INITIAL':
+      return 'PENDING';
+    case 'PROCESSING':
+    case 'IN_PROCESS':
+      return 'PROCESSING';
+    case 'FAILED':
+    case 'FAIL':
+    case 'DECLINED':
+    case 'REJECTED':
+    case 'ERROR':
+      return 'FAILED';
+    case 'EXPIRED':
+    case 'TIMEOUT':
+      return 'EXPIRED';
+    case 'CANCELLED':
+    case 'CANCELED':
+    case 'VOID':
+      return 'CANCELLED';
+    default:
+      return 'UNKNOWN';
+  }
+};
+
+const extractAxiosMessage = (error: unknown, fallback: string): string => {
+  if (isAxiosError(error)) {
+    const responseData = error.response?.data;
+    if (typeof responseData === 'string' && responseData.trim()) {
+      return responseData.trim();
+    }
+    const responseRecord = toRecord(responseData);
+    if (responseRecord) {
       const message =
-        typeof error.response?.data?.message === 'string'
-          ? error.response.data.message
-          : error.message;
-      throw new Error(message || 'Unable to check Bakong payment status.');
+        readStringField(responseRecord, [
+          'message',
+          'error_description',
+          'error',
+          'statusMessage',
+          'status_message',
+        ]) ?? readStringField(toRecord(responseRecord.data ?? null), ['message', 'error']);
+      if (message) {
+        return message;
+      }
     }
-
-    if (error instanceof Error) {
-      throw error;
+    if (typeof error.message === 'string' && error.message.trim()) {
+      return error.message.trim();
     }
-
-    throw new Error('Unable to check Bakong payment status.');
+  } else if (error instanceof Error && typeof error.message === 'string' && error.message.trim()) {
+    return error.message.trim();
   }
+  return fallback;
 };
 
-const buildKhqrPayload = ({ planId, amount = 0, currency = 'USD' }: Required<CheckoutParams>): KhqrGenerationResult => {
-  if (!bakongAccountId) {
-    console.error('Bakong Account ID missing');
-    throw new Error('Payment configuration missing. Please set VITE_BAKONG_ACCOUNT_ID or VITE_PHONE_NUMBER.');
-  }
-
-  if (!merchantName) {
-    console.error('Merchant Name missing');
-    throw new Error('Payment configuration missing. Please set VITE_MERCHANT_NAME.');
-  }
-
-  if (amount <= 0) {
-    console.error('Invalid amount:', amount);
-    throw new Error('Invalid payment amount. Amount must be greater than 0.');
-  }
-
-  const mappedCurrency = getKhqrCurrency(currency);
-  if (!mappedCurrency) {
-    throw new Error(`Unsupported currency "${currency}" for KHQR generation.`);
-  }
-
-  if (khqrAccountType === 'merchant' && (!merchantId || !acquiringBank)) {
-    console.error('Merchant configuration missing', { merchantId, acquiringBank });
-    throw new Error('Payment configuration missing. Please set VITE_MERCHANT_ID and VITE_ACQUIRING_BANK for merchant KHQR.');
-  }
-
-  const now = new Date();
-  const creationTimestamp = now.getTime();
-  const expiryDate = new Date(creationTimestamp + (khqrExpiryMinutes * 60 * 1000));
-  const expirationTimestamp = expiryDate.getTime();
-
-  if (`${expirationTimestamp}`.length !== 13) {
-    console.warn('Unexpected expiration timestamp length detected.', expirationTimestamp);
-  }
-
-  const fallbackMobileNumber = phoneNumber
-    ? phoneNumber.replace(/^\+?855/, '0')
-    : undefined;
-
-  const amountString =
-    mappedCurrency === khqrData.currency.khr
-      ? Math.round(amount).toString()
-      : amount.toFixed(2);
-  const sanitizedBillNumber = sanitizeOptionalField(planId, KHQR_LIMITS.billNumber, 'billNumber');
-  const sanitizedMobileNumber = fallbackMobileNumber
-    ? sanitizeOptionalField(fallbackMobileNumber, KHQR_LIMITS.mobileNumber, 'mobileNumber')
-    : undefined;
-  const sanitizedStoreLabel = sanitizeOptionalField(merchantName, KHQR_LIMITS.storeLabel, 'storeLabel');
-  const sanitizedTerminalLabel = sanitizeOptionalField(merchantName, KHQR_LIMITS.terminalLabel, 'terminalLabel');
-  const sanitizedPurpose = planId
-    ? sanitizeOptionalField(`Plan ${planId}`, KHQR_LIMITS.purposeOfTransaction, 'purposeOfTransaction')
-    : undefined;
-  const sanitizedMerchantCategoryCodeRaw = sanitizeOptionalField(
-    merchantCategoryCode,
-    KHQR_LIMITS.merchantCategoryCode,
-    'merchantCategoryCode'
-  );
-  const effectiveMerchantCategoryCode =
-    sanitizedMerchantCategoryCodeRaw && sanitizedMerchantCategoryCodeRaw.length === KHQR_LIMITS.merchantCategoryCode
-      ? sanitizedMerchantCategoryCodeRaw
-      : '5999';
-  if (
-    sanitizedMerchantCategoryCodeRaw &&
-    sanitizedMerchantCategoryCodeRaw.length !== KHQR_LIMITS.merchantCategoryCode
-  ) {
-    console.warn('Merchant category code must be 4 characters; using fallback 5999.', {
-      original: merchantCategoryCode,
-      sanitised: sanitizedMerchantCategoryCodeRaw,
-    });
-  }
-
-  const optionalFields = {
-    amount: amountString,
-    currency: mappedCurrency,
-    billNumber: sanitizedBillNumber,
-    merchantCategoryCode: effectiveMerchantCategoryCode,
-    mobileNumber: sanitizedMobileNumber,
-    creationTimestamp,
-    expirationTimestamp,
-    // Additional optional fields for better display in Bakong app
-    terminalLabel: sanitizedTerminalLabel,
-    storeLabel: sanitizedStoreLabel,
-    purposeOfTransaction: sanitizedPurpose,
-  };
-
-  // Create Bakong KHQR info with required fields
-  const khqrInfo = khqrAccountType === 'merchant'
-    ? new MerchantInfo(
-        bakongAccountId,
-        merchantName,
-        merchantCity,
-        merchantId,
-        acquiringBank,
-        optionalFields
-      )
-    : new IndividualInfo(
-        bakongAccountId,
-        merchantName,
-        merchantCity,
-        optionalFields
-      );
-
-  try {
-    console.log('Generating KHQR with:', khqrInfo);
-    const result = khqrAccountType === 'merchant'
-      ? khqrClient.generateMerchant(khqrInfo)
-      : khqrClient.generateIndividual(khqrInfo);
-    console.log('KHQR Generation Result:', result);
-
-    if (result.status.code !== 0) {
-      throw new Error(result.status.message ?? 'Unable to generate KHQR payload.');
-    }
-
-    const qrValue = extractKhqrValue(result);
-    if (!qrValue) {
-      throw new Error('Generated KHQR payload is empty.');
-    }
-
-    const md5Value = extractKhqrMd5(result);
-
-    return {
-      payload: qrValue,
-      md5: md5Value,
-      creationTimestamp,
-      expirationTimestamp,
-    };
-  } catch (error) {
-    console.error('Error generating KHQR:', error);
-    throw error;
-  }
+const QR_RENDER_OPTIONS: QRCode.QRCodeToDataURLOptions = {
+  margin: 1,
+  width: 320,
+  color: {
+    dark: '#000000',
+    light: '#FFFFFF',
+  },
 };
 
-export const generateCheckoutDetails = async (params: Required<CheckoutParams>) => {
-  const khqrGeneration = buildKhqrPayload(params);
-  const { payload: khqrPayload, md5, creationTimestamp, expirationTimestamp } = khqrGeneration;
-  if (!khqrPayload) {
-    throw new Error('Unable to generate payment QR code. Please check your configuration.');
-  }
-
-  let qrCode: string;
-  try {
-    qrCode = await QRCode.toDataURL(khqrPayload, {
-      margin: 4,
-      width: 512,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF',
-      },
-      errorCorrectionLevel: 'H' // Highest error correction for better scanning
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to generate KHQR image.';
-    throw new Error(message);
-  }
-
-  return {
-    khqrPayload,
-    qrCode,
-    md5,
-    creationTimestamp,
-    expirationTimestamp,
-  };
-};
-
-export type CheckoutDetails = Awaited<ReturnType<typeof generateCheckoutDetails>>;
-
-export type PaymentStatus = 'PAID' | 'UNPAID';
-
-export interface PaymentStatusResult<T = Record<string, unknown>> {
-  status: PaymentStatus;
-  responseCode: number;
-  errorCode?: number | null;
-  data?: T | null;
-  checkedAt: number;
-  raw: unknown;
+export interface GenerateCheckoutParams {
+  planId: string;
+  amount: number;
+  currency: string;
+  orderId: string;
 }
 
-export const checkBakongPaymentStatus = async (md5: string): Promise<PaymentStatusResult> => {
-  const trimmed = (md5 ?? '').toString().trim();
-  if (!trimmed) {
-    throw new Error('MD5 hash is required to check Bakong payment status.');
+export interface CheckoutDetails {
+  orderId: string;
+  amount: number;
+  currency: string;
+  khqrPayload: string;
+  qrCode: string;
+  md5: string | null;
+  creationTimestamp: number;
+  expirationTimestamp: number;
+  expiresInSeconds: number;
+  data: Record<string, unknown> | null;
+  raw: Record<string, unknown> | null;
+}
+
+export interface PaymentStatusResult {
+  status: PaymentStatus;
+  md5: string | null;
+  data: Record<string, unknown> | null;
+  raw: Record<string, unknown> | null;
+  message: string | null;
+  checkedAt: number;
+}
+
+export const generateCheckoutDetails = async ({
+  planId,
+  amount,
+  currency,
+  orderId,
+}: GenerateCheckoutParams): Promise<CheckoutDetails> => {
+  const normalizedAmount = Number(amount);
+  if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+    throw new Error('A payment amount greater than 0 is required.');
   }
 
-  const backend = await requestPaymentStatus(trimmed);
-
-  const responseCode = typeof backend.responseCode === 'number' ? backend.responseCode : -1;
-  const errorCode = backend.errorCode ?? null;
-  const data = backend.data ?? null;
-
-  let status: PaymentStatus;
-  if (backend.status === 'PAID') {
-    status = 'PAID';
-  } else if (backend.status === 'UNPAID') {
-    status = 'UNPAID';
-  } else {
-    status = responseCode === 0 ? 'PAID' : 'UNPAID';
-  }
-
-  return {
-    status,
-    responseCode,
-    errorCode,
-    data,
-    checkedAt: typeof backend.checkedAt === 'number' ? backend.checkedAt : Date.now(),
-    raw: backend.raw ?? backend,
+  const payload = {
+    planId,
+    plan_id: planId,
+    orderId,
+    order_id: orderId,
+    amount: normalizedAmount,
+    currency,
   };
+
+  try {
+    const { data: response } = await httpClient.post('/api/payway/generate-kqhr', payload);
+    const root = toRecord(response);
+    const payloadRecord = toRecord(root?.data ?? null) ?? root;
+
+    if (!payloadRecord) {
+      throw new Error('Payment service returned an empty response.');
+    }
+
+    const khqrPayload =
+      readStringField(payloadRecord, [
+        'khqrPayload',
+        'khqr_string',
+        'khqrString',
+        'khqr',
+        'payload',
+        'qr',
+        'qrString',
+        'qr_string',
+        'data.khqr',
+      ]) ?? null;
+
+    if (!khqrPayload) {
+      throw new Error('Payment service did not return a KHQR payload.');
+    }
+
+    const md5 =
+      readStringField(payloadRecord, ['md5', 'transactionMd5', 'transaction_hash', 'hash']) ??
+      readStringField(root, ['md5', 'transactionMd5', 'transaction_hash', 'hash']);
+
+    const amountValue =
+      normaliseAmount(readNumberField(payloadRecord, ['amount', 'total', 'price']), normalizedAmount) ??
+      normalizedAmount;
+    const currencyValue = normaliseCurrency(
+      readStringField(payloadRecord, ['currency', 'currencyCode']) ?? currency,
+      currency,
+    );
+
+    const creationTimestamp =
+      parseTimestamp(
+        readNumberField(payloadRecord, ['createdAt', 'created_at', 'creationTimestamp']) ??
+          readStringField(payloadRecord, ['createdAt', 'created_at', 'creationTimestamp']),
+      ) ?? Date.now();
+
+    const expiresInSeconds =
+      readNumberField(payloadRecord, ['expiresIn', 'expires_in', 'expirySeconds', 'expiredInSeconds']) ??
+      readNumberField(root, ['expiresIn', 'expires_in']) ??
+      DEFAULT_EXPIRY_SECONDS;
+
+    const expirationTimestamp =
+      parseTimestamp(
+        readNumberField(payloadRecord, ['expiredAt', 'expired_at', 'expirationTimestamp', 'expiresAt']) ??
+          readStringField(payloadRecord, ['expiredAt', 'expired_at', 'expirationTimestamp', 'expiresAt']),
+      ) ??
+      (Number.isFinite(expiresInSeconds) && expiresInSeconds > 0
+        ? creationTimestamp + expiresInSeconds * 1000
+        : creationTimestamp + DEFAULT_EXPIRY_SECONDS * 1000);
+
+    const qrImage =
+      ensureDataUrl(
+        readStringField(payloadRecord, [
+          'qrCode',
+          'qr_code',
+          'qrImage',
+          'qr_image',
+          'qrDataUrl',
+          'qrUrl',
+          'qr',
+          'qrBase64',
+        ]),
+      ) ?? ensureDataUrl(readStringField(root, ['qrCode', 'qr_image', 'qrDataUrl', 'qrUrl']));
+
+    const qrCode = qrImage ?? (await QRCode.toDataURL(khqrPayload, QR_RENDER_OPTIONS));
+
+    return {
+      orderId,
+      amount: amountValue,
+      currency: currencyValue,
+      khqrPayload,
+      qrCode,
+      md5: md5 ?? null,
+      creationTimestamp,
+      expirationTimestamp,
+      expiresInSeconds: Number.isFinite(expiresInSeconds) ? Math.max(1, Number(expiresInSeconds)) : DEFAULT_EXPIRY_SECONDS,
+      data: payloadRecord,
+      raw: root,
+    };
+  } catch (error) {
+    throw new Error(extractAxiosMessage(error, 'Unable to prepare Bakong checkout at the moment. Please try again.'));
+  }
+};
+
+export const checkBakongPaymentStatus = async (md5: string): Promise<PaymentStatusResult> => {
+  const hash = typeof md5 === 'string' ? md5.trim() : '';
+  if (!hash) {
+    throw new Error('Transaction hash is required to check payment status.');
+  }
+
+  try {
+    const { data: response } = await httpClient.post(
+      '/api/payway/check-transaction-by-md5',
+      { md5: hash },
+      { baseURL: resolveStatusBaseUrl() },
+    );
+
+    const root = toRecord(response);
+    const dataRecord = toRecord(root?.data ?? null) ?? root;
+
+    const statusRaw =
+      readStringField(root, ['status', 'paymentStatus', 'payment_status']) ??
+      readStringField(dataRecord, ['status', 'paymentStatus', 'payment_status']);
+
+    const status = normalisePaymentStatus(statusRaw) ?? 'PENDING';
+
+    const message =
+      readStringField(root, ['message', 'statusMessage', 'status_message']) ??
+      readStringField(dataRecord, ['message', 'statusMessage', 'status_message']) ??
+      null;
+
+    const resolvedMd5 =
+      readStringField(dataRecord, ['md5', 'transactionMd5', 'transaction_hash', 'hash']) ??
+      readStringField(root, ['md5', 'transactionMd5', 'transaction_hash', 'hash']) ??
+      hash;
+
+    return {
+      status,
+      md5: resolvedMd5 ?? hash,
+      data: dataRecord,
+      raw: root,
+      message,
+      checkedAt: Date.now(),
+    };
+  } catch (error) {
+    throw new Error(
+      extractAxiosMessage(error, 'Unable to check Bakong payment status right now. Please try again shortly.'),
+    );
+  }
 };

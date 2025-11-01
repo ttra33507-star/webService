@@ -1,34 +1,41 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
-import { AUTH_STORAGE_KEY, useAuth } from '../composables/useAuth';
+import { useAuth } from '../composables/useAuth';
 
 const router = useRouter();
-const { isAuthenticated, signOut } = useAuth();
-const accountToken = ref<string | null>(null);
+const { isAuthenticated, signOut, authState } = useAuth();
 
-const readToken = () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-  accountToken.value = window.localStorage.getItem(AUTH_STORAGE_KEY);
-};
-
-const handleStorageChange = (event: StorageEvent) => {
-  if (event.key === AUTH_STORAGE_KEY) {
-    readToken();
-  }
-};
+const accountName = computed(() => authState.value?.user?.name ?? 'C4 Member');
+const accountEmail = computed(() => authState.value?.user?.email ?? 'user@c4techhub.com');
 
 const maskedToken = computed(() => {
-  const token = accountToken.value ?? '';
+  const token = authState.value?.accessToken ?? '';
   if (!token) {
     return 'Not available';
   }
-  if (token.length <= 8) {
+  if (token.length <= 12) {
     return token;
   }
-  return `${token.slice(0, 4)}...${token.slice(-4)}`;
+  return `${token.slice(0, 6)}...${token.slice(-6)}`;
+});
+
+const expiresAtLabel = computed(() => {
+  const expiresAt = authState.value?.expiresAt ?? null;
+  if (!expiresAt) {
+    return 'Session active';
+  }
+  if (expiresAt <= Date.now()) {
+    return 'Session expired';
+  }
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(expiresAt));
+  } catch {
+    return 'Session active';
+  }
 });
 
 const handleSignOut = () => {
@@ -41,21 +48,10 @@ watch(
   (authed) => {
     if (!authed) {
       router.replace({ name: 'login', query: { redirect: '/account' } });
-    } else {
-      readToken();
     }
   },
   { immediate: true },
 );
-
-onMounted(() => {
-  readToken();
-  window.addEventListener('storage', handleStorageChange);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('storage', handleStorageChange);
-});
 </script>
 
 <template>
@@ -75,9 +71,13 @@ onBeforeUnmount(() => {
       <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#23bdee]">Signed in as</p>
-          <p class="mt-3 text-xl font-semibold text-white">{{ maskedToken }}</p>
-          <p class="mt-2 text-sm text-slate-400">
-            This is a temporary identifier saved in your browser. Sign out to remove it.
+          <p class="mt-3 text-xl font-semibold text-white">{{ accountName }}</p>
+          <p class="mt-1 text-sm text-slate-400">{{ accountEmail }}</p>
+          <p class="mt-2 text-xs uppercase tracking-[0.3em] text-slate-500">
+            Session expires: <span class="text-slate-300">{{ expiresAtLabel }}</span>
+          </p>
+          <p class="mt-2 text-sm text-slate-500">
+            Token preview: <span class="font-mono text-slate-300">{{ maskedToken }}</span>
           </p>
         </div>
         <button
