@@ -1,4 +1,4 @@
-import { isAxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import QRCode from 'qrcode';
 import httpClient from '../api/httpClient';
 
@@ -28,6 +28,58 @@ const resolveStatusBaseUrl = () => {
   }
   return DEFAULT_STATUS_BASE_URL;
 };
+
+const sanitizeString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+
+const DEFAULT_BAKONG_STATUS_BASE_URL = 'https://api-bakong.nbc.gov.kh';
+
+const resolveBakongStatusBaseUrl = () => {
+  const configured = sanitizeBaseUrl(import.meta.env.VITE_BAKONG_STATUS_BASE_URL);
+  if (configured) {
+    return configured;
+  }
+  return DEFAULT_BAKONG_STATUS_BASE_URL;
+};
+
+const BAKONG_STATUS_API_BASE = `${resolveBakongStatusBaseUrl()}/local/v1`;
+const BAKONG_STATUS_STATIC_TOKEN = sanitizeString(import.meta.env.VITE_BAKONG_STATUS_TOKEN);
+const BAKONG_STATUS_USERNAME = sanitizeString(import.meta.env.VITE_BAKONG_STATUS_USERNAME);
+const BAKONG_STATUS_PASSWORD = sanitizeString(import.meta.env.VITE_BAKONG_STATUS_PASSWORD);
+
+const bakongStatusClient = axios.create({
+  baseURL: BAKONG_STATUS_API_BASE,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+});
+
+const setBakongStatusAuthHeader = (token: string | null) => {
+  if (token) {
+    bakongStatusClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete bakongStatusClient.defaults.headers.common.Authorization;
+  }
+};
+
+if (BAKONG_STATUS_STATIC_TOKEN) {
+  setBakongStatusAuthHeader(BAKONG_STATUS_STATIC_TOKEN);
+}
+
+interface BakongStatusToken {
+  value: string;
+  expiresAt: number | null;
+}
+
+let bakongStatusToken: BakongStatusToken | null = BAKONG_STATUS_STATIC_TOKEN
+  ? { value: BAKONG_STATUS_STATIC_TOKEN, expiresAt: null }
+  : null;
+
+let bakongLoginPromise: Promise<string | null> | null = null;
+
+const shouldUseBakongFallback = () =>
+  Boolean(BAKONG_STATUS_STATIC_TOKEN || (BAKONG_STATUS_USERNAME && BAKONG_STATUS_PASSWORD));
 
 const toRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
@@ -117,6 +169,33 @@ const parseTimestamp = (value: unknown): number | null => {
     return Number.isNaN(parsed.getTime()) ? null : parsed.getTime();
   }
   return null;
+};
+
+const resolveBakongTokenExpiry = (value: unknown): number | null => {
+  const parsed = parseTimestamp(value);
+  if (parsed == null) {
+    return null;
+  }
+  if (parsed < 1e12) {
+    // Treat small values as durations in seconds
+    return Date.now() + parsed * 1000;
+  }
+  return parsed;
+};
+
+const updateBakongStatusToken = (token: string, expiresAt: number | null) => {
+  bakongStatusToken = { value: token, expiresAt };
+  setBakongStatusAuthHeader(token);
+};
+
+const clearBakongStatusToken = () => {
+  if (BAKONG_STATUS_STATIC_TOKEN) {
+    bakongStatusToken = { value: BAKONG_STATUS_STATIC_TOKEN, expiresAt: null };
+    setBakongStatusAuthHeader(BAKONG_STATUS_STATIC_TOKEN);
+    return;
+  }
+  bakongStatusToken = null;
+  setBakongStatusAuthHeader(null);
 };
 
 const ensureDataUrl = (value: string | null | undefined): string | null => {
@@ -217,6 +296,150 @@ const normalisePaymentStatus = (value: unknown): PaymentStatus | null => {
   }
 };
 
+const detectPaymentEvidence = (data: Record<string, unknown> | null): boolean => {
+  if (!data) {
+    return false;
+  }
+
+  const paidTimestamp =
+    parseTimestamp(
+      readNumberField(data, [
+        'paidTimestamp',
+        'paid_at_timestamp',
+        'paid_at',
+        'paidAt',
+        'paidTime',
+        'paymentTimestamp',
+        'paymentTime',
+        'payment_time',
+      ]) ??
+        readStringField(data, [
+          'paidTimestamp',
+          'paid_at_timestamp',
+          'paid_at',
+          'paidAt',
+          'paidTime',
+          'paymentTimestamp',
+          'paymentTime',
+          'payment_time',
+          'transactionDateTime',
+          'transactionDate',
+        ]),
+    ) ?? null;
+
+  if (paidTimestamp != null) {
+    return true;
+  }
+
+  const paidAmount =
+    readNumberField(data, [
+      'order_paid_amount',
+      'paidAmount',
+      'paid_amount',
+      'totalPaidAmount',
+      'total_paid_amount',
+      'paymentAmount',
+    ]) ?? null;
+
+  if (paidAmount != null && paidAmount > 0) {
+    return true;
+  }
+
+  const outstandingAmount =
+    readNumberField(data, ['order_outstanding_amount', 'outstandingAmount', 'outstanding_amount', 'balance']) ?? null;
+
+  if (outstandingAmount != null && outstandingAmount <= 0 && (paidAmount ?? 0) >= 0) {
+    return true;
+  }
+
+  const altStatusRaw = readStringField(data, [
+    'transactionStatus',
+    'orderStatus',
+    'paymentResult',
+    'paywayStatus',
+    'order_status',
+  ]);
+
+  if (altStatusRaw) {
+    const normalizedAltStatus = normalisePaymentStatus(altStatusRaw);
+    if (normalizedAltStatus === 'PAID') {
+      const altStatusUpper = altStatusRaw.trim().toUpperCase();
+      if (
+        altStatusUpper === 'PAID' ||
+        altStatusUpper === 'SETTLED' ||
+        altStatusUpper === 'COMPLETED' ||
+        altStatusUpper.includes('PAID')
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+const performBakongStatusLogin = async (): Promise<string | null> => {
+  if (!BAKONG_STATUS_USERNAME || !BAKONG_STATUS_PASSWORD) {
+    return null;
+  }
+
+  try {
+    const { data: response } = await bakongStatusClient.post('/login', {
+      username: BAKONG_STATUS_USERNAME,
+      password: BAKONG_STATUS_PASSWORD,
+    });
+
+    const root = toRecord(response);
+    const dataRecord = toRecord(root?.data ?? null) ?? root;
+    const token =
+      readStringField(dataRecord, ['token', 'accessToken']) ?? readStringField(root, ['token', 'accessToken']);
+
+    if (!token) {
+      return null;
+    }
+
+    const expiryCandidate =
+      readStringField(dataRecord, ['expireIn', 'expiresIn', 'expiredAt', 'expires_at']) ??
+      readNumberField(dataRecord, ['expireIn', 'expiresIn', 'expiredAt', 'expires_at']);
+
+    const expiresAt = resolveBakongTokenExpiry(expiryCandidate);
+    updateBakongStatusToken(token, expiresAt);
+
+    return token;
+  } catch (error) {
+    clearBakongStatusToken();
+    if (import.meta.env.DEV) {
+      console.warn('[Bakong] Unable to sign in to status API', error);
+    }
+    return null;
+  }
+};
+
+const ensureBakongStatusAuth = async (): Promise<string | null> => {
+  if (!shouldUseBakongFallback()) {
+    return null;
+  }
+
+  if (BAKONG_STATUS_STATIC_TOKEN) {
+    return BAKONG_STATUS_STATIC_TOKEN;
+  }
+
+  const now = Date.now();
+  if (bakongStatusToken?.value) {
+    if (bakongStatusToken.expiresAt == null || bakongStatusToken.expiresAt - now > 5000) {
+      return bakongStatusToken.value;
+    }
+  }
+
+  if (!bakongLoginPromise) {
+    bakongLoginPromise = performBakongStatusLogin().finally(() => {
+      bakongLoginPromise = null;
+    });
+  }
+
+  return bakongLoginPromise;
+};
+
 const extractAxiosMessage = (error: unknown, fallback: string): string => {
   if (isAxiosError(error)) {
     const responseData = error.response?.data;
@@ -225,14 +448,25 @@ const extractAxiosMessage = (error: unknown, fallback: string): string => {
     }
     const responseRecord = toRecord(responseData);
     if (responseRecord) {
+      const messageFields = [
+        'message',
+        'error_description',
+        'error',
+        'statusMessage',
+        'status_message',
+        'responseMessage',
+        'response_message',
+        'responseDescription',
+        'response_description',
+        'description',
+        'statusDescription',
+        'status_description',
+        'remark',
+        'note',
+      ];
       const message =
-        readStringField(responseRecord, [
-          'message',
-          'error_description',
-          'error',
-          'statusMessage',
-          'status_message',
-        ]) ?? readStringField(toRecord(responseRecord.data ?? null), ['message', 'error']);
+        readStringField(responseRecord, messageFields) ??
+        readStringField(toRecord(responseRecord.data ?? null), [...messageFields, 'error']);
       if (message) {
         return message;
       }
@@ -284,6 +518,108 @@ export interface PaymentStatusResult {
   message: string | null;
   checkedAt: number;
 }
+
+const checkBakongStatusByMd5 = async (md5: string): Promise<PaymentStatusResult | null> => {
+  if (!shouldUseBakongFallback()) {
+    return null;
+  }
+
+  const token = await ensureBakongStatusAuth();
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const { data: response } = await bakongStatusClient.post('/check_transaction_by_md5', { md5 });
+    const root = toRecord(response);
+    const dataRecord = toRecord(root?.data ?? null) ?? root;
+
+    if (!dataRecord) {
+      return null;
+    }
+
+    const statusRaw =
+      readStringField(root, ['status', 'responseMessage', 'paymentStatus', 'payment_status']) ??
+      readStringField(dataRecord, ['status', 'paymentStatus', 'transactionStatus', 'orderStatus', 'result']);
+
+    const fallbackStatus = normalisePaymentStatus(statusRaw);
+    const evidenceDetected = detectPaymentEvidence(dataRecord);
+    const statusRawUpper = typeof statusRaw === 'string' ? statusRaw.trim().toUpperCase() : '';
+    const fallbackStatusExplicitlyPaid =
+      statusRawUpper === 'PAID' ||
+      statusRawUpper === 'SETTLED' ||
+      statusRawUpper === 'COMPLETED' ||
+      statusRawUpper.includes('PAID');
+
+    const message =
+      readStringField(root, ['responseMessage', 'message', 'statusMessage']) ??
+      readStringField(dataRecord, ['message', 'statusMessage', 'note']) ??
+      null;
+
+    const resolvedMd5 =
+      readStringField(dataRecord, ['md5', 'qr_md5', 'hash']) ??
+      readStringField(root, ['md5', 'qr_md5', 'hash']) ??
+      md5;
+
+    let status: PaymentStatus;
+    if (fallbackStatus === 'PAID') {
+      status = fallbackStatusExplicitlyPaid || evidenceDetected ? 'PAID' : 'PENDING';
+    } else if (fallbackStatus) {
+      status = fallbackStatus;
+    } else if (evidenceDetected) {
+      status = 'PAID';
+    } else {
+      status = 'PENDING';
+    }
+
+    const result: PaymentStatusResult = {
+      status,
+      md5: resolvedMd5 ?? md5,
+      data: dataRecord,
+      raw: root,
+      message,
+      checkedAt: Date.now(),
+    };
+
+    const messageSuggestsPaid = (() => {
+      if (!message) {
+        return false;
+      }
+      const lower = message.trim().toLowerCase();
+      if (!lower) {
+        return false;
+      }
+      if (['paid', 'paid successfully', 'payment successful'].includes(lower)) {
+        return true;
+      }
+      return (
+        lower.includes('paid') ||
+        lower.includes('payment success') ||
+        lower.includes('payment successful') ||
+        lower.includes('already paid') ||
+        lower.includes('already been paid')
+      );
+    })();
+
+    if (messageSuggestsPaid && result.status !== 'PAID') {
+      result.status = 'PAID';
+    }
+
+    if (result.status !== 'PAID' && evidenceDetected) {
+      result.status = 'PAID';
+    }
+
+    return result;
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 401) {
+      clearBakongStatusToken();
+    }
+    if (import.meta.env.DEV) {
+      console.warn('[Bakong] Unable to fetch status from Bakong fallback API', error);
+    }
+    return null;
+  }
+};
 
 export const generateCheckoutDetails = async ({
   planId,
@@ -417,19 +753,50 @@ export const checkBakongPaymentStatus = async (md5: string): Promise<PaymentStat
       readStringField(root, ['status', 'paymentStatus', 'payment_status']) ??
       readStringField(dataRecord, ['status', 'paymentStatus', 'payment_status']);
 
-    const status = normalisePaymentStatus(statusRaw) ?? 'PENDING';
+    const normalizedStatus = normalisePaymentStatus(statusRaw);
+    const paymentEvidence = detectPaymentEvidence(dataRecord);
+    const statusRawUpper = typeof statusRaw === 'string' ? statusRaw.trim().toUpperCase() : '';
+    const statusExplicitlyPaid =
+      statusRawUpper === 'PAID' ||
+      statusRawUpper === 'SETTLED' ||
+      statusRawUpper === 'COMPLETED' ||
+      statusRawUpper.includes('PAID');
+
+    let status: PaymentStatus;
+    if (normalizedStatus === 'PAID') {
+      status = statusExplicitlyPaid || paymentEvidence ? 'PAID' : 'PENDING';
+    } else if (normalizedStatus) {
+      status = normalizedStatus;
+    } else if (paymentEvidence) {
+      status = 'PAID';
+    } else {
+      status = 'PENDING';
+    }
+
+    const messageFields = [
+      'message',
+      'statusMessage',
+      'status_message',
+      'responseMessage',
+      'response_message',
+      'responseDescription',
+      'response_description',
+      'statusDescription',
+      'status_description',
+      'description',
+      'remark',
+      'note',
+    ];
 
     const message =
-      readStringField(root, ['message', 'statusMessage', 'status_message']) ??
-      readStringField(dataRecord, ['message', 'statusMessage', 'status_message']) ??
-      null;
+      readStringField(root, messageFields) ?? readStringField(dataRecord, messageFields) ?? null;
 
     const resolvedMd5 =
       readStringField(dataRecord, ['md5', 'transactionMd5', 'transaction_hash', 'hash']) ??
       readStringField(root, ['md5', 'transactionMd5', 'transaction_hash', 'hash']) ??
       hash;
 
-    return {
+    const result: PaymentStatusResult = {
       status,
       md5: resolvedMd5 ?? hash,
       data: dataRecord,
@@ -437,6 +804,59 @@ export const checkBakongPaymentStatus = async (md5: string): Promise<PaymentStat
       message,
       checkedAt: Date.now(),
     };
+
+    const messageSuggestsPaid = (() => {
+      if (!message) {
+        return false;
+      }
+      const lower = message.trim().toLowerCase();
+      if (!lower) {
+        return false;
+      }
+      if (['paid', 'paid successfully', 'payment successful'].includes(lower)) {
+        return true;
+      }
+      return (
+        lower.includes('paid') ||
+        lower.includes('payment success') ||
+        lower.includes('payment successful') ||
+        lower.includes('already paid') ||
+        lower.includes('already been paid')
+      );
+    })();
+
+    if (messageSuggestsPaid && result.status !== 'PAID') {
+      result.status = 'PAID';
+    }
+
+    if (result.status === 'PAID') {
+      return result;
+    }
+
+    const fallbackResult = await checkBakongStatusByMd5(hash);
+    if (fallbackResult) {
+      if (fallbackResult.status === 'PAID') {
+        return fallbackResult;
+      }
+
+      if (fallbackResult.status !== 'UNKNOWN' && result.status !== fallbackResult.status) {
+        result.status = fallbackResult.status;
+      }
+      if (!result.message && fallbackResult.message) {
+        result.message = fallbackResult.message;
+      }
+      if (!result.data && fallbackResult.data) {
+        result.data = fallbackResult.data;
+      }
+      if (!result.raw && fallbackResult.raw) {
+        result.raw = fallbackResult.raw;
+      }
+      if (!result.md5 && fallbackResult.md5) {
+        result.md5 = fallbackResult.md5;
+      }
+    }
+
+    return result;
   } catch (error) {
     throw new Error(
       extractAxiosMessage(error, 'Unable to check Bakong payment status right now. Please try again shortly.'),

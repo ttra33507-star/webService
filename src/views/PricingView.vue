@@ -14,6 +14,23 @@ import Swal from 'sweetalert2';
 const merchantName = import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB';
 const acquiringBankName = (import.meta.env.VITE_ACQUIRING_BANK ?? '').toString().trim() || null;
 
+const generateUuid = (): string =>
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+        const random = Math.floor(Math.random() * 16);
+        const value = char === 'x' ? random : (random & 0x3) | 0x8;
+        return value.toString(16);
+      });
+
+const createUniqueSuffix = () => {
+  const condensed = generateUuid().replace(/-/g, '');
+  if (condensed) {
+    return condensed.slice(0, 12);
+  }
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+};
+
 type AudienceKey = 'local' | 'foreigner';
 
 interface Plan {
@@ -462,6 +479,52 @@ const startPaymentTracking = (details: CheckoutDetails) => {
   }, POLL_INTERVAL_MS);
 };
 
+const notifyPaymentSuccess = () => {
+  hasShownPaidAlert.value = true;
+
+  const planSnapshot = selectedPlan.value ?? (selectedPlanId.value ? planMap.get(selectedPlanId.value) ?? null : null);
+  const checkoutSnapshot = checkoutDetails.value;
+  const statusSnapshot = lastStatusResult.value;
+
+  receiptDetails.value = buildReceiptDetailsSnapshot(planSnapshot ?? null, checkoutSnapshot, statusSnapshot);
+
+  stopPolling();
+  stopCountdown();
+  isPaymentModalOpen.value = false;
+  isQrModalOpen.value = false;
+  syncPlanQuery(null);
+  selectedPlanId.value = null;
+
+  const baseMessage =
+    statusSnapshot?.message?.trim() ??
+    (statusSnapshot?.status === 'PAID' ? 'We received your payment successfully.' : 'Payment confirmed.');
+
+  const transactionHashValue =
+    receiptDetails.value?.transactionHash ??
+    checkoutSnapshot?.md5 ??
+    statusSnapshot?.md5 ??
+    checkoutSnapshot?.orderId ??
+    null;
+
+  const message = transactionHashValue ? `${baseMessage} Transaction: ${transactionHashValue}` : baseMessage;
+
+  void Swal.fire({
+    icon: 'success',
+    title: 'Payment confirmed',
+    text: message,
+    confirmButtonText: receiptDetails.value ? 'View receipt' : 'Close',
+    allowOutsideClick: false,
+  }).then(() => {
+    if (receiptDetails.value) {
+      isReceiptModalOpen.value = true;
+    } else {
+      resetPaymentTracking();
+      checkoutDetails.value = null;
+      paymentError.value = null;
+    }
+  });
+};
+
 const isQrExpired = computed(() => remainingSeconds.value <= 0 && !!checkoutDetails.value);
 
 const countdownLabel = computed(() => {
@@ -611,35 +674,7 @@ watch(isQrModalOpen, (open) => {
 
 watch(paymentStatus, (status) => {
   if (status === 'PAID' && !hasShownPaidAlert.value) {
-    hasShownPaidAlert.value = true;
-    const planSnapshot =
-      selectedPlan.value ?? (selectedPlanId.value ? planMap.get(selectedPlanId.value) ?? null : null);
-    const checkoutSnapshot = checkoutDetails.value;
-    const statusSnapshot = lastStatusResult.value;
-    receiptDetails.value = buildReceiptDetailsSnapshot(planSnapshot ?? null, checkoutSnapshot, statusSnapshot);
-
-    stopPolling();
-    stopCountdown();
-    isPaymentModalOpen.value = false;
-    isQrModalOpen.value = false;
-    syncPlanQuery(null);
-    selectedPlanId.value = null;
-
-    void Swal.fire({
-      icon: 'success',
-      title: 'Thank you!',
-      text: 'We received your payment successfully. Your receipt is ready to download.',
-      confirmButtonText: 'View receipt',
-      allowOutsideClick: false,
-    }).then(() => {
-      if (receiptDetails.value) {
-        isReceiptModalOpen.value = true;
-      } else {
-        resetPaymentTracking();
-        checkoutDetails.value = null;
-        paymentError.value = null;
-      }
-    });
+    notifyPaymentSuccess();
   }
 });
 
@@ -674,13 +709,11 @@ const requestCheckout = async () => {
   syncPlanQuery(null);
 
   try {
-    const uniqueSuffix =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID().slice(0, 8)
-        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const uniqueSuffix = createUniqueSuffix();
+    const generatedPlanId = `${plan.id}-${uniqueSuffix}`;
     const orderId = `${plan.id}-${uniqueSuffix}`;
     const payload = {
-      planId: plan.id,
+      planId: generatedPlanId,
       amount: plan.amount,
       currency: plan.currency,
       orderId,
