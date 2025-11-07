@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuth } from '../composables/useAuth';
+import { fetchServiceCatalog, getFeaturedServices } from '../services/catalogService';
+import type { ServiceRecord } from '../types/service';
 
 type HeroHighlightIcon = 'clock' | 'check' | 'trend';
 
@@ -26,16 +27,21 @@ interface HeroSlide {
   };
 }
 
-interface BestsellerCard {
+interface FeaturedServiceCard {
+  id: number;
   title: string;
   tagline: string;
   description: string;
+  price: string;
   image: {
     src: string;
     alt: string;
   };
-  planId: string;
+  iconUrl?: string;
+  service: ServiceRecord;
 }
+
+type ServiceImagery = { src: string; alt: string };
 
 const heroSlides: HeroSlide[] = [
   {
@@ -116,60 +122,81 @@ const heroSlides: HeroSlide[] = [
 ];
 
 const router = useRouter();
-const { isAuthenticated } = useAuth();
 
-const bestsellers: BestsellerCard[] = [
-  {
-    title: 'Auto Delete Comment - 1 Month Plan',
-    tagline: 'Kick-off automation with full feature access for 30 days.',
-    description: 'Entry plan for teams validating their workflow. Includes all standard modules and support.',
-    image: {
-      src: '/images/C4-Auto-Delete-Comment.png',
-      alt: 'Auto Delete Comment - 1 Month Plan',
-    },
-    planId: 'local-1m',
+const FEATURED_SERVICE_LIMIT = 6;
+const featuredServices = ref<ServiceRecord[]>([]);
+const isServicesLoading = ref(true);
+const servicesError = ref<string | null>(null);
+
+const serviceImageryMap = {
+  facebook: {
+    src: '/images/C4-FB-Station.png',
+    alt: 'Facebook automation service',
   },
-  {
-    title: 'Facebook Station',
-    tagline: 'Quarterly bundle with bonus days and premium feature unlocks.',
-    description: 'Our most popular option - extend coverage, unlock additional rotations, and receive priority support.',
-    image: {
-      src: '/images/C4-FB-Station.png',
-      alt: 'Facebook Station',
-    },
-    planId: 'local-3m',
+  telegram: {
+    src: '/images/C4-TG-Station.png',
+    alt: 'Telegram automation service',
   },
-  {
-    title: 'Report Facebook',
-    tagline: 'Annual coverage with native verification and custom feature access.',
-    description: 'Full-year automation license with concierge onboarding, compliance review, and tailored feature drops.',
-    image: {
-      src: '/images/C4-Report-Facebook.png',
-      alt: 'Report Facebook',
-    },
-    planId: 'local-12m',
+  tiktok: {
+    src: '/images/txt.jpg',
+    alt: 'TikTok automation service',
   },
-  {
-    title: 'Telegram Station',
-    tagline: 'Immersive audio with hybrid ANC for open offices.',
-    description: 'Deploy premium messaging workflows with automation-ready routing and proactive moderation.',
-    image: {
-      src: '/images/C4-TG-Station.png',
-      alt: 'Telegram Station',
-    },
-    planId: 'international-3m',
+  default: {
+    src: '/images/C4-Report-Facebook.png',
+    alt: 'Premium automation service',
   },
-  {
-    title: 'Smart Desk Organizer',
-    tagline: 'Wireless charging, pen storage, and cable routing combined.',
-    description: 'Turn any desk into a tidy command center with embedded charging, storage, and lighting control.',
-    image: {
-      src: '/images/txt.jpg',
-      alt: 'Smart Desk Organizer',
-    },
-    planId: 'international-12m',
-  },
-];
+} as const satisfies Record<string, ServiceImagery>;
+
+const resolveServiceImagery = (service: ServiceRecord): ServiceImagery => {
+  const key = service.mainCategory.label.toLowerCase();
+  if (key in serviceImageryMap) {
+    return serviceImageryMap[key as keyof typeof serviceImageryMap];
+  }
+  return serviceImageryMap.default;
+};
+
+const featuredServiceCards = computed<FeaturedServiceCard[]>(() =>
+  featuredServices.value.map((service) => {
+    const heroImage = service.iconUrl
+      ? { src: service.iconUrl, alt: `${service.label} icon` }
+      : resolveServiceImagery(service);
+    return {
+      id: service.id,
+      title: service.label,
+      tagline: `${service.mainCategory.label} • ${service.category.label}`,
+      description: `Default quantity ${service.defaultQuantity} · ${service.price.formatted}`,
+      price: service.price.formatted,
+      image: heroImage,
+      iconUrl: service.iconUrl,
+      service,
+    };
+  }),
+);
+
+const hasFeaturedServices = computed(() => featuredServiceCards.value.length > 0);
+
+const loadFeaturedServices = async () => {
+  servicesError.value = null;
+  try {
+    const catalog = await fetchServiceCatalog();
+    featuredServices.value = getFeaturedServices(catalog, FEATURED_SERVICE_LIMIT);
+  } catch (error) {
+    console.error('[Home] Failed to load featured services', error);
+    servicesError.value = 'Unable to load services right now. Please try again.';
+    featuredServices.value = [];
+  } finally {
+    isServicesLoading.value = false;
+  }
+};
+
+const retryFeaturedServices = () => {
+  isServicesLoading.value = true;
+  return loadFeaturedServices();
+};
+
+const viewServiceDetails = (serviceId: number) => {
+  router.push({ name: 'services', query: { highlight: serviceId.toString() } });
+};
 
 const activeHeroSlide = ref(0);
 
@@ -217,16 +244,9 @@ const handleSelectSlide = (index: number) => {
   restartAutoSlide();
 };
 
-const goToPlans = (planId: string) => {
-  if (!isAuthenticated.value) {
-    router.push({ name: 'login', query: { redirect: '/plans', plan: planId } });
-    return;
-  }
-  router.push({ name: 'plans', query: { plan: planId } });
-};
-
 onMounted(() => {
   startAutoSlide();
+  loadFeaturedServices();
 });
 
 onBeforeUnmount(() => {
@@ -376,56 +396,95 @@ onBeforeUnmount(() => {
             <h2 class="text-3xl font-semibold text-white font-display">Bestsellers</h2>
             <p class="mt-2 text-sm text-slate-400">Curated equipment that teams keep coming back for.</p>
           </div>
-          <a href="/services" class="inline-flex items-center text-sm font-semibold text-emerald-300 transition hover:text-emerald-200">
+          <RouterLink to="/services" class="inline-flex items-center text-sm font-semibold text-emerald-300 transition hover:text-emerald-200">
             View the catalog
             <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h9.586l-3.293-3.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clip-rule="evenodd" />
             </svg>
-          </a>
+          </RouterLink>
         </div>
-        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <article
-            v-for="card in bestsellers"
-            :key="card.title"
-            tabindex="0"
-            class="group relative overflow-hidden rounded-2xl border border-slate-900/80 bg-slate-900/50 shadow-lg transition hover:border-emerald-400/40 hover:shadow-glow focus:border-emerald-400/40 focus:shadow-glow focus:outline-none"
-          >
-            <div class="relative h-48 overflow-hidden">
-              <img
-                :src="card.image.src"
-                :alt="card.image.alt"
-                class="h-full w-full object-cover transition duration-500 group-hover:scale-110 group-focus-within:scale-110"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
-            </div>
-            <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
+        <div class="mt-10">
+          <div v-if="servicesError" class="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-100">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h3 class="text-lg font-semibold text-white">{{ card.title }}</h3>
-                <p class="mt-2 text-sm text-slate-400">
-                  {{ card.tagline }}
-                </p>
+                <p class="text-base font-semibold text-white">Unable to load featured services.</p>
+                <p class="text-sm text-red-100/80">{{ servicesError }}</p>
               </div>
-            </div>
-            <div
-              class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-emerald-400/20 bg-slate-950/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
-            >
-              <span class="self-center rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-emerald-200">
-                Quick view
-              </span>
-              <div class="space-y-2">
-                <h3 class="text-xl font-semibold text-white">{{ card.title }}</h3>
-                <p class="text-sm leading-relaxed text-slate-300">
-                  {{ card.description }}
-                </p>
-              </div>
-              <button type="button" class="btn-order-glow" @click="goToPlans(card.planId)">
-                Order now
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-red-100 transition hover:border-red-300 hover:text-white"
+                @click="retryFeaturedServices"
+              >
+                Retry
               </button>
             </div>
-          </article>
+          </div>
+          <div v-else-if="isServicesLoading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-for="index in 3" :key="`featured-skeleton-${index}`" class="animate-pulse rounded-2xl border border-slate-900/80 bg-slate-900/40 p-6">
+              <div class="h-48 w-full rounded-2xl bg-slate-800/60"></div>
+              <div class="mt-6 space-y-3">
+                <div class="h-4 w-3/5 rounded bg-slate-800"></div>
+                <div class="h-3 w-full rounded bg-slate-800/70"></div>
+                <div class="h-3 w-2/3 rounded bg-slate-800/60"></div>
+              </div>
+              <div class="mt-4 h-10 w-1/2 rounded-full bg-slate-800"></div>
+            </div>
+          </div>
+          <div v-else-if="!hasFeaturedServices" class="rounded-2xl border border-slate-900/80 bg-slate-900/40 p-8 text-center text-slate-300">
+            <p class="text-base font-semibold text-white">Services are syncing.</p>
+            <p class="mt-2 text-sm text-slate-400">Visit the catalog to browse every offer from the API.</p>
+            <RouterLink
+              to="/services"
+              class="mt-6 inline-flex items-center justify-center rounded-full border border-emerald-400/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
+            >
+              Go to services
+            </RouterLink>
+          </div>
+          <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article
+              v-for="card in featuredServiceCards"
+              :key="card.id"
+              tabindex="0"
+              class="group relative overflow-hidden rounded-2xl border border-slate-900/80 bg-slate-900/50 shadow-lg transition hover:border-emerald-400/40 hover:shadow-glow focus:border-emerald-400/40 focus:shadow-glow focus:outline-none"
+            >
+              <div class="relative h-48 overflow-hidden">
+                <img
+                  :src="card.image.src"
+                  :alt="card.image.alt"
+                  class="h-full w-full object-cover transition duration-500 group-hover:scale-110 group-focus-within:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
+              </div>
+              <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
+                <div>
+                  <h3 class="text-lg font-semibold text-white">{{ card.title }}</h3>
+                  <p class="mt-2 text-sm text-slate-400">
+                    {{ card.tagline }}
+                  </p>
+                </div>
+              </div>
+              <div
+                class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-emerald-400/20 bg-slate-950/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
+              >
+                <span class="self-center rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-emerald-200">
+                  Quick view
+                </span>
+                <div class="space-y-2">
+                  <h3 class="text-xl font-semibold text-white">{{ card.title }}</h3>
+                  <p class="text-sm leading-relaxed text-slate-300">
+                    {{ card.description }}
+                  </p>
+                  <p class="text-sm font-semibold text-emerald-300">{{ card.price }}</p>
+                </div>
+                <button type="button" class="btn-order-glow" @click="viewServiceDetails(card.id)">
+                  Explore service
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </button>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
     </section>
