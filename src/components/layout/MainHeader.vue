@@ -15,7 +15,7 @@ const navLinks: NavLink[] = [
   { label: 'Services', target: 'route', to: '/services' },
   { label: 'Privacy & Terms', target: 'route', to: '/legal' },
   { label: 'Contact', target: 'route', to: '/contact' },
-  { label: 'Cart', target: 'route', to: '/cart' },
+  { label: 'Dashboard', target: 'anchor', href: 'https://apps.c4techhub.com/' },
 ];
 
 const isMobileNavOpen = ref(false);
