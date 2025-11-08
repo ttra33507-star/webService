@@ -13,7 +13,8 @@ const navLinks: NavLink[] = [
   { label: 'Home', target: 'route', to: '/' },
   { label: 'Plans', target: 'route', to: '/plans' },
   { label: 'Services', target: 'route', to: '/services' },
-  { label: 'Contact', target: 'anchor', href: '/contact' },
+  { label: 'Privacy & Terms', target: 'route', to: '/legal' },
+  { label: 'Contact', target: 'route', to: '/contact' },
   { label: 'Cart', target: 'route', to: '/cart' },
 ];
 

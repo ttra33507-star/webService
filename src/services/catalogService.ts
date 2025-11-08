@@ -1,7 +1,7 @@
 import httpClient from '../api/httpClient';
 import type { RemoteServiceRecord, ServiceCategoryGroup, ServiceRecord } from '../types/service';
 
-const SERVICES_ENDPOINT = '/api/services';
+const SERVICES_ENDPOINT = '/api/all-services';
 
 const coerceNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === 'number' && Number.isFinite(value)) {
