@@ -4,15 +4,40 @@ const DEFAULT_AUTH_BASE_URL = 'https://api.c4techhub.com';
 const DEFAULT_CLIENT_ID = '019a33e5-4f58-72d7-9d25-d8862a503dc1';
 const DEFAULT_CLIENT_SECRET = 'En4Kv1y04uZIjt8liBbgw4UaHLV4gp8EY85kw8k8';
 const DEFAULT_SCOPE = '*';
+const DEFAULT_PORTAL_BASE_URL = 'https://dashboard.c4techhub.com';
+const DEFAULT_LOCAL_API_BASE_URL = 'http://127.0.0.1:8000';
+
+const normaliseBaseUrl = (value: string): string => value.replace(/\/+$/, '');
+
+const resolveAppEnv = () => {
+  const raw = (import.meta.env.VITE_APP_ENV ?? import.meta.env.MODE ?? '').toString().toLowerCase();
+  return raw;
+};
+
+const isLocalLikeEnv = () => {
+  const env = resolveAppEnv();
+  if (env === 'local' || env === 'development' || env === 'dev') {
+    return true;
+  }
+  return Boolean(import.meta.env.DEV);
+};
 
 const resolveAuthBaseUrl = () => {
+  const devOverride = (import.meta.env.VITE_DEV_API_BASE_URL ?? '').toString().trim();
   const configured = (import.meta.env.VITE_AUTH_BASE_URL ?? '').toString().trim();
-  if (configured) {
-    return configured.replace(/\/+$/, '');
+
+  if (isLocalLikeEnv()) {
+    if (devOverride) {
+      return normaliseBaseUrl(devOverride.startsWith('http') ? devOverride : `http://${devOverride}`);
+    }
+    if (configured) {
+      return normaliseBaseUrl(configured.startsWith('http') ? configured : `http://${configured}`);
+    }
+    return DEFAULT_LOCAL_API_BASE_URL;
   }
 
-  if (import.meta.env.DEV) {
-    return DEFAULT_AUTH_BASE_URL;
+  if (configured) {
+    return normaliseBaseUrl(configured.startsWith('http') ? configured : `https://${configured}`);
   }
 
   return DEFAULT_AUTH_BASE_URL;
@@ -40,6 +65,13 @@ export interface UserProfile {
   name?: string;
   email?: string;
   [key: string]: unknown;
+}
+
+export interface SsoTicketResponse {
+  ticket: string;
+  expires_in?: number;
+  redirect_to?: string | null;
+  state?: string | null;
 }
 
 const getClientCredentials = () => {
@@ -147,4 +179,134 @@ export const getAuthorizationHeader = (token: string | null | undefined): string
   }
 
   return `Bearer ${trimmed}`;
+};
+
+const resolvePortalBaseUrl = () => {
+  const raw = (import.meta.env.VITE_PORTAL_BASE_URL ?? '').toString().trim();
+  if (raw) {
+    return normaliseBaseUrl(raw.startsWith('http') ? raw : `https://${raw}`);
+  }
+  if (import.meta.env.DEV) {
+    const devOverride = (import.meta.env.VITE_DEV_PORTAL_BASE_URL ?? '').toString().trim();
+    if (devOverride) {
+      return normaliseBaseUrl(devOverride.startsWith('http') ? devOverride : `http://${devOverride}`);
+    }
+    return 'http://localhost:5173';
+  }
+  return DEFAULT_PORTAL_BASE_URL;
+};
+
+const resolveSsoSecret = () => {
+  const raw = (import.meta.env.VITE_SSO_SHARED_SECRET ?? '').toString().trim();
+  if (raw) {
+    return raw;
+  }
+  const bridgeSecret = (import.meta.env.VITE_SSO_BRIDGE_SECRET ?? '').toString().trim();
+  if (bridgeSecret) {
+    return bridgeSecret;
+  }
+  throw new Error('Missing SSO shared secret. Set VITE_SSO_SHARED_SECRET.');
+};
+
+export const getPortalBaseUrl = () => resolvePortalBaseUrl();
+
+const normaliseRedirectPath = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  if (trimmed.startsWith('//')) {
+    return null;
+  }
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+  try {
+    const candidate = new URL(trimmed);
+    const portalBase = resolvePortalBaseUrl();
+    if (!portalBase) {
+      return null;
+    }
+    const portalOrigin = new URL(portalBase).origin;
+    if (candidate.origin !== portalOrigin) {
+      return null;
+    }
+    const next = `${candidate.pathname}${candidate.search}${candidate.hash}`;
+    return next || '/';
+  } catch {
+    return null;
+  }
+};
+
+export interface RequestSsoTicketOptions {
+  userId?: number | string | null;
+  email?: string | null;
+  redirectTo?: string | null;
+  state?: string | null;
+}
+
+export const requestSsoTicket = async (options: RequestSsoTicketOptions): Promise<SsoTicketResponse> => {
+  const secret = resolveSsoSecret();
+  const payload: Record<string, unknown> = {};
+
+  if (options.userId !== null && options.userId !== undefined) {
+    payload.user_id = options.userId;
+  }
+
+  if (options.email && options.email.trim()) {
+    payload.email = options.email.trim();
+  }
+
+  const redirect = normaliseRedirectPath(options.redirectTo);
+  if (redirect) {
+    payload.redirect_to = redirect;
+  }
+
+  const state = options.state && typeof options.state === 'string' ? options.state.trim() : '';
+  if (state) {
+    payload.state = state;
+  }
+
+  try {
+    const { data } = await authClient.post<SsoTicketResponse>('/api/sso/tickets', payload, {
+      headers: {
+        'X-SSO-Secret': secret,
+      },
+    });
+
+    if (!data || typeof data.ticket !== 'string' || !data.ticket.trim()) {
+      throw new Error('SSO ticket response was invalid.');
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error, 'Unable to prepare single sign-on ticket.'));
+  }
+};
+
+export const buildPortalCallbackUrl = (ticket: string, redirectPath: string | null, persistenceMode: 'persistent' | 'session') => {
+  const base = resolvePortalBaseUrl();
+  if (!base) {
+    throw new Error('Portal base URL is not configured.');
+  }
+
+  const url = (() => {
+    try {
+      return new URL('/sso/callback', base.startsWith('http') ? base : `https://${base}`);
+    } catch {
+      const fallback = base.startsWith('http') ? base : `https://${base}`;
+      return new URL('/sso/callback', fallback);
+    }
+  })();
+
+  url.searchParams.set('ticket', ticket);
+  if (redirectPath && redirectPath.trim()) {
+    url.searchParams.set('redirect', redirectPath.trim());
+  }
+  url.searchParams.set('mode', persistenceMode === 'session' ? 'session' : 'persistent');
+
+  return url.toString();
 };
