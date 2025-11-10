@@ -43,6 +43,12 @@ const router = createRouter({
       name: 'account',
       component: () => import('../views/ProfileView.vue'),
     },
+    {
+      path: '/services/:serviceId/order',
+      name: 'service-order',
+      component: () => import('../views/NewOrderView.vue'),
+      props: true,
+    },
   ],
   scrollBehavior() {
     return { top: 0 };

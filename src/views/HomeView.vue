@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { fetchServiceCatalog, getFeaturedServices } from '../services/catalogService';
+import { fetchBestsellerServices } from '../services/catalogService';
 import type { ServiceRecord } from '../types/service';
 
 type HeroHighlightIcon = 'clock' | 'check' | 'trend';
@@ -121,8 +120,6 @@ const heroSlides: HeroSlide[] = [
   },
 ];
 
-const router = useRouter();
-
 const FEATURED_SERVICE_LIMIT = 6;
 const featuredServices = ref<ServiceRecord[]>([]);
 const isServicesLoading = ref(true);
@@ -178,8 +175,8 @@ const hasFeaturedServices = computed(() => featuredServiceCards.value.length > 0
 const loadFeaturedServices = async () => {
   servicesError.value = null;
   try {
-    const catalog = await fetchServiceCatalog();
-    featuredServices.value = getFeaturedServices(catalog, FEATURED_SERVICE_LIMIT);
+    const bestsellers = await fetchBestsellerServices();
+    featuredServices.value = bestsellers.slice(0, FEATURED_SERVICE_LIMIT);
   } catch (error) {
     console.error('[Home] Failed to load featured services', error);
     servicesError.value = 'Unable to load services right now. Please try again.';
@@ -192,10 +189,6 @@ const loadFeaturedServices = async () => {
 const retryFeaturedServices = () => {
   isServicesLoading.value = true;
   return loadFeaturedServices();
-};
-
-const viewServiceDetails = (serviceId: number) => {
-  router.push({ name: 'services', query: { highlight: serviceId.toString() } });
 };
 
 const activeHeroSlide = ref(0);
@@ -476,12 +469,15 @@ onBeforeUnmount(() => {
                   </p>
                   <p class="text-sm font-semibold text-emerald-300">{{ card.price }}</p>
                 </div>
-                <button type="button" class="btn-order-glow" @click="viewServiceDetails(card.id)">
-                  Explore service
+                <RouterLink
+                  to="/services/6/order"
+                  class="btn-order-glow"
+                >
+                  Order Now
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
                   </svg>
-                </button>
+                </RouterLink>
               </div>
             </article>
           </div>

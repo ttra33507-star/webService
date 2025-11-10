@@ -13,6 +13,7 @@ export interface RemoteServiceRecord {
   currency_symbol: string;
   visible: boolean;
   default_quantity: number;
+  sales_count?: number | string | null;
 }
 
 export interface ServiceRecord {
@@ -37,6 +38,7 @@ export interface ServiceRecord {
     label: string;
     icon: string;
   };
+  salesCount: number;
 }
 
 export interface ServiceCategoryGroup {
@@ -44,4 +46,12 @@ export interface ServiceCategoryGroup {
   label: string;
   icon: string;
   services: ServiceRecord[];
+}
+
+export interface CategoryRecord {
+  id: number;
+  label: string;
+  mainCategoryId: number;
+  mainCategoryLabel: string | null;
+  isTool: boolean;
 }
