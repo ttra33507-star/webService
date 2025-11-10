@@ -1,27 +1,33 @@
-FROM node:20.19-alpine AS builder
-
+# Build stage installs all dependencies for the TypeScript compiler
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-# Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source files
+# Copy the rest of the source and compile to JavaScript
 COPY . .
-
-# Build the production assets
-ARG VITE_API_BASE_URL=/api
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
-FROM nginx:1.27-alpine AS runner
+# Drop development dependencies to slim the runtime bundle
+RUN npm prune --omit=dev
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Runtime stage contains only what is needed to execute the compiled app
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3002
 
-# Copy built assets
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy the application artifacts from the builder image
+COPY package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server.js ./server.js
 
-EXPOSE 80
+# Run the service as an unprivileged user inside the container
+RUN addgroup -g 1001 -S nodejs && adduser -S nodeuser -u 1001
+RUN chown -R nodeuser:nodejs /app
+USER nodeuser
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3002
+
+CMD ["node", "server.js"]

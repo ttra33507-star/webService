@@ -83,6 +83,7 @@ const handleSubmit = async () => {
 
     rememberAccount(username);
     password.value = '';
+
     navigateAfterAuth();
   } catch (error) {
     authError.value =

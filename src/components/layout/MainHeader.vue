@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute, RouterLink } from 'vue-router';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { useAuth } from '../../composables/useAuth';
+import { getPortalBaseUrl, requestSsoTicket, buildPortalCallbackUrl } from '../../services/authService';
 
 type NavLink =
   | { label: string; target: 'route'; to: string }
   | { label: string; target: 'anchor'; href: string };
 
 const route = useRoute();
+const router = useRouter();
+
+const portalBaseUrl = getPortalBaseUrl();
+const portalFallbackUrl = portalBaseUrl ? portalBaseUrl.replace(/\/+$/, '') : 'https://apps.c4techhub.com';
+const dashboardRedirecting = ref(false);
 
 const navLinks: NavLink[] = [
   { label: 'Home', target: 'route', to: '/' },
@@ -15,14 +21,13 @@ const navLinks: NavLink[] = [
   { label: 'Services', target: 'route', to: '/services' },
   { label: 'Privacy & Terms', target: 'route', to: '/legal' },
   { label: 'Contact', target: 'route', to: '/contact' },
-  { label: 'Dashboard', target: 'anchor', href: 'https://apps.c4techhub.com/' },
 ];
 
 const isMobileNavOpen = ref(false);
 const isProfileDropdownOpen = ref(false);
 const profileMenuRef = ref<HTMLElement | null>(null);
 const profileButtonRef = ref<HTMLElement | null>(null);
-const { isAuthenticated, signOut } = useAuth();
+const { isAuthenticated, signOut, authState } = useAuth();
 let ignoreNextOutsideClick = false;
 
 const isActive = (link: NavLink) => {
@@ -56,6 +61,41 @@ const handleSignOut = () => {
   signOut();
   closeProfileDropdown();
   closeMobileNav();
+};
+
+const resolvePortalRedirectPath = () => {
+  return '/';
+};
+
+const handleDashboardRedirect = async () => {
+  if (dashboardRedirecting.value) {
+    return;
+  }
+  if (!isAuthenticated.value) {
+    router.push({ path: '/login', query: { redirect: '/' } });
+    return;
+  }
+
+  dashboardRedirecting.value = true;
+  try {
+    const redirectPath = resolvePortalRedirectPath();
+    const user = authState.value?.user ?? null;
+    const ticket = await requestSsoTicket({
+      userId: typeof user?.id === 'number' || typeof user?.id === 'string' ? user.id : undefined,
+      email: typeof user?.email === 'string' ? user.email : undefined,
+      redirectTo: redirectPath,
+      state: redirectPath,
+    });
+
+    const targetUrl = buildPortalCallbackUrl(ticket.ticket, redirectPath, 'persistent');
+    window.location.href = targetUrl;
+  } catch (error: unknown) {
+    console.error('[SSO] Dashboard redirect failed', error);
+    const fallback = `${portalFallbackUrl}/`;
+    window.location.href = fallback;
+  } finally {
+    dashboardRedirecting.value = false;
+  }
 };
 
 const handleEscape = (event: KeyboardEvent) => {
@@ -140,6 +180,15 @@ onBeforeUnmount(() => {
               {{ link.label }}
             </a>
           </template>
+          <button
+            type="button"
+            class="rounded-full px-4 py-2 transition hover:bg-slate-800/60 hover:text-white"
+            :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
+            :disabled="dashboardRedirecting"
+            @click.prevent="handleDashboardRedirect"
+          >
+            Dashboard
+          </button>
         </div>
         <RouterLink
           v-if="!isAuthenticated"
@@ -261,6 +310,15 @@ onBeforeUnmount(() => {
                 {{ link.label }}
               </a>
             </template>
+            <button
+              type="button"
+              class="block w-full rounded-2xl px-5 py-4 text-left transition hover:bg-slate-800/60 hover:text-white"
+              :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
+              :disabled="dashboardRedirecting"
+              @click="() => { closeMobileNav(); handleDashboardRedirect(); }"
+            >
+              Dashboard
+            </button>
           </nav>
           <RouterLink
             v-if="!isAuthenticated"

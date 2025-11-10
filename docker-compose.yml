@@ -1,0 +1,17 @@
+services:
+  c4techhub_web:
+    image: vatsrey/c4techhub_web:v1.0
+    container_name: c4techhub_web
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      API_BASE_URL: "https://api.c4techhub.com"
+    restart: unless-stopped
+    networks:
+      - my_shared_network
+
+networks:
+  my_shared_network:
+    external: true

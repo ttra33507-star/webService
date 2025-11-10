@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "build-only": "vite build",
     "preview": "vite preview",
-    "server": "node server/index.js"
+    "build-docker": "docker build -t vatsrey/c4techhub_web:v1.0 .",
+    "push-docker": "docker push vatsrey/c4techhub_web:v1.0"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
@@ -17,6 +19,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "html-to-image": "^1.11.13",
+    "http-proxy-middleware": "^3.0.3",
     "qrcode": "^1.5.4",
     "sweetalert2": "^11.14.2",
     "tailwindcss": "^4.1.16",

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const DEFAULT_DEV_BASE_URL = 'https://api.c4techhub.com';
+const DEFAULT_DEV_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_PROD_BASE_URL = 'https://api.c4techhub.com';
 
 const resolveEnvString = (value: unknown): string => {
@@ -15,27 +15,35 @@ const sanitizeBaseUrl = (value: unknown): string => {
   return candidate.replace(/\/+$/, '');
 };
 
-const ensureLeadingSlash = (value: string): string => {
-  if (!value) {
-    return value;
+const resolveAppEnv = () => {
+  const raw = (import.meta.env.VITE_APP_ENV ?? import.meta.env.MODE ?? '').toString().toLowerCase();
+  return raw;
+};
+
+const isLocalLikeEnv = () => {
+  const env = resolveAppEnv();
+  if (env === 'local' || env === 'development' || env === 'dev') {
+    return true;
   }
-  return value.startsWith('/') ? value : `/${value}`;
+  return Boolean(import.meta.env.DEV);
 };
 
 const resolveBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    const devConfigured = sanitizeBaseUrl(import.meta.env.VITE_DEV_API_BASE_URL);
+  const devConfigured = sanitizeBaseUrl(import.meta.env.VITE_DEV_API_BASE_URL);
+  const configured = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_AUTH_BASE_URL);
+
+  if (isLocalLikeEnv()) {
     if (devConfigured) {
-      return devConfigured.startsWith('http')
-        ? devConfigured
-        : ensureLeadingSlash(devConfigured);
+      return devConfigured.startsWith('http') ? devConfigured : `http://${devConfigured}`;
+    }
+    if (configured) {
+      return configured.startsWith('http') ? configured : `http://${configured}`;
     }
     return DEFAULT_DEV_BASE_URL;
   }
 
-  const configured = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
   if (configured) {
-    return configured;
+    return configured.startsWith('http') ? configured : `https://${configured}`;
   }
 
   return DEFAULT_PROD_BASE_URL;
