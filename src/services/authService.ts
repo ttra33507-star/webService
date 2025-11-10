@@ -4,7 +4,21 @@ const DEFAULT_AUTH_BASE_URL = 'https://api.c4techhub.com';
 const DEFAULT_CLIENT_ID = '019a33e5-4f58-72d7-9d25-d8862a503dc1';
 const DEFAULT_CLIENT_SECRET = 'En4Kv1y04uZIjt8liBbgw4UaHLV4gp8EY85kw8k8';
 const DEFAULT_SCOPE = '*';
-const DEFAULT_PORTAL_BASE_URL = 'https://dashboard.c4techhub.com';
+const DEFAULT_PORTAL_BASE_URL = (() => {
+  const fallback = (import.meta.env.VITE_DEFAULT_PORTAL_BASE_URL ?? import.meta.env.VITE_PORTAL_BASE_URL ?? '')
+    .toString()
+    .trim();
+
+  if (!fallback) {
+    return 'https://apps.c4techhub.com';
+  }
+
+  if (/^https?:\/\//i.test(fallback)) {
+    return fallback.replace(/\/+$/, '');
+  }
+
+  return `https://${fallback.replace(/\/+$/, '')}`;
+})();
 const DEFAULT_LOCAL_API_BASE_URL = 'http://127.0.0.1:8000';
 
 const normaliseBaseUrl = (value: string): string => value.replace(/\/+$/, '');
@@ -182,17 +196,28 @@ export const getAuthorizationHeader = (token: string | null | undefined): string
 };
 
 const resolvePortalBaseUrl = () => {
-  const raw = (import.meta.env.VITE_PORTAL_BASE_URL ?? '').toString().trim();
-  if (raw) {
-    return normaliseBaseUrl(raw.startsWith('http') ? raw : `https://${raw}`);
-  }
-  if (import.meta.env.DEV) {
-    const devOverride = (import.meta.env.VITE_DEV_PORTAL_BASE_URL ?? '').toString().trim();
+  const appEnv = resolveAppEnv();
+  const configured = (import.meta.env.VITE_PORTAL_BASE_URL ?? '').toString().trim();
+  const devOverride = (import.meta.env.VITE_DEV_PORTAL_BASE_URL ?? '').toString().trim();
+
+  if (appEnv === 'local') {
     if (devOverride) {
       return normaliseBaseUrl(devOverride.startsWith('http') ? devOverride : `http://${devOverride}`);
     }
+    if (configured) {
+      return normaliseBaseUrl(configured.startsWith('http') ? configured : `https://${configured}`);
+    }
     return 'http://localhost:5173';
   }
+
+  if (configured) {
+    return normaliseBaseUrl(configured.startsWith('http') ? configured : `https://${configured}`);
+  }
+
+  if (devOverride) {
+    return normaliseBaseUrl(devOverride.startsWith('http') ? devOverride : `https://${devOverride}`);
+  }
+
   return DEFAULT_PORTAL_BASE_URL;
 };
 

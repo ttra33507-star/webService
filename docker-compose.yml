@@ -1,6 +1,8 @@
+version: "3.9"
+
 services:
   c4techhub_web:
-    image: vatsrey/c4techhub_web:v1.0
+    image: vatsrey/c4techhub_web:v1.1
     container_name: c4techhub_web
     ports:
       - "3002:3002"
@@ -8,6 +10,8 @@ services:
       NODE_ENV: production
       PORT: 3002
       API_BASE_URL: "https://api.c4techhub.com"
+    volumes:
+      - ./.env:/app/.env
     restart: unless-stopped
     networks:
       - my_shared_network

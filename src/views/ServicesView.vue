@@ -214,13 +214,11 @@ onMounted(() => {
           <section v-for="group in categoryGroups" :key="group.id" aria-live="polite">
             <header class="flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-center gap-4">
-                <span class="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/80 p-2">
+                <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/80 p-2">
                   <img :src="getIconForGroup(group)" :alt="`${group.label} icon`" class="h-full w-full object-contain" />
                 </span>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">Main category</p>
                   <h2 class="text-2xl font-semibold text-white">{{ group.label }}</h2>
-                  <p class="text-sm text-slate-400">{{ group.services.length }} active services</p>
                 </div>
               </div>
             </header>
@@ -235,7 +233,7 @@ onMounted(() => {
                 <div class="flex items-start gap-4">
                   <div class="relative">
                     <span
-                      class="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/60 bg-gradient-to-br from-emerald-500/15 via-slate-950/80 to-slate-950 text-lg font-semibold text-white shadow-inner shadow-emerald-500/10"
+                      class="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800/60 bg-gradient-to-br from-emerald-500/15 via-slate-950/80 to-slate-950 text-lg font-semibold text-white shadow-inner shadow-emerald-500/10"
                     >
                       <img
                         v-if="service.iconUrl"
@@ -272,7 +270,7 @@ onMounted(() => {
                 </div>
                 <RouterLink
                   class="mt-6 inline-flex items-center justify-center rounded-full border border-emerald-400/40 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
-                  :to="{ name: 'plans', query: { service: service.id.toString() } }"
+                  :to="{ name: 'service-order', params: { serviceId: service.id } }"
                 >
                   Order now
                 </RouterLink>

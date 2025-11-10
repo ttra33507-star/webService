@@ -1,7 +1,13 @@
 import httpClient from '../api/httpClient';
-import type { RemoteServiceRecord, ServiceCategoryGroup, ServiceRecord } from '../types/service';
+import type {
+  CategoryRecord,
+  RemoteServiceRecord,
+  ServiceCategoryGroup,
+  ServiceRecord,
+} from '../types/service';
 
 const SERVICES_ENDPOINT = '/api/all-services';
+const CATEGORIES_ENDPOINT = '/api/categories';
 
 const coerceNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -28,6 +34,26 @@ const coerceString = (value: unknown, fallback = ''): string => {
 
 const DEFAULT_ASSET_BASE_URL = 'https://apps.c4techhub.com';
 
+const resolveApiBaseUrl = () => {
+  const devApi = coerceString(import.meta.env.VITE_DEV_API_BASE_URL);
+  const prodApi = coerceString(import.meta.env.VITE_API_BASE_URL);
+
+  if (import.meta.env.DEV && devApi) {
+    return devApi.replace(/\/+$/, '');
+  }
+
+  if (prodApi) {
+    return prodApi.replace(/\/+$/, '');
+  }
+
+  const clientBase = coerceString(httpClient.defaults.baseURL);
+  if (clientBase) {
+    return clientBase.replace(/\/+$/, '');
+  }
+
+  return '';
+};
+
 const ensureLeadingSlash = (value: string): string => {
   if (!value) {
     return value;
@@ -39,6 +65,16 @@ const resolveAssetBaseUrl = () => {
   const envConfigured = coerceString(import.meta.env.VITE_PUBLIC_ASSET_BASE_URL);
   if (envConfigured) {
     return envConfigured.replace(/\/+$/, '');
+  }
+
+  const devAsset = coerceString(import.meta.env.VITE_DEV_PUBLIC_ASSET_BASE_URL);
+  if (devAsset) {
+    return devAsset.replace(/\/+$/, '');
+  }
+
+  const apiBase = resolveApiBaseUrl();
+  if (apiBase) {
+    return apiBase;
   }
 
   if (DEFAULT_ASSET_BASE_URL) {
@@ -82,6 +118,7 @@ const normalizeService = (payload: RemoteServiceRecord): ServiceRecord => {
   const currency = coerceString(payload.currency, 'USD');
   const symbol = coerceString(payload.currency_symbol, currency === 'USD' ? '$' : '');
   const iconUrl = resolveAssetUrl(payload.icon ?? '');
+  const salesCount = coerceNumber(payload.sales_count, 0);
 
   return {
     id: payload.id,
@@ -105,6 +142,7 @@ const normalizeService = (payload: RemoteServiceRecord): ServiceRecord => {
       label: coerceString(payload.main_category_label, 'Services'),
       icon: resolveAssetUrl(payload.main_category_icon),
     },
+    salesCount: Math.max(0, Math.floor(salesCount)),
   };
 };
 
@@ -115,6 +153,18 @@ const sortServices = (left: ServiceRecord, right: ServiceRecord) => {
 
   if (left.category.label !== right.category.label) {
     return left.category.label.localeCompare(right.category.label);
+  }
+
+  if (left.price.amount !== right.price.amount) {
+    return left.price.amount - right.price.amount;
+  }
+
+  return left.label.localeCompare(right.label);
+};
+
+const sortBestsellers = (left: ServiceRecord, right: ServiceRecord) => {
+  if (left.salesCount !== right.salesCount) {
+    return right.salesCount - left.salesCount;
   }
 
   if (left.price.amount !== right.price.amount) {
@@ -151,6 +201,34 @@ export const fetchServiceCatalog = async (options?: { force?: boolean }): Promis
   return inflightRequest;
 };
 
+let cachedBestsellers: ServiceRecord[] | null = null;
+let bestsellersInflight: Promise<ServiceRecord[]> | null = null;
+
+export const fetchBestsellerServices = async (options?: { force?: boolean }): Promise<ServiceRecord[]> => {
+  if (!options?.force && cachedBestsellers) {
+    return cachedBestsellers;
+  }
+
+  if (!options?.force && bestsellersInflight) {
+    return bestsellersInflight;
+  }
+
+  const force = options?.force ?? false;
+
+  bestsellersInflight = fetchServiceCatalog({ force })
+    .then((catalog) => {
+      const sorted = [...catalog].sort(sortBestsellers);
+      const withSales = sorted.filter((service) => service.salesCount > 0);
+      cachedBestsellers = withSales.length ? withSales : sorted;
+      return cachedBestsellers;
+    })
+    .finally(() => {
+      bestsellersInflight = null;
+    });
+
+  return bestsellersInflight;
+};
+
 export const groupServicesByMainCategory = (services: ServiceRecord[]): ServiceCategoryGroup[] => {
   const map = new Map<number, ServiceCategoryGroup>();
 
@@ -185,4 +263,102 @@ export const getFeaturedServices = (services: ServiceRecord[], limit = 3): Servi
   });
 
   return sorted.slice(0, limit);
+};
+
+interface RemoteCategoryRecord {
+  id: number;
+  name?: string | null;
+  label?: string | null;
+  main_category_id?: number | string | null;
+  main_category_label?: string | null;
+  is_tool?: boolean | number | string | null;
+}
+
+const normalizeCategory = (payload: RemoteCategoryRecord): CategoryRecord => {
+  const label = coerceString(payload.label ?? payload.name ?? 'Category', 'Category');
+  const mainCategoryId = coerceNumber(payload.main_category_id, 0);
+  const mainLabel = coerceString(payload.main_category_label, '');
+  const rawIsTool = payload.is_tool;
+  const isTool = (() => {
+    if (typeof rawIsTool === 'boolean') {
+      return rawIsTool;
+    }
+    if (typeof rawIsTool === 'number') {
+      return rawIsTool === 1;
+    }
+    if (typeof rawIsTool === 'string') {
+      const normalized = rawIsTool.trim().toLowerCase();
+      return ['1', 'true', 'yes', 'on'].includes(normalized);
+    }
+    return false;
+  })();
+
+  return {
+    id: payload.id,
+    label,
+    mainCategoryId,
+    mainCategoryLabel: mainLabel || null,
+    isTool,
+  };
+};
+
+let cachedCategories: Map<number, CategoryRecord> | null = null;
+let categoriesInflight: Promise<Map<number, CategoryRecord>> | null = null;
+
+const fetchCategoriesInternal = async (force = false): Promise<Map<number, CategoryRecord>> => {
+  if (!force && cachedCategories) {
+    return cachedCategories;
+  }
+
+  if (!force && categoriesInflight) {
+    return categoriesInflight;
+  }
+
+  categoriesInflight = httpClient
+    .get<RemoteCategoryRecord[]>(CATEGORIES_ENDPOINT)
+    .then((response) => {
+      const map = new Map<number, CategoryRecord>();
+      response.data.forEach((record) => {
+        if (!record || typeof record.id !== 'number') {
+          return;
+        }
+        map.set(record.id, normalizeCategory(record));
+      });
+      cachedCategories = map;
+      return map;
+    })
+    .finally(() => {
+      categoriesInflight = null;
+    });
+
+  return categoriesInflight;
+};
+
+export const fetchCategoryById = async (
+  categoryId: number,
+  options?: { force?: boolean },
+): Promise<CategoryRecord | null> => {
+  const force = options?.force ?? false;
+  const initialMap = await fetchCategoriesInternal(force);
+  const existing = initialMap.get(categoryId) ?? null;
+  if (existing || force) {
+    return existing;
+  }
+
+  const refreshed = await fetchCategoriesInternal(true);
+  return refreshed.get(categoryId) ?? null;
+};
+
+export const getCachedCategory = (categoryId: number): CategoryRecord | null => {
+  if (!cachedCategories) {
+    return null;
+  }
+  return cachedCategories.get(categoryId) ?? null;
+};
+
+export const listCachedCategories = (): CategoryRecord[] => {
+  if (!cachedCategories) {
+    return [];
+  }
+  return Array.from(cachedCategories.values());
 };
