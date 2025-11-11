@@ -17,7 +17,7 @@ const dashboardRedirecting = ref(false);
 
 const navLinks: NavLink[] = [
   { label: 'Home', target: 'route', to: '/' },
-  { label: 'Plans', target: 'route', to: '/plans' },
+  // { label: 'Plans', target: 'route', to: '/plans' },
   { label: 'Services', target: 'route', to: '/services' },
   { label: 'Privacy & Terms', target: 'route', to: '/legal' },
   { label: 'Contact', target: 'route', to: '/contact' },
@@ -182,7 +182,7 @@ onBeforeUnmount(() => {
               {{ link.label }}
             </a>
           </template>
-          <button
+          <!-- <button
             type="button"
             class="rounded-full px-4 py-2 border border-transparent text-slate-600 transition hover:border-[#0c86c3]/40 hover:bg-white hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
             :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
@@ -190,7 +190,7 @@ onBeforeUnmount(() => {
             @click.prevent="handleDashboardRedirect"
           >
             Dashboard
-          </button>
+          </button> -->
         </div>
         <RouterLink
           v-if="!isAuthenticated"
