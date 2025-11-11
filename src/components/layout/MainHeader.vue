@@ -154,20 +154,22 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="border-b border-slate-900/80 bg-slate-950/70 backdrop-blur">
+  <header class="border-b border-slate-900/80 bg-white/70 backdrop-blur">
     <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
       <RouterLink to="/" class="flex items-center gap-3">
-        <img src="/images/logo-C4-HUB.png" alt="C4 logo" class="h-[45px] w-[180px] rounded-[3px] p-[1px] object-cover shadow" />
+        <img src="/images/logo C4 TECH HUB 1.png" alt="C4 Teach Hub logo" class="h-[45px] w-[180px] rounded-[3px] p-[1px] object-cover shadow" />
       </RouterLink>
       <div class="hidden items-center gap-6 md:flex">
-        <div class="flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/70 p-1 text-sm font-medium text-slate-300 shadow-inner">
+        <div class="flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-sm font-medium text-slate-600 shadow-inner shadow-[#096b9f]/10">
           <template v-for="link in navLinks" :key="link.label">
             <RouterLink
               v-if="link.target === 'route'"
               :to="link.to"
               :class="[
-                'rounded-full px-4 py-2 transition',
-                isActive(link) ? 'bg-slate-800/80 text-white' : 'hover:bg-slate-800/60 hover:text-white',
+                'rounded-full px-4 py-2 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
+                isActive(link)
+                  ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f] shadow-sm shadow-[#096b9f]/20'
+                  : 'border-transparent text-slate-600 hover:text-[#096b9f] hover:border-[#0c86c3]/40 hover:bg-white',
               ]"
             >
               {{ link.label }}
@@ -175,14 +177,14 @@ onBeforeUnmount(() => {
             <a
               v-else
               :href="link.href"
-              class="rounded-full px-4 py-2 transition hover:bg-slate-800/60 hover:text-white"
+              class="rounded-full px-4 py-2 border border-transparent text-slate-600 transition hover:border-[#0c86c3]/40 hover:bg-white hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
             >
               {{ link.label }}
             </a>
           </template>
           <button
             type="button"
-            class="rounded-full px-4 py-2 transition hover:bg-slate-800/60 hover:text-white"
+            class="rounded-full px-4 py-2 border border-transparent text-slate-600 transition hover:border-[#0c86c3]/40 hover:bg-white hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
             :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
             :disabled="dashboardRedirecting"
             @click.prevent="handleDashboardRedirect"
@@ -193,7 +195,7 @@ onBeforeUnmount(() => {
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"
-          class="inline-flex items-center rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
+          class="inline-flex items-center rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
         >
           Sign in Accounts
         </RouterLink>
@@ -201,13 +203,13 @@ onBeforeUnmount(() => {
           <button
             ref="profileButtonRef"
             type="button"
-            class="inline-flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition hover:border-[#23bdee] hover:text-white"
+            class="inline-flex items-center gap-3 rounded-full border border-slate-700 bg-white/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700 transition hover:border-[#23bdee] hover:text-slate-900"
             :aria-expanded="isProfileDropdownOpen"
             aria-haspopup="menu"
             @click.stop="toggleProfileDropdown"
           >
             <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-[#23bdee]/20 text-sm font-semibold text-[#23bdee]"
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-[#23bdee]"
             >
               AC
             </span>
@@ -218,7 +220,7 @@ onBeforeUnmount(() => {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              :class="isProfileDropdownOpen ? 'rotate-180 text-[#23bdee]' : 'text-slate-400'"
+              :class="isProfileDropdownOpen ? 'rotate-180 text-[#23bdee]' : 'text-slate-500'"
             >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
             </svg>
@@ -226,11 +228,11 @@ onBeforeUnmount(() => {
           <div
             v-if="isProfileDropdownOpen"
             ref="profileMenuRef"
-            class="absolute right-0 z-20 mt-3 w-56 rounded-3xl border border-slate-800/80 bg-[#0c152e] p-3 text-left shadow-[0_25px_60px_rgba(5,14,32,0.6)]"
+            class="absolute right-0 z-20 mt-3 w-56 rounded-3xl border border-slate-800/80 bg-white p-3 text-left shadow-[0_25px_60px_rgba(5,14,32,0.6)]"
           >
             <RouterLink
               to="/account"
-              class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/60 hover:text-white"
+              class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white/60 hover:text-slate-900"
               @click="closeProfileDropdown"
             >
               Profile
@@ -240,7 +242,7 @@ onBeforeUnmount(() => {
             </RouterLink>
             <button
               type="button"
-              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-white"
+              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out
@@ -253,7 +255,7 @@ onBeforeUnmount(() => {
       </div>
       <button
         type="button"
-        class="inline-flex items-center rounded-xl border border-slate-700 bg-slate-900/80 p-2 text-slate-200 md:hidden"
+        class="inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-700 md:hidden"
         aria-label="Toggle menu"
         :aria-expanded="isMobileNavOpen"
         @click="toggleMobileNav"
@@ -269,15 +271,15 @@ onBeforeUnmount(() => {
         class="fixed inset-0 z-50 flex items-center justify-center px-5 py-8"
         @click.self="closeMobileNav"
       >
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md"></div>
+        <div class="absolute inset-0 bg-white/80 backdrop-blur-md"></div>
         <div
-          class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-[#0b152b]/95 p-8 text-slate-100 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
+          class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-white/95 p-8 text-slate-900 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
         >
           <div class="mb-8 flex items-center justify-between">
             <p class="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-300">Menu</p>
             <button
               type="button"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-300 transition hover:border-slate-500 hover:text-white"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:border-slate-500 hover:text-slate-900"
               aria-label="Close menu"
               @click="closeMobileNav"
             >
@@ -286,16 +288,16 @@ onBeforeUnmount(() => {
               </svg>
             </button>
           </div>
-          <nav class="space-y-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-200">
+          <nav class="space-y-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-700">
             <template v-for="link in navLinks" :key="`mobile-${link.label}`">
               <RouterLink
                 v-if="link.target === 'route'"
                 :to="link.to"
                 :class="[
-                  'block rounded-2xl px-5 py-4 transition',
+                  'block rounded-2xl px-5 py-4 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
                   isActive(link)
-                    ? 'bg-slate-800/80 text-white shadow-[inset_0_0_0_1px_rgba(94,234,212,0.4)]'
-                    : 'hover:bg-slate-800/60 hover:text-white',
+                    ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f]'
+                    : 'border-transparent hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f]',
                 ]"
                 @click="closeMobileNav"
               >
@@ -304,7 +306,7 @@ onBeforeUnmount(() => {
               <a
                 v-else
                 :href="link.href"
-                class="block rounded-2xl px-5 py-4 transition hover:bg-slate-800/60 hover:text-white"
+                class="block rounded-2xl px-5 py-4 border border-transparent transition hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
                 @click="closeMobileNav"
               >
                 {{ link.label }}
@@ -312,7 +314,7 @@ onBeforeUnmount(() => {
             </template>
             <button
               type="button"
-              class="block w-full rounded-2xl px-5 py-4 text-left transition hover:bg-slate-800/60 hover:text-white"
+              class="block w-full rounded-2xl px-5 py-4 border border-transparent text-left transition hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
               :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
               :disabled="dashboardRedirecting"
               @click="() => { closeMobileNav(); handleDashboardRedirect(); }"
@@ -323,7 +325,7 @@ onBeforeUnmount(() => {
           <RouterLink
             v-if="!isAuthenticated"
             to="/login"
-            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-white"
+            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
             @click="closeMobileNav"
           >
             Sign in Accounts
@@ -331,14 +333,14 @@ onBeforeUnmount(() => {
           <div v-else class="mt-10 space-y-3">
             <RouterLink
               to="/account"
-              class="flex w-full justify-center rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200 transition hover:border-[#23bdee] hover:text-white"
+              class="flex w-full justify-center rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-700 transition hover:border-[#23bdee] hover:text-slate-900"
               @click="closeMobileNav"
             >
               Accounts Profile
             </RouterLink>
             <button
               type="button"
-              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-red-200 transition hover:border-red-300 hover:text-white"
+              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-red-200 transition hover:border-red-300 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out

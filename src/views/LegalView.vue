@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 type LegalCard = {
   title: string;
   description: string;
@@ -42,7 +42,7 @@ const privacySections: PolicySection[] = [
   {
     heading: '1. Information We Collect',
     body:
-      'We collect information you provide directly to us when creating an account, making a purchase, or contacting support—this includes your name, email, payment details, and any files you upload.',
+      'We collect information you provide directly to us when creating an account, making a purchase, or contacting supportâ€”this includes your name, email, payment details, and any files you upload.',
   },
   {
     heading: '2. How We Use Your Information',
@@ -70,7 +70,7 @@ const termsSections: PolicySection[] = [
   {
     heading: '1. Acceptance of Terms',
     body:
-      'By using the C4 platform you agree to these Terms of Service and all applicable laws. If you do not agree, please discontinue use.',
+      'By using the C4 Teach Hub platform you agree to these Terms of Service and all applicable laws. If you do not agree, please discontinue use.',
   },
   {
     heading: '2. License',
@@ -96,17 +96,17 @@ const termsSections: PolicySection[] = [
 </script>
 
 <template>
-  <div class="bg-[#050608] text-slate-100">
-    <section class="border-b border-emerald-500/10 bg-gradient-to-br from-[#021307] via-[#05260f] to-[#031308]">
+  <div class="bg-white text-slate-900">
+    <section class="border-b border-[#096b9f]/15 bg-white from-white via-[#e6f4fb] to-[#eef7fd]">
       <div
         class="mx-auto flex w-full max-w-5xl flex-col items-center gap-10 px-4 py-16 text-center sm:px-6 lg:px-8"
-        style="background-image: radial-gradient(circle at 30% 20%, rgba(34,197,94,0.25), transparent 55%);"
+        style="background-image: radial-gradient(circle at 30% 20%, rgba(9,107,159,0.25), transparent 55%);"
       >
         <div class="space-y-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.55em] text-emerald-300">Legal Information</p>
-          <h1 class="text-4xl font-semibold text-white sm:text-5xl">Transparent policies for every workflow.</h1>
-          <p class="text-base text-emerald-100/80 sm:text-lg">
-            Borrowing the Farmreel vibe—deep greens, iconography, and simple copy—this section gives your team quick access to everything compliance needs.
+          <p class="text-xs font-semibold uppercase tracking-[0.55em] text-[#0c86c3]">Legal Information</p>
+          <h1 class="text-4xl font-semibold text-slate-900 sm:text-5xl">Transparent policies for every workflow.</h1>
+          <p class="text-base text-[#0c86c3]/80 sm:text-lg">
+            Borrowing the Farmreel vibeâ€”deep greens, iconography, and simple copyâ€”this section gives your team quick access to everything compliance needs.
           </p>
         </div>
         <div class="grid w-full gap-6 text-left sm:grid-cols-3">
@@ -114,60 +114,60 @@ const termsSections: PolicySection[] = [
             v-for="card in legalCards"
             :key="card.title"
             :href="card.href"
-            class="group rounded-3xl border border-emerald-500/20 bg-[#041609]/80 p-6 text-center transition hover:-translate-y-1 hover:border-emerald-400/60 hover:bg-[#062313]"
+            class="group rounded-3xl border border-[#096b9f]/25 bg-white/80 p-6 text-center transition hover:-translate-y-1 hover:border-[#0c86c3]/60 hover:bg-white"
           >
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#096b9f]/10 text-[#0c86c3]">
               <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path :d="iconPaths[card.icon]" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-white">{{ card.title }}</h3>
-            <p class="mt-2 text-sm text-emerald-100/80">{{ card.description }}</p>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">{{ card.title }}</h3>
+            <p class="mt-2 text-sm text-slate-600">{{ card.description }}</p>
           </a>
         </div>
       </div>
     </section>
 
-    <section id="privacy" class="border-b border-slate-900/80 bg-[#050608]">
+    <section id="privacy" class="border-b border-slate-900/80 bg-white">
       <div class="mx-auto w-full max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-semibold text-white">Privacy Policy</h2>
-        <p class="mt-2 text-sm text-slate-400">
-          This is a starter copy deck—replace with your internal policy text or import from your CMS once ready.
+        <h2 class="text-3xl font-semibold text-slate-900">Privacy Policy</h2>
+        <p class="mt-2 text-sm text-slate-900">
+          This is a starter copy deckâ€”replace with your internal policy text or import from your CMS once ready.
         </p>
-        <div class="mt-8 space-y-7 text-base text-slate-200">
+        <div class="mt-8 space-y-7 text-base text-slate-700">
           <article v-for="section in privacySections" :key="section.heading">
-            <h3 class="text-xl font-semibold text-white">{{ section.heading }}</h3>
-            <p class="mt-2 text-slate-300">{{ section.body }}</p>
+            <h3 class="text-xl font-semibold text-slate-900">{{ section.heading }}</h3>
+            <p class="mt-2 text-slate-600">{{ section.body }}</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="terms" class="border-b border-slate-900/80 bg-[#050608]">
+    <section id="terms" class="border-b border-slate-900/80 bg-white">
       <div class="mx-auto w-full max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-semibold text-white">Terms of Service</h2>
-        <p class="mt-2 text-sm text-slate-400">Use this structure to keep things scannable, just like the Farmreel example.</p>
-        <div class="mt-8 space-y-7 text-base text-slate-200">
+        <h2 class="text-3xl font-semibold text-slate-900">Terms of Service</h2>
+        <p class="mt-2 text-sm text-slate-900">Use this structure to keep things scannable, just like the Farmreel example.</p>
+        <div class="mt-8 space-y-7 text-base text-slate-700">
           <article v-for="section in termsSections" :key="section.heading">
-            <h3 class="text-xl font-semibold text-white">{{ section.heading }}</h3>
-            <p class="mt-2 text-slate-300">{{ section.body }}</p>
+            <h3 class="text-xl font-semibold text-slate-900">{{ section.heading }}</h3>
+            <p class="mt-2 text-slate-600">{{ section.body }}</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="bg-[#050b09]">
+    <section class="bg-white">
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 py-14 text-center sm:px-6 lg:px-8">
-        <p class="text-xs font-semibold uppercase tracking-[0.55em] text-emerald-300">Need something else?</p>
-        <h3 class="text-3xl font-semibold text-white">We are happy to prep bespoke legal copy or documentation.</h3>
-        <p class="max-w-3xl text-sm text-slate-300">
+        <p class="text-xs font-semibold uppercase tracking-[0.55em] text-[#0c86c3]">Need something else?</p>
+        <h3 class="text-3xl font-semibold text-slate-900">We are happy to prep bespoke legal copy or documentation.</h3>
+        <p class="max-w-3xl text-sm text-slate-600">
           This page is built using the same creative direction as the reference screenshots: dark foundation, green neon accents, rounded cards, and straightforward typography. Use it as a blueprint for other compliance screens.
         </p>
         <div class="flex flex-wrap justify-center gap-4 text-sm font-semibold uppercase tracking-[0.25em]">
-          <a href="mailto:legal@c4.com" class="rounded-full border border-emerald-400/40 px-6 py-3 text-emerald-200 transition hover:bg-emerald-400/10">
-            Email legal
+          <a href="https://t.me/c4techhub" class="rounded-full border border-[#0c86c3]/40 px-6 py-3 text-[#096b9f] transition hover:bg-[#0c86c3]/10">
+            Telegram legal
           </a>
-          <a href="/contact" class="rounded-full border border-slate-800/70 px-6 py-3 text-slate-300 transition hover:border-emerald-400/40 hover:text-white">
+          <a href="/contact" class="rounded-full border border-slate-800/70 px-6 py-3 text-slate-600 transition hover:border-[#0c86c3]/40 hover:text-slate-900">
             Visit support center
           </a>
         </div>
@@ -175,3 +175,4 @@ const termsSections: PolicySection[] = [
     </section>
   </div>
 </template>
+

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
@@ -11,7 +11,7 @@ import {
 } from '../services/paywayService';
 import Swal from 'sweetalert2';
 
-const merchantName = import.meta.env.VITE_MERCHANT_NAME ?? 'C4 TECH HUB';
+const merchantName = import.meta.env.VITE_MERCHANT_NAME ?? 'C4 Teach Hub';
 const acquiringBankName = (import.meta.env.VITE_ACQUIRING_BANK ?? '').toString().trim() || null;
 
 const generateUuid = (): string =>
@@ -854,25 +854,29 @@ const printReceipt = () => {
 </script>
 
 <template>
-  <section class="relative overflow-hidden bg-black text-slate-100">
+<section class="relative overflow-hidden bg-white text-slate-900">
     <div
       class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(9,107,159,0.2),_transparent_60%),radial-gradient(circle_at_center,_rgba(9,107,159,0.15),_transparent_55%)]"
     ></div>
     <div class="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-12 px-4 py-16 sm:px-6 lg:px-8">
       <header class="text-center">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-300">Pricing</p>
-        <h1 class="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
+        <h1 class="mt-4 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
           Choose Your Perfect Plan
         </h1>
-        <p class="mx-auto mt-4 max-w-2xl text-base text-slate-300">
+        <p class="mx-auto mt-4 max-w-2xl text-base text-slate-600">
           Select the ideal package that fits your automation needs and scale your success. Local and international teams
           get tailored bundles with generous freebies and dedicated support.
         </p>
-        <div class="mx-auto mt-8 inline-flex rounded-full border border-emerald-400/40 bg-slate-900/60 p-1">
+        <div class="mx-auto mt-8 inline-flex rounded-full border border-[#096b9f]/30 bg-white/70 p-1 shadow-inner shadow-[#096b9f]/10">
           <button
             type="button"
             class="rounded-full px-6 py-2 text-sm font-semibold transition"
-            :class="audience === 'local' ? 'bg-emerald-500 text-slate-950' : 'text-slate-300 hover:text-white'"
+            :class="
+              audience === 'local'
+                ? 'bg-[#096b9f] text-white shadow-lg shadow-[#096b9f]/30'
+                : 'text-slate-600 hover:text-[#096b9f]'
+            "
             @click="selectAudience('local')"
           >
             Local
@@ -880,7 +884,11 @@ const printReceipt = () => {
           <button
             type="button"
             class="rounded-full px-6 py-2 text-sm font-semibold transition"
-            :class="audience === 'foreigner' ? 'bg-emerald-500 text-slate-950' : 'text-slate-300 hover:text-white'"
+            :class="
+              audience === 'foreigner'
+                ? 'bg-[#096b9f] text-white shadow-lg shadow-[#096b9f]/30'
+                : 'text-slate-600 hover:text-[#096b9f]'
+            "
             @click="selectAudience('foreigner')"
           >
             Foreigner
@@ -892,7 +900,7 @@ const printReceipt = () => {
         <article
           v-for="plan in activePlans"
           :key="plan.id"
-          class="group relative flex flex-col overflow-hidden rounded-[2.5rem] border border-slate-900/80 bg-slate-900/60 p-8 shadow-[0_35px_90px_rgba(8,47,73,0.35)] transition hover:border-[#096b9f]/50 hover:shadow-[0_45px_130px_rgba(9,107,159,0.35)]"
+          class="group relative flex flex-col overflow-hidden rounded-[2.5rem] border border-slate-900/80 bg-white/60 p-8 shadow-[0_35px_90px_rgba(8,47,73,0.35)] transition hover:border-[#096b9f]/50 hover:shadow-[0_45px_130px_rgba(9,107,159,0.35)]"
           :class="[
             plan.highlight ? 'border-[#096b9f] bg-[rgba(9,107,159,0.18)] backdrop-blur' : '',
             highlightedPlanId === plan.id ? 'ring-2 ring-[#23bdee]' : '',
@@ -900,27 +908,27 @@ const printReceipt = () => {
         >
           <div
             v-if="plan.highlight"
-            class="absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-[#23bdee]/40 bg-[#23bdee]/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-[#c6f3ff]"
+            class="absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-[#23bdee]/40 bg-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-[#c6f3ff]"
           >
             Most Popular
           </div>
           <div class="mt-6 flex flex-col gap-4 text-center">
-            <h2 class="text-2xl font-semibold text-white">{{ plan.name }}</h2>
-            <div class="text-4xl font-bold text-white">
+            <h2 class="text-2xl font-semibold text-slate-900">{{ plan.name }}</h2>
+            <div class="text-4xl font-bold text-slate-900">
               {{ formatPrice(plan.amount, plan.currency) }}
-              <span class="text-base font-medium text-slate-300">{{ plan.cadence }}</span>
+              <span class="text-base font-medium text-slate-600">{{ plan.cadence }}</span>
             </div>
             <p v-if="plan.tagline" class="text-sm font-medium text-[#6ee7ff]">
               {{ plan.tagline }}
             </p>
           </div>
-          <ul class="mt-8 flex-1 space-y-3 text-sm text-slate-200">
+          <ul class="mt-8 flex-1 space-y-3 text-sm text-slate-700">
             <li
               v-for="feature in plan.features"
               :key="feature"
-              class="flex items-start gap-3 rounded-2xl bg-slate-900/60 px-4 py-3 text-left transition group-hover:bg-slate-900/80"
+              class="flex items-start gap-3 rounded-2xl bg-white/60 px-4 py-3 text-left transition group-hover:bg-white/80"
             >
-              <span class="mt-1 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#096b9f]/30 text-[#23bdee]">
+              <span class="mt-1 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white/30 text-[#23bdee]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 20 20">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l3 3 7-7" />
                 </svg>
@@ -930,7 +938,7 @@ const printReceipt = () => {
           </ul>
           <button
             type="button"
-            class="mt-10 w-full rounded-full bg-[#096b9f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-[#0c86c3]"
+            class="mt-10 w-full rounded-full bg-[#096b9f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-lg shadow-[#096b9f]/30 transition hover:bg-[#0c86c3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
             @click="handleGetStarted(plan.id)"
           >
             Get Started
@@ -941,13 +949,13 @@ const printReceipt = () => {
 
     <Teleport to="body">
       <div v-if="isPaymentModalOpen" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-slate-950/75 backdrop-blur" @click="closePaymentModal"></div>
+        <div class="absolute inset-0 bg-white/75 backdrop-blur" @click="closePaymentModal"></div>
         <div
-          class="relative w-full max-w-lg rounded-[2.5rem] border border-slate-800 bg-[#081226] px-10 py-12 text-slate-100 shadow-[0_40px_120px_rgba(8,18,38,0.65)]"
+          class="relative w-full max-w-lg rounded-[2.5rem] border border-slate-800 bg-white px-10 py-12 text-slate-900 shadow-[0_40px_120px_rgba(8,18,38,0.65)]"
         >
           <button
             type="button"
-            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-slate-400 transition hover:text-white"
+            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/80 text-slate-500 transition hover:text-slate-900"
             aria-label="Close payment modal"
             @click="closePaymentModal"
           >
@@ -957,27 +965,27 @@ const printReceipt = () => {
           </button>
           <header class="text-center">
             <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#23bdee]">Choose Payment Method</p>
-            <h2 class="mt-4 text-2xl font-semibold text-white">Select your preferred payment method to complete the purchase.</h2>
+            <h2 class="mt-4 text-2xl font-semibold text-slate-900">Select your preferred payment method to complete the purchase.</h2>
           </header>
           <div
             v-if="selectedPlan"
-            class="mt-8 rounded-[1.5rem] border border-[#23bdee]/30 bg-slate-900/70 px-6 py-6 text-center shadow-inner shadow-[#23bdee]/10"
+            class="mt-8 rounded-[1.5rem] border border-[#23bdee]/30 bg-white/70 px-6 py-6 text-center shadow-inner shadow-[#23bdee]/10"
           >
             <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#23bdee]">{{ selectedPlan.name }}</p>
-            <p class="mt-4 text-4xl font-bold text-white">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
-            <p class="text-sm text-slate-400">{{ selectedPlan.cadence }}</p>
+            <p class="mt-4 text-4xl font-bold text-slate-900">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
+            <p class="text-sm text-slate-500">{{ selectedPlan.cadence }}</p>
           </div>
           <p v-if="paymentError" class="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             {{ paymentError }}
           </p>
           <button
             type="button"
-              class="mt-10 flex w-full items-center justify-center gap-3 rounded-full bg-[#23bdee]/20 px-6 py-4 text-base font-semibold text-[#23bdee] transition hover:bg-[#23bdee]/30 disabled:cursor-not-allowed disabled:opacity-60"
+              class="mt-10 flex w-full items-center justify-center gap-3 rounded-full bg-white/20 px-6 py-4 text-base font-semibold text-[#23bdee] transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="isGeneratingCheckout"
             @click="requestCheckout"
           >
             <span
-              class="inline-flex items-center rounded-full bg-[#23bdee] px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#081226]"
+              class="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#081226]"
             >
               PAY
             </span>
@@ -992,13 +1000,13 @@ const printReceipt = () => {
         v-if="isQrModalOpen && selectedPlan && checkoutDetails"
         class="fixed inset-0 z-50 flex items-center justify-center px-4"
       >
-        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" @click="closeQrModal"></div>
+        <div class="absolute inset-0 bg-white/70 backdrop-blur-sm" @click="closeQrModal"></div>
         <div
           class="relative w-full max-w-md rounded-[2.75rem] border border-[#23bdee]/40 bg-white px-8 py-10 text-slate-900 shadow-[0_35px_120px_rgba(8,47,73,0.45)]"
         >
           <button
             type="button"
-            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:text-slate-600"
+            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:text-slate-600"
             aria-label="Close QR modal"
             @click="closeQrModal"
           >
@@ -1012,7 +1020,7 @@ const printReceipt = () => {
           </div>
           
           <div class="mt-6 text-center">
-            <div class="mx-auto h-16 mb-4 bg-blue-500 text-white flex items-center justify-center rounded-lg">
+            <div class="mx-auto h-16 mb-4 bg-blue-500 text-slate-900 flex items-center justify-center rounded-lg">
               KHQR
             </div>
             <h3 class="text-xl font-bold text-slate-900 mb-4">{{ merchantName }}</h3>
@@ -1026,19 +1034,19 @@ const printReceipt = () => {
                 class="mx-auto w-full"
               />
               <div class="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">$</div>
+                <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-slate-900 font-bold">$</div>
               </div>
             </div>
           </div>
 
           <div class="mt-8 text-center">
             <h3 class="text-xl font-bold text-slate-900 mb-2">{{ merchantName }}</h3>
-            <p class="text-sm text-slate-500">{{ countdownLabel }}</p>
+            <p class="text-sm text-slate-900">{{ countdownLabel }}</p>
             <p class="text-sm font-medium mt-2" :class="statusLabelClass">{{ statusLabel }}</p>
-            <p v-if="lastCheckedLabel" class="mt-1 text-xs text-slate-400">
+            <p v-if="lastCheckedLabel" class="mt-1 text-xs text-slate-500">
               {{ lastCheckedLabel }}
             </p>
-            <p v-if="transactionHash" class="mt-2 text-xs text-slate-400 break-all">
+            <p v-if="transactionHash" class="mt-2 text-xs text-slate-500 break-all">
               Transaction hash: {{ transactionHash }}
             </p>
           </div>
@@ -1046,8 +1054,8 @@ const printReceipt = () => {
             type="button"
             class="mt-8 w-full rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] transition"
             :class="paymentStatus === 'PAID'
-              ? 'bg-emerald-500 text-white hover:bg-emerald-400'
-              : 'bg-slate-300 text-slate-500 cursor-not-allowed'"
+              ? 'bg-emerald-500 text-slate-900 hover:bg-emerald-400'
+              : 'bg-white text-slate-900 cursor-not-allowed'"
             :disabled="paymentStatus !== 'PAID'"
             @click="continueToCheckout"
           >
@@ -1063,13 +1071,13 @@ const printReceipt = () => {
         class="fixed inset-0 z-50 flex items-center justify-center px-4"
         @click.self="closeReceiptModal"
       >
-        <div class="absolute inset-0 bg-slate-950/75 backdrop-blur" />
+        <div class="absolute inset-0 bg-white/75 backdrop-blur" />
         <div
-          class="relative w-full max-w-xl rounded-[2.75rem] border border-[#1d2b4f] bg-[#050d22] px-10 py-12 text-slate-100 shadow-[0_45px_120px_rgba(4,12,32,0.85)]"
+          class="relative w-full max-w-xl rounded-[2.75rem] border border-[#1d2b4f] bg-white px-10 py-12 text-slate-900 shadow-[0_45px_120px_rgba(4,12,32,0.85)]"
         >
           <button
             type="button"
-            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-300 transition hover:text-white"
+            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:text-slate-900"
             aria-label="Close receipt modal"
             @click="closeReceiptModal"
           >
@@ -1078,14 +1086,14 @@ const printReceipt = () => {
             </svg>
           </button>
 
-          <div ref="receiptContentRef" class="rounded-[2.5rem] border border-[#2a3c68] bg-[#0c152e] p-9 text-white shadow-[0_25px_80px_rgba(7,20,56,0.55)]">
+          <div ref="receiptContentRef" class="rounded-[2.5rem] border border-[#2a3c68] bg-white p-9 text-slate-900 shadow-[0_25px_80px_rgba(7,20,56,0.55)]">
             <div class="flex flex-wrap items-center gap-4">
-              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-lg font-bold text-white shadow-inner shadow-red-500/40">
+              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-lg font-bold text-slate-900 shadow-inner shadow-red-500/40">
                 KH
               </div>
               <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.45em] text-slate-300/90">KHQR Receipt</p>
-                <p class="mt-1 text-lg font-semibold text-white">{{ receiptDetails.merchantName }}</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.45em] text-slate-600/90">KHQR Receipt</p>
+                <p class="mt-1 text-lg font-semibold text-slate-900">{{ receiptDetails.merchantName }}</p>
                 <p class="text-2xl font-bold text-red-600">{{ receiptDetails.amountPaidLabel }}</p>
               </div>
             </div>
@@ -1094,70 +1102,70 @@ const printReceipt = () => {
 
             <div class="grid grid-cols-[auto,1fr] gap-y-4 gap-x-8 text-sm">
               <template v-if="receiptDetails.planName">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Plan</span>
-                <span class="font-semibold text-white">{{ receiptDetails.planName }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Plan</span>
+                <span class="font-semibold text-slate-900">{{ receiptDetails.planName }}</span>
               </template>
               <template v-if="receiptDetails.planAmountLabel">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Plan amount</span>
-                <span class="font-semibold text-white">{{ receiptDetails.planAmountLabel }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Plan amount</span>
+                <span class="font-semibold text-slate-900">{{ receiptDetails.planAmountLabel }}</span>
               </template>
               <template v-if="receiptDetails.reference">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Reference</span>
-                <span class="max-w-[260px] break-all font-medium text-white/90">{{ receiptDetails.reference }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Reference</span>
+                <span class="max-w-[260px] break-all font-medium text-slate-900/90">{{ receiptDetails.reference }}</span>
               </template>
               <template v-if="receiptDetails.transactionHash">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Transaction hash</span>
-                <span class="max-w-[260px] break-all font-medium text-white/90">{{ receiptDetails.transactionHash }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Transaction hash</span>
+                <span class="max-w-[260px] break-all font-medium text-slate-900/90">{{ receiptDetails.transactionHash }}</span>
               </template>
               <template v-if="receiptDetails.paidAtLabel">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Completed at</span>
-                <span class="font-medium text-white/90">{{ receiptDetails.paidAtLabel }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Completed at</span>
+                <span class="font-medium text-slate-900/90">{{ receiptDetails.paidAtLabel }}</span>
               </template>
               <template v-if="receiptDetails.customerName">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Customer</span>
-                <span class="font-medium text-white/90">{{ receiptDetails.customerName }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Customer</span>
+                <span class="font-medium text-slate-900/90">{{ receiptDetails.customerName }}</span>
               </template>
               <template v-if="receiptDetails.customerPhone">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Phone</span>
-                <span class="font-medium text-white/90">{{ receiptDetails.customerPhone }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Phone</span>
+                <span class="font-medium text-slate-900/90">{{ receiptDetails.customerPhone }}</span>
               </template>
-              <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Merchant</span>
-              <span class="font-medium text-white/90">{{ receiptDetails.merchantName }}</span>
+              <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Merchant</span>
+              <span class="font-medium text-slate-900/90">{{ receiptDetails.merchantName }}</span>
               <template v-if="receiptDetails.merchantBank">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Receiving bank</span>
-                <span class="font-medium text-white/90">{{ receiptDetails.merchantBank }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Receiving bank</span>
+                <span class="font-medium text-slate-900/90">{{ receiptDetails.merchantBank }}</span>
               </template>
               <template v-if="receiptDetails.feeLabel">
-                <span class="font-medium uppercase tracking-[0.2em] text-slate-300/90">Fee</span>
-                <span class="font-medium text-white/90">{{ receiptDetails.feeLabel }}</span>
+                <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Fee</span>
+                <span class="font-medium text-slate-900/90">{{ receiptDetails.feeLabel }}</span>
               </template>
             </div>
 
             <div class="mt-6 border-t border-dashed border-white/15"></div>
 
-            <p class="mt-4 text-xs text-slate-300/80">
+            <p class="mt-4 text-xs text-slate-600/80">
               Save this receipt for your records. Generated automatically after payment confirmation from Bakong.
             </p>
           </div>
 
-          <div class="mt-8 flex flex-col gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-white sm:flex-row">
+          <div class="mt-8 flex flex-col gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-900 sm:flex-row">
             <button
               type="button"
-              class="flex-1 rounded-full border border-slate-600 bg-[#23bdee]/20 px-5 py-3 text-[#23bdee] transition hover:bg-[#23bdee]/30 hover:text-white"
+              class="flex-1 rounded-full border border-slate-600 bg-white/20 px-5 py-3 text-[#23bdee] transition hover:bg-white/30 hover:text-slate-900"
               @click="downloadReceipt"
             >
               Download Receipt
             </button>
             <button
               type="button"
-              class="flex-1 rounded-full border border-slate-600 bg-slate-800/60 px-5 py-3 text-slate-200 transition hover:bg-slate-700/70 hover:text-white"
+              class="flex-1 rounded-full border border-slate-600 bg-white/60 px-5 py-3 text-slate-700 transition hover:bg-white/70 hover:text-slate-900"
               @click="printReceipt"
             >
               Print
             </button>
             <button
               type="button"
-              class="flex-1 rounded-full border border-slate-700 bg-transparent px-5 py-3 text-slate-300 transition hover:bg-slate-800/60 hover:text-white"
+              class="flex-1 rounded-full border border-slate-700 bg-transparent px-5 py-3 text-slate-600 transition hover:bg-white/60 hover:text-slate-900"
               @click="closeReceiptModal"
             >
               Close
@@ -1168,3 +1176,4 @@ const printReceipt = () => {
     </Teleport>
   </section>
 </template>
+
