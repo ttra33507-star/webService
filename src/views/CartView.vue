@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import CartItemsTable from '../components/cart/CartItemsTable.vue';
 import CartSummaryCard from '../components/cart/CartSummaryCard.vue';
@@ -38,23 +38,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="border-y border-slate-900/80 bg-slate-950/60">
+  <section class="border-y border-slate-900/80 bg-white/60">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">
             Manage orders
           </span>
-          <h1 class="mt-4 text-3xl font-semibold text-white sm:text-4xl font-display">
+          <h1 class="mt-4 text-3xl font-semibold text-slate-900 sm:text-4xl font-display">
             Cart overview
           </h1>
-          <p class="mt-3 max-w-xl text-sm text-slate-400">
+          <p class="mt-3 max-w-xl text-sm text-slate-900">
             Review every item currently queued for checkout. Connected directly to the live API so you can monitor quantities, pricing, and order totals in real time.
           </p>
         </div>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/70 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/60 hover:text-white"
+          class="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-400/60 hover:text-slate-900"
           :disabled="isLoading"
           @click="refresh"
         >
@@ -73,8 +73,8 @@ onMounted(() => {
       </div>
 
       <div v-if="isLoading" class="flex flex-col gap-6">
-        <div class="h-64 animate-pulse rounded-2xl bg-slate-900/50"></div>
-        <div class="h-48 animate-pulse rounded-2xl bg-slate-900/50 lg:w-80"></div>
+        <div class="h-64 animate-pulse rounded-2xl bg-white/50"></div>
+        <div class="h-48 animate-pulse rounded-2xl bg-white/50 lg:w-80"></div>
       </div>
 
       <div v-else-if="errorMessage" class="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-5 text-sm text-red-200">
@@ -86,7 +86,7 @@ onMounted(() => {
         <CartSummaryCard :summary="cart!.summary" />
       </div>
 
-      <div v-else class="rounded-2xl border border-slate-900/80 bg-slate-900/40 px-6 py-12 text-center text-sm text-slate-300">
+      <div v-else class="rounded-2xl border border-slate-900/80 bg-white/40 px-6 py-12 text-center text-sm text-slate-600">
         <p>No items are currently in the cart.</p>
         <p class="mt-2">
           Head back to the <a href="/" class="text-emerald-300 underline hover:text-emerald-200">home page</a> to add products.
@@ -95,3 +95,4 @@ onMounted(() => {
     </div>
   </section>
 </template>
+

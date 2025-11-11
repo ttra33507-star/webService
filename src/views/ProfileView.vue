@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, watch } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
@@ -6,7 +6,7 @@ import { useAuth } from '../composables/useAuth';
 const router = useRouter();
 const { isAuthenticated, signOut, authState } = useAuth();
 
-const accountName = computed(() => authState.value?.user?.name ?? 'C4 Member');
+const accountName = computed(() => authState.value?.user?.name ?? 'C4 Teach Hub Member');
 const accountEmail = computed(() => authState.value?.user?.email ?? 'user@c4techhub.com');
 
 const maskedToken = computed(() => {
@@ -58,31 +58,31 @@ watch(
   <section class="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 py-16">
     <header class="text-center">
       <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#23bdee]">Accounts</p>
-      <h1 class="mt-4 text-3xl font-bold text-white">Accounts Overview</h1>
-      <p class="mt-3 text-sm text-slate-400">
-        Manage your C4 Tech Hub subscription details and keep your payment preferences up to date.
+      <h1 class="mt-4 text-3xl font-bold text-slate-900">Accounts Overview</h1>
+      <p class="mt-3 text-sm text-slate-500">
+        Manage your C4 Teach Hub subscription details and keep your payment preferences up to date.
       </p>
     </header>
 
     <div
       v-if="isAuthenticated"
-      class="rounded-[2.5rem] border border-slate-800 bg-slate-900/60 p-10 text-slate-100 shadow-[0_30px_90px_rgba(5,14,32,0.65)]"
+      class="rounded-[2.5rem] border border-slate-800 bg-white/60 p-10 text-slate-900 shadow-[0_30px_90px_rgba(5,14,32,0.65)]"
     >
       <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#23bdee]">Signed in as</p>
-          <p class="mt-3 text-xl font-semibold text-white">{{ accountName }}</p>
-          <p class="mt-1 text-sm text-slate-400">{{ accountEmail }}</p>
-          <p class="mt-2 text-xs uppercase tracking-[0.3em] text-slate-500">
-            Session expires: <span class="text-slate-300">{{ expiresAtLabel }}</span>
+          <p class="mt-3 text-xl font-semibold text-slate-900">{{ accountName }}</p>
+          <p class="mt-1 text-sm text-slate-500">{{ accountEmail }}</p>
+          <p class="mt-2 text-xs uppercase tracking-[0.3em] text-slate-900">
+            Session expires: <span class="text-slate-600">{{ expiresAtLabel }}</span>
           </p>
-          <p class="mt-2 text-sm text-slate-500">
-            Token preview: <span class="font-mono text-slate-300">{{ maskedToken }}</span>
+          <p class="mt-2 text-sm text-slate-900">
+            Token preview: <span class="font-mono text-slate-600">{{ maskedToken }}</span>
           </p>
         </div>
         <button
           type="button"
-          class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-red-200 transition hover:border-red-300 hover:text-white"
+          class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-red-200 transition hover:border-red-300 hover:text-slate-900"
           @click="handleSignOut"
         >
           Sign out
@@ -90,10 +90,10 @@ watch(
       </div>
 
       <div class="mt-10 grid gap-6 sm:grid-cols-2">
-        <article class="rounded-3xl border border-slate-800 bg-slate-950/70 p-6">
+        <article class="rounded-3xl border border-slate-800 bg-white/70 p-6">
           <p class="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300">Manage Plan</p>
-          <h2 class="mt-4 text-lg font-semibold text-white">Upgrade or renew your subscription</h2>
-          <p class="mt-3 text-sm text-slate-400">
+          <h2 class="mt-4 text-lg font-semibold text-slate-900">Upgrade or renew your subscription</h2>
+          <p class="mt-3 text-sm text-slate-500">
             Explore available plans, complete payments, and renew access to premium tools.
           </p>
           <RouterLink
@@ -107,10 +107,10 @@ watch(
           </RouterLink>
         </article>
 
-        <article class="rounded-3xl border border-slate-800 bg-slate-950/70 p-6">
-          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300">Support</p>
-          <h2 class="mt-4 text-lg font-semibold text-white">Need help with your account?</h2>
-          <p class="mt-3 text-sm text-slate-400">
+        <article class="rounded-3xl border border-slate-800 bg-white/70 p-6">
+          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-600">Support</p>
+          <h2 class="mt-4 text-lg font-semibold text-slate-900">Need help with your account?</h2>
+          <p class="mt-3 text-sm text-slate-500">
             Contact our team for assistance with billing, device registrations, or feature requests.
           </p>
           <a
@@ -128,7 +128,7 @@ watch(
 
     <div
       v-else
-      class="rounded-[2.5rem] border border-slate-800 bg-slate-900/60 p-10 text-center text-slate-200 shadow-[0_30px_90px_rgba(5,14,32,0.65)]"
+      class="rounded-[2.5rem] border border-slate-800 bg-white/60 p-10 text-center text-slate-700 shadow-[0_30px_90px_rgba(5,14,32,0.65)]"
     >
       <p class="text-sm">
         You need to sign in to view your account. Please
@@ -140,3 +140,4 @@ watch(
     </div>
   </section>
 </template>
+

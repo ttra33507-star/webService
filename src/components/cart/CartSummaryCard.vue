@@ -21,16 +21,16 @@ const rows = computed(() => [
 </script>
 
 <template>
-  <div class="rounded-2xl border border-emerald-500/30 bg-slate-900/80 p-6 shadow-emerald-500/10 shadow-xl">
-    <h2 class="text-lg font-semibold text-white">Order summary</h2>
-    <dl class="mt-4 space-y-3 text-sm text-slate-300">
+  <div class="rounded-2xl border border-emerald-500/30 bg-white/80 p-6 shadow-emerald-500/10 shadow-xl">
+    <h2 class="text-lg font-semibold text-slate-900">Order summary</h2>
+    <dl class="mt-4 space-y-3 text-sm text-slate-600">
       <div v-for="row in rows" :key="row.label" class="flex items-center justify-between">
         <dt>{{ row.label }}</dt>
         <dd :class="row.value < 0 ? 'text-emerald-300' : undefined">
           {{ formatCurrency(row.value) }}
         </dd>
       </div>
-      <div class="flex items-center justify-between border-t border-emerald-500/30 pt-4 text-base font-semibold text-white">
+      <div class="flex items-center justify-between border-t border-emerald-500/30 pt-4 text-base font-semibold text-slate-900">
         <dt>Total</dt>
         <dd>{{ formatCurrency(summary.total) }}</dd>
       </div>
