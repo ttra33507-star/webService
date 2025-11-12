@@ -21,6 +21,7 @@ export interface ServiceRecord {
   name: string;
   label: string;
   iconUrl: string;
+  description?: string | null;
   visible: boolean;
   defaultQuantity: number;
   price: {

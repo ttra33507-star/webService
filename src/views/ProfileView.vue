@@ -9,17 +9,6 @@ const { isAuthenticated, signOut, authState } = useAuth();
 const accountName = computed(() => authState.value?.user?.name ?? 'C4 Teach Hub Member');
 const accountEmail = computed(() => authState.value?.user?.email ?? 'user@c4techhub.com');
 
-const maskedToken = computed(() => {
-  const token = authState.value?.accessToken ?? '';
-  if (!token) {
-    return 'Not available';
-  }
-  if (token.length <= 12) {
-    return token;
-  }
-  return `${token.slice(0, 6)}...${token.slice(-6)}`;
-});
-
 const expiresAtLabel = computed(() => {
   const expiresAt = authState.value?.expiresAt ?? null;
   if (!expiresAt) {
@@ -75,9 +64,6 @@ watch(
           <p class="mt-1 text-sm text-slate-500">{{ accountEmail }}</p>
           <p class="mt-2 text-xs uppercase tracking-[0.3em] text-slate-900">
             Session expires: <span class="text-slate-600">{{ expiresAtLabel }}</span>
-          </p>
-          <p class="mt-2 text-sm text-slate-900">
-            Token preview: <span class="font-mono text-slate-600">{{ maskedToken }}</span>
           </p>
         </div>
         <button

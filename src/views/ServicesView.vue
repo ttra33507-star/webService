@@ -88,11 +88,6 @@ const lastUpdatedDisplay = computed(() => {
 const getIconForGroup = (group: ServiceCategoryGroup) => group.icon || fallbackIcon;
 const getIconForService = (service: ServiceRecord) =>
   service.iconUrl || service.mainCategory.icon || fallbackServiceIcon;
-const getServiceInitial = (service: ServiceRecord) => {
-  const source = service.label || service.name || service.mainCategory.label;
-  return source.trim().slice(0, 2).toUpperCase();
-};
-
 watch(
   () => route.query.highlight,
   () => {
