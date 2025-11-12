@@ -157,11 +157,11 @@ onBeforeUnmount(() => {
   <header
     class="sticky top-0 z-40 border-b border-white bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgba(15,23,42,0.08)] supports-[backdrop-filter]:bg-white/70"
   >
-    <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+    <nav class="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-5 sm:px-6 lg:px-8">
       <RouterLink to="/" class="flex items-center gap-3">
         <img src="/images/logo C4 TECH HUB 1.png" alt="C4 Teach Hub logo" class="h-[45px] w-[180px] rounded-[3px] p-[1px] object-cover shadow" />
       </RouterLink>
-      <div class="hidden items-center gap-6 md:flex">
+      <div class="hidden flex-1 items-center justify-center md:flex">
         <div class="flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-sm font-medium text-slate-600 shadow-inner shadow-[#096b9f]/10">
           <template v-for="link in navLinks" :key="link.label">
             <RouterLink
@@ -184,7 +184,7 @@ onBeforeUnmount(() => {
               {{ link.label }}
             </a>
           </template>
-          <!-- <button
+          <button
             type="button"
             class="rounded-full px-4 py-2 border border-transparent text-slate-600 transition hover:border-[#0c86c3]/40 hover:bg-white hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
             :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
@@ -192,8 +192,10 @@ onBeforeUnmount(() => {
             @click.prevent="handleDashboardRedirect"
           >
             Dashboard
-          </button> -->
+          </button>
         </div>
+      </div>
+      <div class="hidden items-center md:flex">
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"

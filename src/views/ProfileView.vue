@@ -76,9 +76,6 @@ watch(
           <p class="mt-2 text-xs uppercase tracking-[0.3em] text-slate-900">
             Session expires: <span class="text-slate-600">{{ expiresAtLabel }}</span>
           </p>
-          <p class="mt-2 text-sm text-slate-900">
-            Token preview: <span class="font-mono text-slate-600">{{ maskedToken }}</span>
-          </p>
         </div>
         <button
           type="button"
