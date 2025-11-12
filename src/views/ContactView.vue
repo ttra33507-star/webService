@@ -225,7 +225,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
 
 <template>
   <div class="bg-white text-slate-900">
-    <section class="relative overflow-hidden border-b border-slate-900/70 bg-white/80">
+    <section class="relative overflow-hidden border-b border-white bg-white/80">
       <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.2),_transparent_55%)]"></div>
       <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:px-8">
         <div class="space-y-8">
@@ -306,7 +306,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       </div>
     </section>
 
-    <section class="border-b border-slate-900/80 bg-white">
+    <section class="border-b border-white bg-white">
       <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
@@ -370,7 +370,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       </div>
     </section>
 
-    <section class="border-b border-slate-900/80 bg-white/80">
+    <section class="border-b border-white bg-white/80">
       <div class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
           <div class="mb-8">
@@ -447,7 +447,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       </div>
     </section>
 
-    <section id="faq" class="border-b border-slate-900/80 bg-white">
+    <section id="faq" class="border-b border-white bg-white">
       <div class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
           <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

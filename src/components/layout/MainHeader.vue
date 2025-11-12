@@ -154,7 +154,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="border-b border-slate-900/80 bg-white/70 backdrop-blur">
+  <header
+    class="sticky top-0 z-40 border-b border-white bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgba(15,23,42,0.08)] supports-[backdrop-filter]:bg-white/70"
+  >
     <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
       <RouterLink to="/" class="flex items-center gap-3">
         <img src="/images/logo C4 TECH HUB 1.png" alt="C4 Teach Hub logo" class="h-[45px] w-[180px] rounded-[3px] p-[1px] object-cover shadow" />
