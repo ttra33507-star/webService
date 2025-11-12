@@ -160,7 +160,7 @@ const featuredServiceCards = computed<FeaturedServiceCard[]>(() =>
     return {
       id: service.id,
       title: service.label,
-      tagline: `${service.mainCategory.label} â€¢ ${service.category.label}`,
+      tagline: `${service.mainCategory.label} at ${service.category.label}`,
       description: `Default quantity ${service.defaultQuantity} Â· ${service.price.formatted}`,
       price: service.price.formatted,
       image: heroImage,
@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <section class="border-y border-slate-900/80 bg-white/60">
+    <section class="border-y border-white bg-white/60">
       <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
           <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-[#096b9f]">
@@ -291,46 +291,7 @@ onBeforeUnmount(() => {
                     {{ slide.description }}
                   </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-                  <span
-                    v-for="highlight in slide.highlights"
-                    :key="`${slide.id}-${highlight.text}`"
-                    class="rounded-xl border px-3 py-2 transition"
-                    :class="[highlight.classes, highlight.icon ? 'flex items-center gap-2' : '']"
-                  >
-                    <svg
-                      v-if="highlight.icon === 'clock'"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <svg
-                      v-else-if="highlight.icon === 'check'"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <svg
-                      v-else-if="highlight.icon === 'trend'"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M3 3v18h18" />
-                    </svg>
-                    {{ highlight.text }}
-                  </span>
-                </div>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600"></div>
               </div>
               <div class="relative flex items-center justify-center">
                 <img
@@ -382,7 +343,7 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <section class="border-t border-slate-900/80 bg-white/40">
+    <section class="border-t border-white bg-white/40">
       <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -470,7 +431,7 @@ onBeforeUnmount(() => {
                   <p class="text-sm font-semibold text-[#0c86c3]">{{ card.price }}</p>
                 </div>
                 <RouterLink
-                  to="/services/6/order"
+                  :to="{ name: 'service-order', params: { serviceId: card.id } }"
                   class="btn-order-glow"
                 >
                   Order Now

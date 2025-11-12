@@ -78,7 +78,7 @@ const estimateTotal = computed<number | null>(() => {
 
 const formatCurrency = (amount: number | null): string => {
   if (amount === null) {
-    return 'â€”';
+    return '--';
   }
   const symbol = service.value?.price.symbol ?? '';
   const currency = service.value?.price.currency ?? 'USD';
@@ -218,7 +218,7 @@ const handleSubmit = async () => {
       items,
     });
 
-    submitSuccess.value = 'Order placed successfully. Redirecting to your accountâ€¦';
+    submitSuccess.value = 'Order placed successfully. Redirecting to your account...';
     if (redirectTimer) {
       clearTimeout(redirectTimer);
     }
@@ -339,15 +339,14 @@ onBeforeUnmount(() => {
       <div class="mb-6">
         <RouterLink
           to="/services"
-          class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 transition hover:text-emerald-200"
+          class="inline-flex items-center gap-2 text-sm font-semibold text-[#0c86c3] transition hover:text-[#0fa6ef]"
         >
-          <span aria-hidden="true">â†</span>
           Back to services
         </RouterLink>
       </div>
 
       <div v-if="isLoading" class="rounded-3xl border border-slate-900/70 bg-white/50 p-10 text-center">
-        <p class="text-sm text-slate-600">Loading service detailsâ€¦</p>
+        <p class="text-sm text-slate-600">Loading service details...</p>
       </div>
 
       <div v-else-if="loadError" class="space-y-6">
@@ -359,7 +358,7 @@ onBeforeUnmount(() => {
 
       <div v-else-if="service" class="space-y-8">
         <header class="rounded-[2.5rem] border border-slate-900/80 bg-white/60 p-8 shadow-[0_40px_120px_rgba(5,15,35,0.65)]">
-          <p class="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-300">Prepare order</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Prepare order</p>
           <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ service.label }}</h1>
           <p class="mt-4 text-sm text-slate-600">{{ service.name }}</p>
           <dl class="mt-6 grid gap-4 sm:grid-cols-3">
@@ -387,7 +386,7 @@ onBeforeUnmount(() => {
                 type="number"
                 min="1"
                 step="1"
-                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
               />
               <span class="text-xs text-slate-500">Minimum of 1. Adjust to match the size of your order.</span>
               <span v-if="quantityError" class="text-xs text-red-300">{{ quantityError }}</span>
@@ -399,7 +398,7 @@ onBeforeUnmount(() => {
                 v-model="link"
                 type="text"
                 :placeholder="requiresLink ? 'https://example.com/handle' : 'Optional for tool-based services'"
-                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
               />
               <span class="text-xs text-slate-500">
                 {{ requiresLink ? 'Provide the profile or content URL we should process.' : 'Optional input for software tools.' }}
@@ -408,14 +407,14 @@ onBeforeUnmount(() => {
             </label>
           </div>
 
-          <div class="rounded-[2rem] border border-emerald-400/30 bg-emerald-500/10 p-6 text-sm text-emerald-100">
+          <div class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3]">
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p class="text-[11px] uppercase tracking-[0.35em] text-emerald-300">Estimated total</p>
+                <p class="text-[11px] uppercase tracking-[0.35em] text-[#0c86c3]">Estimated total</p>
                 <p class="mt-2 text-2xl font-semibold text-slate-900">{{ totalDisplay }}</p>
               </div>
               <div>
-                <p class="text-[11px] uppercase tracking-[0.35em] text-emerald-300">Quantity</p>
+                <p class="text-[11px] uppercase tracking-[0.35em] text-[#0c86c3]">Quantity</p>
                 <p class="mt-2 text-2xl font-semibold text-slate-900">{{ normalizedQuantity }}</p>
               </div>
             </div>
@@ -430,7 +429,7 @@ onBeforeUnmount(() => {
             </p>
             <p
               v-if="submitSuccess"
-              class="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"
+              class="rounded-2xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-3 text-sm text-[#0c86c3]"
             >
               {{ submitSuccess }}
             </p>
@@ -439,10 +438,10 @@ onBeforeUnmount(() => {
           <div class="flex flex-wrap items-center gap-4">
             <button
               type="submit"
-              class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-500"
+              class="inline-flex items-center justify-center rounded-full bg-[#096b9f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-500"
               :disabled="submitting"
             >
-              {{ submitting ? 'Placing orderâ€¦' : 'Place order' }}
+              {{ submitting ? 'Placing order...' : 'Place order' }}
             </button>
             <RouterLink
               to="/services"

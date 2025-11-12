@@ -41,8 +41,8 @@ const iconPaths: Record<LegalCard['icon'], string> = {
 const privacySections: PolicySection[] = [
   {
     heading: '1. Information We Collect',
-    body:
-      'We collect information you provide directly to us when creating an account, making a purchase, or contacting supportâ€”this includes your name, email, payment details, and any files you upload.',
+      body:
+        'We collect information you provide directly to us when creating an account, making a purchase, or contacting support—this includes your name, email, payment details, and any files you upload.',
   },
   {
     heading: '2. How We Use Your Information',
@@ -97,7 +97,7 @@ const termsSections: PolicySection[] = [
 
 <template>
   <div class="bg-white text-slate-900">
-    <section class="border-b border-[#096b9f]/15 bg-white from-white via-[#e6f4fb] to-[#eef7fd]">
+    <section class="border-b border-white bg-white from-white via-[#e6f4fb] to-[#eef7fd]">
       <div
         class="mx-auto flex w-full max-w-5xl flex-col items-center gap-10 px-4 py-16 text-center sm:px-6 lg:px-8"
         style="background-image: radial-gradient(circle at 30% 20%, rgba(9,107,159,0.25), transparent 55%);"
@@ -106,7 +106,7 @@ const termsSections: PolicySection[] = [
           <p class="text-xs font-semibold uppercase tracking-[0.55em] text-[#0c86c3]">Legal Information</p>
           <h1 class="text-4xl font-semibold text-slate-900 sm:text-5xl">Transparent policies for every workflow.</h1>
           <p class="text-base text-[#0c86c3]/80 sm:text-lg">
-            Borrowing the Farmreel vibeâ€”deep greens, iconography, and simple copyâ€”this section gives your team quick access to everything compliance needs.
+            Borrowing the Farmreel vibe—deep greens, iconography, and simple copy—this section gives your team quick access to everything compliance needs.
           </p>
         </div>
         <div class="grid w-full gap-6 text-left sm:grid-cols-3">
@@ -128,11 +128,11 @@ const termsSections: PolicySection[] = [
       </div>
     </section>
 
-    <section id="privacy" class="border-b border-slate-900/80 bg-white">
+    <section id="privacy" class="border-b border-white bg-white">
       <div class="mx-auto w-full max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-semibold text-slate-900">Privacy Policy</h2>
         <p class="mt-2 text-sm text-slate-900">
-          This is a starter copy deckâ€”replace with your internal policy text or import from your CMS once ready.
+          This is a starter copy deck—replace with your internal policy text or import from your CMS once ready.
         </p>
         <div class="mt-8 space-y-7 text-base text-slate-700">
           <article v-for="section in privacySections" :key="section.heading">
@@ -143,7 +143,7 @@ const termsSections: PolicySection[] = [
       </div>
     </section>
 
-    <section id="terms" class="border-b border-slate-900/80 bg-white">
+    <section id="terms" class="border-b border-white bg-white">
       <div class="mx-auto w-full max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-semibold text-slate-900">Terms of Service</h2>
         <p class="mt-2 text-sm text-slate-900">Use this structure to keep things scannable, just like the Farmreel example.</p>
