@@ -57,14 +57,27 @@ const toggleProfileDropdown = () => {
   }
 };
 
+const redirectToLogin = (redirectPath?: string) => {
+  const target = redirectPath && typeof redirectPath === 'string' ? redirectPath : route.fullPath || '/';
+  router.push({ path: '/login', query: { redirect: target } });
+};
+
 const handleSignOut = () => {
+  const nextRedirect = route.fullPath || '/';
   signOut();
   closeProfileDropdown();
   closeMobileNav();
+  redirectToLogin(nextRedirect);
 };
 
 const resolvePortalRedirectPath = () => {
-  return '/';
+  return '/orders';
+};
+
+const appendPath = (base: string, path: string) => {
+  const normalizedBase = base.replace(/\/+$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
 };
 
 const handleDashboardRedirect = async () => {
@@ -77,8 +90,9 @@ const handleDashboardRedirect = async () => {
   }
 
   dashboardRedirecting.value = true;
+  const redirectPath = resolvePortalRedirectPath();
+
   try {
-    const redirectPath = resolvePortalRedirectPath();
     const user = authState.value?.user ?? null;
     const ticket = await requestSsoTicket({
       userId: typeof user?.id === 'number' || typeof user?.id === 'string' ? user.id : undefined,
@@ -91,7 +105,7 @@ const handleDashboardRedirect = async () => {
     window.location.href = targetUrl;
   } catch (error: unknown) {
     console.error('[SSO] Dashboard redirect failed', error);
-    const fallback = `${portalFallbackUrl}/`;
+    const fallback = appendPath(portalFallbackUrl, redirectPath || '/');
     window.location.href = fallback;
   } finally {
     dashboardRedirecting.value = false;

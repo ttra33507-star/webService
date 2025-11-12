@@ -9,17 +9,6 @@ const { isAuthenticated, signOut, authState } = useAuth();
 const accountName = computed(() => authState.value?.user?.name ?? 'C4 Teach Hub Member');
 const accountEmail = computed(() => authState.value?.user?.email ?? 'user@c4techhub.com');
 
-const maskedToken = computed(() => {
-  const token = authState.value?.accessToken ?? '';
-  if (!token) {
-    return 'Not available';
-  }
-  if (token.length <= 12) {
-    return token;
-  }
-  return `${token.slice(0, 6)}...${token.slice(-6)}`;
-});
-
 const expiresAtLabel = computed(() => {
   const expiresAt = authState.value?.expiresAt ?? null;
   if (!expiresAt) {

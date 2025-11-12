@@ -5,13 +5,19 @@ import { isAxiosError } from 'axios';
 import { useAuth } from '../composables/useAuth';
 import { fetchCategoryById, fetchServiceCatalog } from '../services/catalogService';
 import type { CategoryRecord, ServiceRecord } from '../types/service';
-import { createOrder } from '../services/orderService';
+import { createOrder, fetchRecentOrders } from '../services/orderService';
+import { getPortalBaseUrl, requestSsoTicket, buildPortalCallbackUrl } from '../services/authService';
 
 type RouteParam = string | string[] | number | undefined;
 
 const route = useRoute();
 const router = useRouter();
-const { isAuthenticated } = useAuth();
+const { isAuthenticated, signOut, authState } = useAuth();
+const portalBaseUrl = (getPortalBaseUrl() || 'https://apps.c4techhub.com').replace(/\/+$/, '');
+const disablePortalSsoRedirect =
+  String(import.meta.env.VITE_DISABLE_PORTAL_SSO_REDIRECT ?? 'true')
+    .toLowerCase()
+    .trim() !== 'false';
 
 const isLoading = ref(true);
 const loadError = ref<string | null>(null);
@@ -89,15 +95,537 @@ const formatCurrency = (amount: number | null): string => {
 const unitPriceDisplay = computed(() => formatCurrency(unitPriceValue.value));
 const totalDisplay = computed(() => formatCurrency(estimateTotal.value));
 
-const ensureAuthenticated = (): boolean => {
-  if (isAuthenticated.value) {
-    return true;
+const sanitizeIdentifier = (value: string) => value.replace(/[^\w-]/g, '');
+
+const extractOrderPathFromUrl = (value: string): string | null => {
+  try {
+    const parsed = new URL(value);
+    const hasOrderSegment = /\/orders\/[A-Za-z0-9-_]+/i;
+    if (hasOrderSegment.test(parsed.pathname)) {
+      return `${parsed.pathname}${parsed.search}${parsed.hash}` || '/orders';
+    }
+  } catch {
+    // ignore
   }
+  const inlineMatch = value.match(/\/?orders\/[A-Za-z0-9-_]+(?:[/?#][^\s]*)?/i);
+  if (inlineMatch?.[0]) {
+    const candidate = inlineMatch[0];
+    return candidate.startsWith('/') ? candidate : `/${candidate}`;
+  }
+  return null;
+};
+
+const tryExtractFromUrl = (value: string): string | null => {
+  try {
+    const { pathname, hash } = new URL(value);
+    const pathMatch = pathname.match(/\/orders\/([A-Za-z0-9-_]+)/);
+    if (pathMatch?.[1]) {
+      return sanitizeIdentifier(pathMatch[1]);
+    }
+    if (hash) {
+      const hashMatch = hash.match(/\/orders\/([A-Za-z0-9-_]+)/);
+      if (hashMatch?.[1]) {
+        return sanitizeIdentifier(hashMatch[1]);
+      }
+    }
+  } catch {
+    // ignore, not a URL
+  }
+  const inlineMatch = value.match(/orders\/([A-Za-z0-9-_]+)/i);
+  if (inlineMatch?.[1]) {
+    return sanitizeIdentifier(inlineMatch[1]);
+  }
+  return null;
+};
+
+const stringifyPayload = (value: unknown): string | null => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value == null) {
+    return null;
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    try {
+      return String(value);
+    } catch {
+      return null;
+    }
+  }
+};
+
+const delay = (ms: number) => new Promise<void>((resolve) => {
+  setTimeout(resolve, ms);
+});
+
+const keywordPattern = /(?:order|reference|ref|ticket|code|id)[\s_]*(?:number|no\.?|code|id|#)?[\s_:/-]*([A-Za-z0-9-_]+)/i;
+
+const extractIdentifierFromString = (input: string): string | null => {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const fromUrl = tryExtractFromUrl(trimmed);
+  if (fromUrl) {
+    return fromUrl;
+  }
+
+  const withoutHashPrefix = trimmed.replace(/^#+/, '').trim();
+  if (withoutHashPrefix && !/\s/.test(withoutHashPrefix)) {
+    return sanitizeIdentifier(withoutHashPrefix);
+  }
+
+  const hashMatch = trimmed.match(/#\s*([A-Za-z0-9-_]+)/);
+  if (hashMatch?.[1]) {
+    return sanitizeIdentifier(hashMatch[1]);
+  }
+
+  const keywordMatch = trimmed.match(keywordPattern);
+  if (keywordMatch?.[1]) {
+    return sanitizeIdentifier(keywordMatch[1].replace(/^#+/, ''));
+  }
+
+  return null;
+};
+
+const normalizeOrderDetailPath = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const fromUrl = extractOrderPathFromUrl(trimmed);
+  if (fromUrl) {
+    return fromUrl;
+  }
+  if (trimmed.startsWith('/orders/')) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('orders/')) {
+    return `/${trimmed}`;
+  }
+  return null;
+};
+
+const normaliseOrderIdentifier = (value: unknown): string | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(Math.trunc(value));
+  }
+  if (typeof value === 'string') {
+    return extractIdentifierFromString(value);
+  }
+  return null;
+};
+
+const IDENTIFIER_KEY_HINTS = ['order', 'id', 'reference', 'ref', 'ticket', 'code', 'number'];
+const DETAIL_KEY_HINTS = ['url', 'link', 'path', 'href', 'detail', 'portal'];
+const LINK_KEY_HINTS = ['link', 'username', 'profile', 'url', 'account'];
+const QUANTITY_KEY_HINTS = ['quantity', 'qty', 'count', 'amount', 'remaining'];
+
+const hasKeyHint = (key: string, hints: string[]) => {
+  const normalized = key.toLowerCase();
+  return hints.some((hint) => normalized.includes(hint));
+};
+
+const extractOrderIdentifier = (payload: unknown): string | null => {
+  const visited = new WeakSet<object>();
+  const preferredKeys = [
+    'order_id',
+    'orderId',
+    'id',
+    'order_no',
+    'orderNo',
+    'order_number',
+    'orderNumber',
+    'order_code',
+    'orderCode',
+    'order_uuid',
+    'orderUUID',
+    'uuid',
+    'uuid_v4',
+    'uuidV4',
+    'number',
+    'reference',
+    'reference_id',
+    'code',
+  ];
+
+  const walk = (candidate: unknown): string | null => {
+    if (!candidate) {
+      return null;
+    }
+    if (Array.isArray(candidate)) {
+      for (const item of candidate) {
+        const result = walk(item);
+        if (result) {
+          return result;
+        }
+      }
+      return null;
+    }
+    if (typeof candidate === 'string' || typeof candidate === 'number') {
+      return normaliseOrderIdentifier(candidate);
+    }
+    if (typeof candidate !== 'object') {
+      return null;
+    }
+    if (visited.has(candidate as object)) {
+      return null;
+    }
+    visited.add(candidate as object);
+
+    const record = candidate as Record<string, unknown>;
+    for (const key of preferredKeys) {
+      if (key in record) {
+        const resolved = normaliseOrderIdentifier(record[key]);
+        if (resolved) {
+          return resolved;
+        }
+      }
+    }
+
+    for (const [key, value] of Object.entries(record)) {
+      if (!hasKeyHint(key, IDENTIFIER_KEY_HINTS)) {
+        continue;
+      }
+      const resolved = normaliseOrderIdentifier(value);
+      if (resolved) {
+        return resolved;
+      }
+    }
+
+    for (const value of Object.values(record)) {
+      const nested = walk(value);
+      if (nested) {
+        return nested;
+      }
+    }
+
+    return null;
+  };
+
+  const direct = walk(payload);
+  if (direct) {
+    return direct;
+  }
+
+  const serialized = stringifyPayload(payload);
+  if (serialized) {
+    return extractIdentifierFromString(serialized);
+  }
+
+  return null;
+};
+
+const extractOrderDetailPath = (payload: unknown): string | null => {
+  const visited = new WeakSet<object>();
+  const preferredKeys = [
+    'order_url',
+    'orderUrl',
+    'detail_url',
+    'detailUrl',
+    'detail_link',
+    'detailLink',
+    'detail_path',
+    'detailPath',
+    'url',
+    'order_link',
+    'orderLink',
+    'order_detail_url',
+    'orderDetailUrl',
+    'order_detail_path',
+    'orderDetailPath',
+    'order_path',
+    'orderPath',
+    'path',
+    'link',
+    'href',
+    'portal_url',
+    'portalUrl',
+  ];
+
+  const walk = (candidate: unknown): string | null => {
+    if (!candidate) {
+      return null;
+    }
+    if (Array.isArray(candidate)) {
+      for (const item of candidate) {
+        const result = walk(item);
+        if (result) {
+          return result;
+        }
+      }
+      return null;
+    }
+    if (typeof candidate === 'string') {
+      return normalizeOrderDetailPath(candidate);
+    }
+    if (typeof candidate !== 'object') {
+      return null;
+    }
+    if (visited.has(candidate as object)) {
+      return null;
+    }
+    visited.add(candidate as object);
+
+    const record = candidate as Record<string, unknown>;
+    for (const key of preferredKeys) {
+      if (key in record) {
+        const resolved = normalizeOrderDetailPath(record[key] as string | null | undefined);
+        if (resolved) {
+          return resolved;
+        }
+      }
+    }
+
+    for (const [key, value] of Object.entries(record)) {
+      if (!hasKeyHint(key, DETAIL_KEY_HINTS)) {
+        continue;
+      }
+      const resolved = normalizeOrderDetailPath(value as string | null | undefined);
+      if (resolved) {
+        return resolved;
+      }
+    }
+
+    for (const value of Object.values(record)) {
+      const nested = walk(value);
+      if (nested) {
+        return nested;
+      }
+    }
+
+    return null;
+  };
+
+  const direct = walk(payload);
+  if (direct) {
+    return direct;
+  }
+
+  const serialized = stringifyPayload(payload);
+  if (serialized) {
+    return extractOrderPathFromUrl(serialized);
+  }
+
+  return null;
+};
+
+const normaliseComparableLink = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.toString().trim();
+  if (!trimmed) {
+    return null;
+  }
+  return trimmed.replace(/\/+$/, '').toLowerCase();
+};
+
+const normaliseComparableQuantity = (value: unknown): number | null => {
+  const numeric =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Number.parseFloat(value.replace(/,/g, ''))
+        : Number.NaN;
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+  return Math.max(0, Math.round(numeric));
+};
+
+const extractRecordValueByHints = <T>(
+  candidate: unknown,
+  hints: string[],
+  parser: (value: unknown) => T | null,
+  visited = new WeakSet<object>(),
+): T | null => {
+  if (!candidate) {
+    return null;
+  }
+  if (Array.isArray(candidate)) {
+    for (const item of candidate) {
+      const result = extractRecordValueByHints(item, hints, parser, visited);
+      if (result !== null && result !== undefined) {
+        return result;
+      }
+    }
+    return null;
+  }
+  if (typeof candidate !== 'object') {
+    return null;
+  }
+  if (visited.has(candidate as object)) {
+    return null;
+  }
+  visited.add(candidate as object);
+
+  const record = candidate as Record<string, unknown>;
+  for (const [key, value] of Object.entries(record)) {
+    if (!hasKeyHint(key, hints)) {
+      continue;
+    }
+    const parsed = parser(value);
+    if (parsed !== null && parsed !== undefined) {
+      return parsed;
+    }
+  }
+
+  for (const value of Object.values(record)) {
+    if (typeof value === 'object' && value !== null) {
+      const nested = extractRecordValueByHints(value, hints, parser, visited);
+      if (nested !== null && nested !== undefined) {
+        return nested;
+      }
+    }
+  }
+
+  return null;
+};
+
+const extractOrderLinkFromRecord = (record: Record<string, unknown>): string | null =>
+  extractRecordValueByHints(record, LINK_KEY_HINTS, (value) =>
+    typeof value === 'string' ? normaliseComparableLink(value) : null,
+  );
+
+const extractOrderQuantityFromRecord = (record: Record<string, unknown>): number | null =>
+  extractRecordValueByHints(record, QUANTITY_KEY_HINTS, (value) => normaliseComparableQuantity(value));
+
+interface OrderMetadataResolutionOptions {
+  attempts?: number;
+  initialDelay?: number;
+  perPage?: number;
+  expectedLink?: string | null;
+  expectedQuantity?: number | null;
+}
+
+const resolveLatestOrderMetadata = async (options?: OrderMetadataResolutionOptions) => {
+  const attempts = Math.max(1, options?.attempts ?? 4);
+  const initialDelay = Math.max(50, options?.initialDelay ?? 350);
+  const perPage = Math.max(1, options?.perPage ?? 5);
+  const normalizedExpectedLink = normaliseComparableLink(options?.expectedLink ?? null);
+  const expectedQuantity =
+    typeof options?.expectedQuantity === 'number' && Number.isFinite(options.expectedQuantity)
+      ? Math.max(0, Math.round(options.expectedQuantity))
+      : null;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const recentRecords = await fetchRecentOrders({ perPage });
+    let matchedRecord: Record<string, unknown> | null = null;
+
+    if (normalizedExpectedLink) {
+      for (const record of recentRecords) {
+        const recordLink = extractOrderLinkFromRecord(record);
+        if (recordLink && recordLink === normalizedExpectedLink) {
+          matchedRecord = record;
+          break;
+        }
+      }
+    }
+
+    if (!matchedRecord && expectedQuantity !== null) {
+      for (const record of recentRecords) {
+        const recordQuantity = extractOrderQuantityFromRecord(record);
+        if (recordQuantity !== null && recordQuantity === expectedQuantity) {
+          matchedRecord = record;
+          break;
+        }
+      }
+    }
+
+    if (!matchedRecord) {
+      matchedRecord = recentRecords[0] ?? null;
+    }
+
+    if (matchedRecord) {
+      const identifier = extractOrderIdentifier(matchedRecord);
+      const detailPath = extractOrderDetailPath(matchedRecord);
+      if (identifier || detailPath) {
+        return { identifier, detailPath };
+      }
+    }
+
+    if (attempt < attempts - 1) {
+      const waitDuration = initialDelay * (attempt + 1);
+      await delay(waitDuration);
+    }
+  }
+
+  return { identifier: null, detailPath: null };
+};
+
+const resolveOrderDetailPath = (orderIdentifier: string | null, explicitPath?: string | null) => {
+  const normalizedExplicit = normalizeOrderDetailPath(explicitPath);
+  if (normalizedExplicit) {
+    return normalizedExplicit;
+  }
+  if (orderIdentifier) {
+    return `/orders/${encodeURIComponent(orderIdentifier)}`;
+  }
+  return null;
+};
+
+const buildPortalUrl = (path: string) => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${portalBaseUrl}${normalizedPath}`;
+};
+
+const redirectToPortalOrders = async (orderIdentifier: string | null, explicitPath?: string | null) => {
+  const detailPath = resolveOrderDetailPath(orderIdentifier, explicitPath);
+  const baseOrdersPath = '/orders';
+  const redirectPath = detailPath ?? baseOrdersPath;
+  const targetStatePath = redirectPath;
+
+  if (disablePortalSsoRedirect) {
+    const targetUrl = buildPortalUrl(redirectPath);
+    window.location.href = targetUrl;
+    return;
+  }
+  try {
+    const user = authState.value?.user ?? null;
+    const ticket = await requestSsoTicket({
+      userId:
+        typeof user?.id === 'number' || typeof user?.id === 'string'
+          ? user.id
+          : undefined,
+      email: typeof user?.email === 'string' ? user.email : undefined,
+      redirectTo: redirectPath,
+      state: targetStatePath,
+    });
+    const targetUrl = buildPortalCallbackUrl(ticket.ticket, redirectPath, 'persistent', {
+      hashPath: targetStatePath,
+    });
+    window.location.href = targetUrl;
+  } catch (error) {
+    console.error('[Order] Failed to redirect with SSO ticket', error);
+    const fallbackPath = targetStatePath.startsWith('/') ? targetStatePath : `/${targetStatePath}`;
+    window.location.href = `${portalBaseUrl}${fallbackPath}`;
+  }
+};
+
+const redirectToLogin = () => {
+  const redirectTarget = route.fullPath || route.path || '/';
   router.replace({
     name: 'login',
-    query: { redirect: route.fullPath },
+    query: { redirect: redirectTarget },
   });
-  return false;
+};
+
+const ensureAuthenticated = (options?: { forceRedirect?: boolean }): boolean => {
+  if (!isAuthenticated.value || options?.forceRedirect) {
+    if (options?.forceRedirect) {
+      signOut();
+    }
+    redirectToLogin();
+    return false;
+  }
+  return true;
 };
 
 const loadServiceDetails = async () => {
@@ -203,7 +731,7 @@ const handleSubmit = async () => {
   submitting.value = true;
 
   try {
-    await createOrder({
+    const orderResponse = await createOrder<Record<string, unknown>>({
       platform: service.value.mainCategory.label,
       mainCategory: String(service.value.mainCategory.id),
       category: service.value.category.label,
@@ -217,19 +745,43 @@ const handleSubmit = async () => {
       currency: service.value.price.currency,
       items,
     });
+    let orderIdentifier = extractOrderIdentifier(orderResponse);
+    let orderDetailPath = extractOrderDetailPath(orderResponse);
 
-    submitSuccess.value = 'Order placed successfully. Redirecting to your account...';
+    if (!orderIdentifier || !orderDetailPath) {
+      try {
+        const latestMetadata = await resolveLatestOrderMetadata({
+          attempts: 6,
+          initialDelay: 350,
+          perPage: 6,
+          expectedLink: trimmedLink || null,
+          expectedQuantity: currentQuantity,
+        });
+        if (!orderIdentifier) {
+          orderIdentifier = latestMetadata.identifier;
+        }
+        if (!orderDetailPath) {
+          orderDetailPath = latestMetadata.detailPath;
+        }
+      } catch (latestError) {
+        console.warn('[Order] Unable to resolve latest order record', latestError);
+      }
+    }
+
+    submitSuccess.value = orderIdentifier
+      ? `Order #${orderIdentifier} placed successfully. Redirecting to your order details...`
+      : 'Order placed successfully. Redirecting to your orders dashboard...';
     if (redirectTimer) {
       clearTimeout(redirectTimer);
     }
     redirectTimer = setTimeout(() => {
-      router.push({ name: 'account' });
-    }, 1800);
+      void redirectToPortalOrders(orderIdentifier, orderDetailPath);
+    }, 1500);
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
         submitError.value = 'Your session has expired. Please sign in again.';
-        ensureAuthenticated();
+        ensureAuthenticated({ forceRedirect: true });
         submitting.value = false;
         return;
       }
@@ -302,7 +854,7 @@ onMounted(() => {
 
 watch(isAuthenticated, (value) => {
   if (!value) {
-    ensureAuthenticated();
+    ensureAuthenticated({ forceRedirect: true });
   }
 });
 
