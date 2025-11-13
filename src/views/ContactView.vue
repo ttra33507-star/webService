@@ -225,7 +225,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
 
 <template>
   <div class="bg-white text-slate-900">
-    <section class="relative overflow-hidden border-b border-slate-900/70 bg-white/80">
+    <section class="relative overflow-hidden border-b border-white bg-white/80">
       <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.2),_transparent_55%)]"></div>
       <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:px-8">
         <div class="space-y-8">
@@ -306,7 +306,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       </div>
     </section>
 
-    <section class="border-b border-slate-900/80 bg-white">
+    <section class="border-b border-white bg-white">
       <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
@@ -356,7 +356,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
             <a
               v-if="channel.cta"
               :href="channel.cta.href"
-              class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-emerald-200"
+              class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#096b9f] transition hover:text-[#0fa6ef]"
               target="_blank"
               rel="noreferrer"
             >
@@ -370,7 +370,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       </div>
     </section>
 
-    <section class="border-b border-slate-900/80 bg-white/80">
+    <section class="border-b border-white bg-white/80">
       <div class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
           <div class="mb-8">
@@ -412,7 +412,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
               <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Escalation desk</p>
               <h3 class="mt-3 text-3xl font-semibold text-slate-900">Never guess who to ping.</h3>
             </div>
-            <span class="rounded-full border border-orange-300/40 bg-orange-400/10 px-3 py-1 text-xs font-semibold text-orange-100">On-call</span>
+            <span class="rounded-full border border-[#096b9f]/30 bg-[#096b9f]/10 px-3 py-1 text-xs font-semibold text-[#096b9f]">On-call</span>
           </div>
           <div class="mt-8 space-y-6">
             <article
@@ -447,7 +447,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       </div>
     </section>
 
-    <section id="faq" class="border-b border-slate-900/80 bg-white">
+    <section id="faq" class="border-b border-white bg-white">
       <div class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
           <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

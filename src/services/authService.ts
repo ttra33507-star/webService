@@ -23,6 +23,66 @@ const DEFAULT_LOCAL_API_BASE_URL = 'http://127.0.0.1:8000';
 
 const normaliseBaseUrl = (value: string): string => value.replace(/\/+$/, '');
 
+const LOCAL_HOSTNAME_PATTERN = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/;
+
+const isPrivateNetworkHostname = (hostname: string) => {
+  if (!hostname) {
+    return false;
+  }
+  const lower = hostname.toLowerCase();
+  if (LOCAL_HOSTNAME_PATTERN.test(lower)) {
+    return true;
+  }
+  if (lower.endsWith('.local')) {
+    return true;
+  }
+  if (/^10\./.test(lower)) {
+    return true;
+  }
+  if (/^192\.168\./.test(lower)) {
+    return true;
+  }
+  if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(lower)) {
+    return true;
+  }
+  return false;
+};
+
+const resolveHostname = (candidate: string): string => {
+  if (!candidate) {
+    return '';
+  }
+  try {
+    const withProtocol = /^https?:\/\//i.test(candidate) ? candidate : `http://${candidate}`;
+    return new URL(withProtocol).hostname ?? '';
+  } catch {
+    return candidate;
+  }
+};
+
+const isLikelyLocalHostValue = (value: string) => {
+  const hostname = resolveHostname(value);
+  return isPrivateNetworkHostname(hostname);
+};
+
+const isBrowserRunningLocally = () => {
+  if (typeof window === 'undefined' || !window.location?.hostname) {
+    return false;
+  }
+  return isPrivateNetworkHostname(window.location.hostname);
+};
+
+const normalisePortalBaseCandidate = (value: string): string => {
+  const trimmed = value?.toString().trim();
+  if (!trimmed) {
+    return '';
+  }
+  const hasProtocol = /^https?:\/\//i.test(trimmed);
+  const needsHttp = !hasProtocol && isLikelyLocalHostValue(trimmed);
+  const withProtocol = hasProtocol ? trimmed : `${needsHttp ? 'http' : 'https'}://${trimmed}`;
+  return normaliseBaseUrl(withProtocol);
+};
+
 const resolveAppEnv = () => {
   const raw = (import.meta.env.VITE_APP_ENV ?? import.meta.env.MODE ?? '').toString().toLowerCase();
   return raw;
@@ -195,30 +255,55 @@ export const getAuthorizationHeader = (token: string | null | undefined): string
   return `Bearer ${trimmed}`;
 };
 
+const shouldForceRemotePortalBase = () => {
+  if (isLocalLikeEnv()) {
+    return false;
+  }
+  if (isBrowserRunningLocally()) {
+    return false;
+  }
+  return true;
+};
+
 const resolvePortalBaseUrl = () => {
   const appEnv = resolveAppEnv();
   const configured = (import.meta.env.VITE_PORTAL_BASE_URL ?? '').toString().trim();
   const devOverride = (import.meta.env.VITE_DEV_PORTAL_BASE_URL ?? '').toString().trim();
 
-  if (appEnv === 'local') {
-    if (devOverride) {
-      return normaliseBaseUrl(devOverride.startsWith('http') ? devOverride : `http://${devOverride}`);
+  const pickCandidate = (): string => {
+    if (appEnv === 'local') {
+      if (devOverride) {
+        return normalisePortalBaseCandidate(devOverride);
+      }
+      if (configured) {
+        return normalisePortalBaseCandidate(configured);
+      }
+      return normalisePortalBaseCandidate('http://localhost:5173');
     }
+
     if (configured) {
-      return normaliseBaseUrl(configured.startsWith('http') ? configured : `https://${configured}`);
+      return normalisePortalBaseCandidate(configured);
     }
-    return 'http://localhost:5173';
+
+    if (devOverride) {
+      return normalisePortalBaseCandidate(devOverride);
+    }
+
+    return DEFAULT_PORTAL_BASE_URL;
+  };
+
+  const candidate = pickCandidate();
+  const fallback = DEFAULT_PORTAL_BASE_URL;
+
+  if (!candidate) {
+    return fallback;
   }
 
-  if (configured) {
-    return normaliseBaseUrl(configured.startsWith('http') ? configured : `https://${configured}`);
+  if (shouldForceRemotePortalBase() && isLikelyLocalHostValue(candidate)) {
+    return fallback;
   }
 
-  if (devOverride) {
-    return normaliseBaseUrl(devOverride.startsWith('http') ? devOverride : `https://${devOverride}`);
-  }
-
-  return DEFAULT_PORTAL_BASE_URL;
+  return candidate;
 };
 
 const resolveSsoSecret = () => {
@@ -312,7 +397,16 @@ export const requestSsoTicket = async (options: RequestSsoTicketOptions): Promis
   }
 };
 
-export const buildPortalCallbackUrl = (ticket: string, redirectPath: string | null, persistenceMode: 'persistent' | 'session') => {
+interface BuildPortalCallbackOptions {
+  hashPath?: string | null;
+}
+
+export const buildPortalCallbackUrl = (
+  ticket: string,
+  redirectPath: string | null,
+  persistenceMode: 'persistent' | 'session',
+  options?: BuildPortalCallbackOptions,
+) => {
   const base = resolvePortalBaseUrl();
   if (!base) {
     throw new Error('Portal base URL is not configured.');
@@ -328,9 +422,31 @@ export const buildPortalCallbackUrl = (ticket: string, redirectPath: string | nu
   })();
 
   url.searchParams.set('ticket', ticket);
-  if (redirectPath && redirectPath.trim()) {
-    url.searchParams.set('redirect', redirectPath.trim());
-  }
+  const normalizedRedirect = (() => {
+    if (!redirectPath || !redirectPath.trim()) {
+      return '/';
+    }
+    const trimmed = redirectPath.trim();
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  })();
+  url.searchParams.set('redirect', normalizedRedirect);
+  url.searchParams.set('redirect_to', normalizedRedirect);
+  url.searchParams.set('redirect_url', normalizedRedirect);
+  url.searchParams.set('return_to', normalizedRedirect);
+  url.searchParams.set('next', normalizedRedirect);
+  url.searchParams.set('destination', normalizedRedirect);
+  url.searchParams.set('path', normalizedRedirect);
+
+  const hashPath = (() => {
+    const candidate = options?.hashPath;
+    if (!candidate || !candidate.trim()) {
+      return normalizedRedirect;
+    }
+    const trimmed = candidate.trim();
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  })();
+  url.hash = hashPath;
+
   url.searchParams.set('mode', persistenceMode === 'session' ? 'session' : 'persistent');
 
   return url.toString();

@@ -17,7 +17,7 @@ const dashboardRedirecting = ref(false);
 
 const navLinks: NavLink[] = [
   { label: 'Home', target: 'route', to: '/' },
-  { label: 'Plans', target: 'route', to: '/plans' },
+  // { label: 'Plans', target: 'route', to: '/plans' },
   { label: 'Services', target: 'route', to: '/services' },
   { label: 'Privacy & Terms', target: 'route', to: '/legal' },
   { label: 'Contact', target: 'route', to: '/contact' },
@@ -57,14 +57,27 @@ const toggleProfileDropdown = () => {
   }
 };
 
+const redirectToLogin = (redirectPath?: string) => {
+  const target = redirectPath && typeof redirectPath === 'string' ? redirectPath : route.fullPath || '/';
+  router.push({ path: '/login', query: { redirect: target } });
+};
+
 const handleSignOut = () => {
+  const nextRedirect = route.fullPath || '/';
   signOut();
   closeProfileDropdown();
   closeMobileNav();
+  redirectToLogin(nextRedirect);
 };
 
 const resolvePortalRedirectPath = () => {
-  return '/';
+  return '/orders';
+};
+
+const appendPath = (base: string, path: string) => {
+  const normalizedBase = base.replace(/\/+$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
 };
 
 const handleDashboardRedirect = async () => {
@@ -77,8 +90,9 @@ const handleDashboardRedirect = async () => {
   }
 
   dashboardRedirecting.value = true;
+  const redirectPath = resolvePortalRedirectPath();
+
   try {
-    const redirectPath = resolvePortalRedirectPath();
     const user = authState.value?.user ?? null;
     const ticket = await requestSsoTicket({
       userId: typeof user?.id === 'number' || typeof user?.id === 'string' ? user.id : undefined,
@@ -91,7 +105,7 @@ const handleDashboardRedirect = async () => {
     window.location.href = targetUrl;
   } catch (error: unknown) {
     console.error('[SSO] Dashboard redirect failed', error);
-    const fallback = `${portalFallbackUrl}/`;
+    const fallback = appendPath(portalFallbackUrl, redirectPath || '/');
     window.location.href = fallback;
   } finally {
     dashboardRedirecting.value = false;
@@ -154,12 +168,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="border-b border-slate-900/80 bg-white/70 backdrop-blur">
-    <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+  <header
+    class="sticky top-0 z-40 border-b border-white bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgba(15,23,42,0.08)] supports-[backdrop-filter]:bg-white/70"
+  >
+    <nav class="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-5 sm:px-6 lg:px-8">
       <RouterLink to="/" class="flex items-center gap-3">
         <img src="/images/logo C4 TECH HUB 1.png" alt="C4 Teach Hub logo" class="h-[45px] w-[180px] rounded-[3px] p-[1px] object-cover shadow" />
       </RouterLink>
-      <div class="hidden items-center gap-6 md:flex">
+      <div class="hidden flex-1 items-center justify-center md:flex">
         <div class="flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-sm font-medium text-slate-600 shadow-inner shadow-[#096b9f]/10">
           <template v-for="link in navLinks" :key="link.label">
             <RouterLink
@@ -192,6 +208,8 @@ onBeforeUnmount(() => {
             Dashboard
           </button>
         </div>
+      </div>
+      <div class="hidden items-center md:flex">
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"

@@ -121,7 +121,7 @@ const handleSubmit = async () => {
           <input
             v-model="password"
             type="password"
-            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+            placeholder="********"
             class="rounded-xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             required
           />

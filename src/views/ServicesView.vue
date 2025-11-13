@@ -88,11 +88,6 @@ const lastUpdatedDisplay = computed(() => {
 const getIconForGroup = (group: ServiceCategoryGroup) => group.icon || fallbackIcon;
 const getIconForService = (service: ServiceRecord) =>
   service.iconUrl || service.mainCategory.icon || fallbackServiceIcon;
-const getServiceInitial = (service: ServiceRecord) => {
-  const source = service.label || service.name || service.mainCategory.label;
-  return source.trim().slice(0, 2).toUpperCase();
-};
-
 watch(
   () => route.query.highlight,
   () => {
@@ -115,7 +110,7 @@ onMounted(() => {
 
 <template>
   <div class="bg-white text-slate-900">
-    <section class="border-b border-slate-900/80 bg-white from-slate-950 via-slate-950/80 to-[#050b1b]">
+    <section class="border-b border-white bg-white from-slate-950 via-slate-950/80 to-[#050b1b]">
       <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 lg:flex-row lg:items-center lg:px-8">
         <div class="flex-1 space-y-6">
           <p class="text-xs font-semibold uppercase tracking-[0.55em] text-[#0c86c3]">Services Catalog</p>
@@ -187,7 +182,7 @@ onMounted(() => {
       </div>
 
       <div v-else>
-        <div v-if="isLoading" class="grid gap-6 sm:grid-cols-2">
+        <div v-if="isLoading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div v-for="index in 4" :key="`skeleton-${index}`" class="animate-pulse rounded-3xl border border-slate-900/80 bg-white/40 p-6">
             <div class="flex items-center gap-4">
               <div class="h-12 w-12 rounded-2xl bg-white"></div>
@@ -222,56 +217,57 @@ onMounted(() => {
                 </div>
               </div>
             </header>
-            <div class="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <article
                 v-for="service in group.services"
                 :key="service.id"
                 :id="`service-${service.id}`"
-                class="group flex h-full flex-col rounded-[2.25rem] border border-slate-900/70 bg-white from-slate-950/80 via-slate-950/60 to-slate-950/40 p-6 shadow-lg transition hover:-translate-y-1 hover:border-[#096b9f]/40 hover:shadow-glow"
+                tabindex="0"
+                class="group relative overflow-hidden rounded-2xl border border-slate-900/80 bg-white/50 shadow-lg transition hover:border-[#096b9f]/40 hover:shadow-glow focus:border-[#096b9f]/40 focus:shadow-glow focus:outline-none"
                 :class="highlightedServiceId === service.id ? 'border-[#0c86c3]/60 shadow-glow' : ''"
               >
-                <div class="flex items-start gap-4">
-                  <div class="relative">
-                    <span
-                      class="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800/60 bg-white from-[#096b9f]/15 via-slate-950/80 to-slate-950 text-lg font-semibold text-slate-900 shadow-inner shadow-[#096b9f]/10"
-                    >
-                      <img
-                        v-if="service.iconUrl"
-                        :src="getIconForService(service)"
-                        :alt="`${service.label} icon`"
-                        class="h-full w-full rounded-2xl object-cover"
-                      />
-                      <span v-else class="tracking-[0.3em]">{{ getServiceInitial(service) }}</span>
-                    </span>
-                    <span
-                      class="absolute -right-2 -top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-[10px] font-semibold text-[#0c86c3] shadow"
-                    >
-                      {{ service.category.label.split(' ')[0] }}
-                    </span>
+                <div class="relative h-48 overflow-hidden">
+                  <img
+                    :src="getIconForService(service)"
+                    :alt="`${service.label} visual`"
+                    class="h-full w-full object-cover transition duration-500 group-hover:scale-110 group-focus-within:scale-110"
+                  />
+                  <div class="absolute inset-0 bg-white from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
+                </div>
+                <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-900">{{ service.label }}</h3>
+                    <p class="mt-2 text-sm text-slate-900">
+                      {{ service.mainCategory.label }} at {{ service.category.label }}
+                    </p>
                   </div>
-                  <div class="space-y-1">
-                    <p class="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#096b9f]">{{ service.category.label }}</p>
-                  </div>
-                  <div class="ml-auto text-right">
-                    <p class="text-[11px] uppercase tracking-[0.3em] text-slate-500">From</p>
-                    <p class="text-2xl font-semibold text-slate-900">{{ service.price.formatted }}</p>
-                    <p class="text-[11px] text-slate-900">Qty {{ service.defaultQuantity }}</p>
+                  <div class="flex items-center justify-between text-sm text-slate-600">
+                    <p>Default qty {{ service.defaultQuantity }} · {{ service.price.formatted }}</p>
                   </div>
                 </div>
-                <div class="mt-5 rounded-2xl border border-slate-900/70 bg-white/50 p-4 text-sm text-slate-600 shadow-inner">
-                  <p>{{ service.name }}</p>
-                </div>
-                <div class="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-700">
-                  <span class="rounded-full border border-slate-800/80 px-3 py-1">Instant</span>
-                  <span class="rounded-full border border-slate-800/80 px-3 py-1">API ready</span>
-                  <span class="rounded-full border border-slate-800/80 px-3 py-1">24/7 ops</span>
-                </div>
-                <RouterLink
-                  class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
-                  :to="{ name: 'service-order', params: { serviceId: service.id } }"
+                <div
+                  class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
                 >
-                  Order now
-                </RouterLink>
+                  <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#096b9f]">
+                    Quick view
+                  </span>
+                  <div class="space-y-2">
+                    <h3 class="text-xl font-semibold text-slate-900">{{ service.label }}</h3>
+                    <p class="text-sm leading-relaxed text-slate-600">
+                      {{ service.description || service.name }}
+                    </p>
+                    <p class="text-sm font-semibold text-[#0c86c3]">{{ service.price.formatted }}</p>
+                  </div>
+                  <RouterLink
+                    :to="{ name: 'service-order', params: { serviceId: service.id } }"
+                    class="btn-order-glow"
+                  >
+                    Order Now
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </RouterLink>
+                </div>
               </article>
             </div>
           </section>
