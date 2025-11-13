@@ -10,19 +10,19 @@ const legalLinks = [
 
 <template>
   <footer class="border-t border-slate-900/80 bg-white/70">
-    <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-12 sm:px-6 lg:flex-row lg:items-start lg:justify-between lg:px-8">
+    <div
+      class="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-4 py-12 text-center sm:px-6 lg:flex-row lg:items-start lg:justify-between lg:px-8 lg:text-left"
+    >
       <div class="max-w-md">
-        <p class="font-display text-lg font-semibold text-slate-900">C4 Teach Hub</p>
+        <p class="font-display text-lg font-semibold text-slate-900">C4 Tech Hub</p>
         <p class="mt-3 text-sm text-slate-500">
           A digital innovation platform powering automation, marketing, and creative tech solutions for modern businesses.
         </p>
-        <div class="mt-6 flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-slate-900">
-          <span>&copy; 2025 C4 Teach Hub</span>
-          <span class="h-1 w-1 rounded-full bg-white"></span>
-          <span>All rights reserved</span>
+        <div class="mt-6 flex justify-center text-center text-xs tracking-[0.25em] text-slate-900">
+          <span>&copy; 2025 c4 Tech Hub</span>
         </div>
       </div>
-      <div class="grid flex-1 gap-8 sm:grid-cols-2">
+      <div class="grid w-full gap-8 text-center sm:grid-cols-2 sm:text-left lg:flex-1">
         <div>
           <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Privacy &amp; Terms</h3>
           <ul class="mt-3 space-y-2 text-sm text-slate-600">

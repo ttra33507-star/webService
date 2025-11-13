@@ -294,7 +294,7 @@ onBeforeUnmount(() => {
           class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-white/95 p-8 text-slate-900 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
         >
           <div class="mb-8 flex items-center justify-between">
-            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-300">Menu</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Menu</p>
             <button
               type="button"
               class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:border-slate-500 hover:text-slate-900"

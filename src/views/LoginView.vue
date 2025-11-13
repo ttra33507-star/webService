@@ -98,7 +98,7 @@ const handleSubmit = async () => {
   <section class="flex min-h-screen items-center justify-center bg-white px-4 py-16 text-slate-900">
     <div class="w-full max-w-md rounded-3xl border border-slate-900/80 bg-white/70 p-8 shadow-2xl">
       <header class="text-center">
-        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300">Account access</p>
+        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#0c86c3]">Account access</p>
         <h1 class="mt-3 text-3xl font-semibold text-slate-900">Sign in to continue</h1>
         <p class="mt-3 text-sm text-slate-900">
           Use your account to continue ordering. Your session unlocks checkout flows and saved information.
@@ -112,7 +112,7 @@ const handleSubmit = async () => {
             v-model="email"
             type="email"
             placeholder="you@example.com"
-            class="rounded-xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            class="rounded-xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
             required
           />
         </label>
@@ -122,13 +122,13 @@ const handleSubmit = async () => {
             v-model="password"
             type="password"
             placeholder="********"
-            class="rounded-xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            class="rounded-xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
             required
           />
         </label>
         <button
           type="submit"
-          class="w-full rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-900"
+          class="w-full rounded-full bg-[#0c86c3] px-5 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-900"
           :disabled="isSubmitting"
         >
           {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
@@ -142,7 +142,7 @@ const handleSubmit = async () => {
         {{ authError }}
       </p>
 
-      <p v-if="isAuthenticated" class="mt-6 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200">
+      <p v-if="isAuthenticated" class="mt-6 rounded-xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-3 text-center text-sm text-[#0c86c3]">
         You are already signed in. <button type="button" class="underline transition hover:text-slate-900" @click="navigateAfterAuth">Continue</button>
       </p>
     </div>
