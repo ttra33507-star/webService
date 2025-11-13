@@ -273,7 +273,7 @@ onBeforeUnmount(() => {
       </div>
       <button
         type="button"
-        class="inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-700 md:hidden"
+        class="ml-auto inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-700 md:hidden"
         aria-label="Toggle menu"
         :aria-expanded="isMobileNavOpen"
         @click="toggleMobileNav"
