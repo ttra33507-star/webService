@@ -46,7 +46,7 @@ watch(
 <template>
   <section class="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 py-16">
     <header class="text-center">
-      <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#23bdee]">Accounts</p>
+      <p class="text-xs font-semibold uppercase text-[#23bdee]">Accounts</p>
       <h1 class="mt-4 text-3xl font-bold text-slate-900">Accounts Overview</h1>
       <p class="mt-3 text-sm text-slate-500">
         Manage your C4 Teach Hub subscription details and keep your payment preferences up to date.

@@ -264,7 +264,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
               :key="stat.label"
               class="rounded-3xl border border-[#096b9f]/30 bg-white/70 p-5 shadow-inner shadow-[#096b9f]/20"
             >
-              <dt class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-9000">{{ stat.label }}</dt>
+              <dt class="text-xs font-semibold uppercase text-slate-9000">{{ stat.label }}</dt>
               <dd class="mt-3 text-3xl font-semibold text-slate-900">{{ stat.value }}</dd>
               <p class="mt-2 text-sm text-slate-500">{{ stat.helper }}</p>
             </div>
@@ -274,7 +274,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
           <div class="space-y-6">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-9000">Live queue health</p>
+                <p class="text-xs font-semibold uppercase text-slate-9000">Live queue health</p>
                 <p class="mt-2 text-3xl font-semibold text-slate-900">Green · 4 agents</p>
               </div>
               <span class="rounded-full border border-[#0c86c3]/40 bg-[#0c86c3]/10 px-3 py-1 text-xs font-semibold text-[#0c86c3]">Realtime</span>
@@ -400,7 +400,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
                   ></span>
                 </span>
               </span>
-              <p class="text-sm font-semibold uppercase tracking-[0.4em] text-slate-500">{{ step.eta }}</p>
+              <p class="text-sm font-semibold uppercase text-slate-500">{{ step.eta }}</p>
               <h4 class="mt-2 text-2xl font-semibold text-slate-900">{{ step.title }}</h4>
               <p class="mt-2 text-base text-slate-600">{{ step.detail }}</p>
             </li>

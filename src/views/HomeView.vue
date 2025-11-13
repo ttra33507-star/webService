@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
               <div class="flex flex-col justify-between gap-6">
                 <div class="space-y-5">
                   <span
-                    class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em]"
+                    class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase"
                     :class="slide.badgeClasses"
                   >
                     {{ slide.badgeLabel }}
@@ -420,7 +420,7 @@ onBeforeUnmount(() => {
               <div
                 class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
               >
-                <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#096b9f]">
+                <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase text-[#096b9f]">
                   Quick view
                 </span>
                 <div class="space-y-2">
