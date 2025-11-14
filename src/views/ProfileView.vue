@@ -46,7 +46,7 @@ watch(
 <template>
   <section class="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 py-16">
     <header class="text-center">
-      <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#23bdee]">Accounts</p>
+      <p class="text-xs font-semibold uppercase text-[#23bdee]">Accounts</p>
       <h1 class="mt-4 text-3xl font-bold text-slate-900">Accounts Overview</h1>
       <p class="mt-3 text-sm text-slate-500">
         Manage your C4 Teach Hub subscription details and keep your payment preferences up to date.
@@ -77,14 +77,14 @@ watch(
 
       <div class="mt-10 grid gap-6 sm:grid-cols-2">
         <article class="rounded-3xl border border-slate-800 bg-white/70 p-6">
-          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300">Manage Plan</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#0c86c3]">Manage Plan</p>
           <h2 class="mt-4 text-lg font-semibold text-slate-900">Upgrade or renew your subscription</h2>
           <p class="mt-3 text-sm text-slate-500">
             Explore available plans, complete payments, and renew access to premium tools.
           </p>
           <RouterLink
             to="/plans"
-            class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 transition hover:text-emerald-100"
+            class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#0c86c3] transition hover:text-[#0fa6ef]"
           >
             Go to plans
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -964,7 +964,7 @@ const printReceipt = () => {
             </svg>
           </button>
           <header class="text-center">
-            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#23bdee]">Choose Payment Method</p>
+            <p class="text-xs font-semibold uppercase text-[#23bdee]">Choose Payment Method</p>
             <h2 class="mt-4 text-2xl font-semibold text-slate-900">Select your preferred payment method to complete the purchase.</h2>
           </header>
           <div

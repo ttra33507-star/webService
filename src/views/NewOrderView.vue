@@ -891,9 +891,9 @@ onBeforeUnmount(() => {
       <div class="mb-6">
         <RouterLink
           to="/services"
-          class="inline-flex items-center gap-2 text-sm font-semibold text-[#0c86c3] transition hover:text-[#0fa6ef]"
+          class="inline-flex border-2 border-[#0c86c3] pt-2 pb-2 pr-2 pl-2 rounded-[10px] items-center gap-2 text-sm font-semibold text-[#0c86c3] transition hover:text-[#0fa6ef]"
         >
-          Back to services
+          Back 
         </RouterLink>
       </div>
 
@@ -930,20 +930,8 @@ onBeforeUnmount(() => {
         </header>
 
         <form class="space-y-6" @submit.prevent="handleSubmit">
-          <div class="grid gap-6 md:grid-cols-2">
-            <label class="flex flex-col gap-2 text-sm font-medium text-slate-700">
-              Quantity
-              <input
-                v-model.number="quantity"
-                type="number"
-                min="1"
-                step="1"
-                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
-              />
-              <span class="text-xs text-slate-500">Minimum of 1. Adjust to match the size of your order.</span>
-              <span v-if="quantityError" class="text-xs text-red-300">{{ quantityError }}</span>
-            </label>
-
+          <div class="grid gap-6 md:grid-cols-1">
+            
             <label class="flex flex-col gap-2 text-sm font-medium text-slate-700">
               Link / Username
               <input
@@ -957,7 +945,21 @@ onBeforeUnmount(() => {
               </span>
               <span v-if="linkError" class="text-xs text-red-300">{{ linkError }}</span>
             </label>
+
+            <label class="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                Quantity
+                <input
+                  v-model.number="quantity"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
+                />
+                <span class="text-xs text-slate-500">Minimum of 1. Adjust to match the size of your order.</span>
+                <span v-if="quantityError" class="text-xs text-red-300">{{ quantityError }}</span>
+              </label>
           </div>
+
 
           <div class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3]">
             <div class="flex flex-wrap items-center justify-between gap-4">
