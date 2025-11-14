@@ -252,7 +252,7 @@ onBeforeUnmount(() => {
     <section class="border-y border-white bg-white/60">
       <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-          <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-[#096b9f]">
+          <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase  text-[#096b9f]">
             Launch faster
           </span>
           <h1 class="mt-6 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl font-display">

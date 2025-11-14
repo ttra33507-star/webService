@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"
-          class="inline-flex items-center rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
+          class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
         >
           Sign in Accounts
         </RouterLink>
@@ -259,7 +259,7 @@ onBeforeUnmount(() => {
             </RouterLink>
             <button
               type="button"
-              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-slate-900"
+              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold bg-red-500 text-white transition hover:bg-red-500/10 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out
@@ -350,14 +350,14 @@ onBeforeUnmount(() => {
           <div v-else class="mt-10 space-y-3">
             <RouterLink
               to="/account"
-              class="flex w-full justify-center rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-700 transition hover:border-[#23bdee] hover:text-slate-900"
+              class="flex w-full justify-center rounded-full  px-5 py-3 text-[14px] font-semibold uppercase  text-white bg-[#279dc2] transition hover:border-[#23bdee] hover:text-slate-900"
               @click="closeMobileNav"
             >
               Accounts Profile
             </RouterLink>
             <button
               type="button"
-              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-red-200 transition hover:border-red-300 hover:text-slate-900"
+              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-[14px] font-semibold uppercase  text-white bg-red-500 transition hover:border-red-300 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out
