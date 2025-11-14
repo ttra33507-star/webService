@@ -6,7 +6,6 @@ import type { ServiceCategoryGroup, ServiceRecord } from '../types/service';
 
 const services = ref<ServiceRecord[]>([]);
 const isLoading = ref(true);
-const isRefreshing = ref(false);
 const errorMessage = ref<string | null>(null);
 const lastFetchedAt = ref<number | null>(null);
 
@@ -54,20 +53,13 @@ const loadServices = async (force = false) => {
     errorMessage.value = 'Unable to load services right now. Please try again in a moment.';
   } finally {
     isLoading.value = false;
-    isRefreshing.value = false;
   }
-};
-
-const handleRefresh = () => {
-  isRefreshing.value = true;
-  return loadServices(true);
 };
 
 const handleRetry = () => {
-  if (services.value.length) {
-    return handleRefresh();
+  if (!services.value.length) {
+    isLoading.value = true;
   }
-  isLoading.value = true;
   return loadServices(true);
 };
 
@@ -113,52 +105,28 @@ onMounted(() => {
     <section class="border-b border-white bg-white from-slate-950 via-slate-950/80 to-[#050b1b]">
       <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 lg:flex-row lg:items-center lg:px-8">
         <div class="flex-1 space-y-6">
-          <p class="text-xs font-semibold uppercase tracking-[0.55em] text-[#0c86c3]">Services Catalog</p>
+          <p class="text-xs font-semibold uppercase  text-[#0c86c3]">Services Catalog</p>
           <div>
             <h1 class="font-display text-4xl font-semibold text-slate-900 sm:text-5xl">Automation services built for scale.</h1>
             <p class="mt-4 text-lg text-slate-600 sm:text-xl">
               Browse every ready-to-deploy module spanning Facebook, Telegram, TikTok, and more. Pricing is transparent and every offer can be bundled into your next checkout.
             </p>
           </div>
-          <div class="flex flex-wrap gap-4">
-            <RouterLink
-              to="/plans"
-              class="inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
-            >
-              View subscription plans
-            </RouterLink>
-            <button
-              type="button"
-              class="inline-flex items-center justify-center rounded-full border border-slate-800/80 px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-slate-600 transition hover:border-slate-600 hover:text-slate-900"
-              :disabled="isRefreshing"
-              @click="handleRefresh"
-            >
-              <span v-if="!isRefreshing">Sync catalog</span>
-              <span v-else class="inline-flex items-center gap-2">
-                <svg class="h-4 w-4 animate-spin text-[#0c86c3]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                Refreshing
-              </span>
-            </button>
-          </div>
         </div>
         <div class="flex w-full flex-1 flex-col gap-4 rounded-[2.5rem] border border-slate-800/70 bg-white p-6 shadow-[0_45px_120px_rgba(4,12,32,0.85)]">
           <div class="flex items-center justify-between rounded-3xl border border-slate-800/80 bg-white/60 p-4">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500">Services</p>
+              <p class="text-xs font-semibold uppercase  text-slate-500">Services</p>
               <p class="mt-2 text-3xl font-semibold text-slate-900">{{ totalServices }}</p>
             </div>
             <div class="text-right">
-              <p class="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500">Categories</p>
+              <p class="text-xs font-semibold uppercase  text-slate-500">Categories</p>
               <p class="mt-2 text-3xl font-semibold text-slate-900">{{ totalCategories }}</p>
             </div>
           </div>
           <div class="rounded-3xl border border-[#096b9f]/25 bg-[#096b9f]/5 p-5 text-[#0c86c3]/80">
-            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Last synced</p>
+            <p class="text-xs font-semibold uppercase  text-[#0c86c3]">Last synced</p>
             <p class="mt-2 text-lg font-semibold text-slate-900">{{ lastUpdatedDisplay }}</p>
-            <p class="mt-1 text-sm text-[#096b9f]/70">Powered by api.c4techhub.com/services</p>
           </div>
         </div>
       </div>
@@ -173,7 +141,7 @@ onMounted(() => {
           </div>
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-red-100 transition hover:border-red-300 hover:text-slate-900"
+            class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-sm font-semibold uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-900"
             @click="handleRetry"
           >
             Try again
@@ -248,7 +216,7 @@ onMounted(() => {
                 <div
                   class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
                 >
-                  <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#096b9f]">
+                  <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase text-[#096b9f]">
                     Quick view
                   </span>
                   <div class="space-y-2">

@@ -19,7 +19,6 @@ const navLinks: NavLink[] = [
   { label: 'Home', target: 'route', to: '/' },
   // { label: 'Plans', target: 'route', to: '/plans' },
   { label: 'Services', target: 'route', to: '/services' },
-  { label: 'Privacy & Terms', target: 'route', to: '/legal' },
   { label: 'Contact', target: 'route', to: '/contact' },
 ];
 
@@ -213,7 +212,7 @@ onBeforeUnmount(() => {
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"
-          class="inline-flex items-center rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
+          class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
         >
           Sign in Accounts
         </RouterLink>
@@ -260,7 +259,7 @@ onBeforeUnmount(() => {
             </RouterLink>
             <button
               type="button"
-              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-slate-900"
+              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold bg-red-500 text-white transition hover:bg-red-500/10 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out
@@ -273,7 +272,7 @@ onBeforeUnmount(() => {
       </div>
       <button
         type="button"
-        class="inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-700 md:hidden"
+        class="ml-auto inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-700 md:hidden"
         aria-label="Toggle menu"
         :aria-expanded="isMobileNavOpen"
         @click="toggleMobileNav"
@@ -294,7 +293,7 @@ onBeforeUnmount(() => {
           class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-white/95 p-8 text-slate-900 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
         >
           <div class="mb-8 flex items-center justify-between">
-            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-300">Menu</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Menu</p>
             <button
               type="button"
               class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:border-slate-500 hover:text-slate-900"
@@ -351,14 +350,14 @@ onBeforeUnmount(() => {
           <div v-else class="mt-10 space-y-3">
             <RouterLink
               to="/account"
-              class="flex w-full justify-center rounded-full border border-slate-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-slate-700 transition hover:border-[#23bdee] hover:text-slate-900"
+              class="flex w-full justify-center rounded-full  px-5 py-3 text-[14px] font-semibold uppercase  text-white bg-[#279dc2] transition hover:border-[#23bdee] hover:text-slate-900"
               @click="closeMobileNav"
             >
               Accounts Profile
             </RouterLink>
             <button
               type="button"
-              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-red-200 transition hover:border-red-300 hover:text-slate-900"
+              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-[14px] font-semibold uppercase  text-white bg-red-500 transition hover:border-red-300 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out

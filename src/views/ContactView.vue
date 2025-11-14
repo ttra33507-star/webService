@@ -230,7 +230,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:px-8">
         <div class="space-y-8">
           <div class="space-y-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Contact operations</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">Contact operations</p>
             <div>
               <h1 class="font-display text-4xl font-semibold text-slate-900 sm:text-5xl">Your queue, our priority.</h1>
               <p class="mt-4 text-lg text-slate-600 sm:text-xl">
@@ -252,7 +252,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
             </a>
             <a
               :href="CONTACT_LINK"
-              class="inline-flex h-10 items-center gap-2 rounded-full border border-[#096b9f]/50 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#096b9f] transition hover:border-[#096b9f] hover:text-[#0c86c3]"
+              class="inline-flex h-10 items-center gap-2 rounded-full border border-[#096b9f]/50 px-4 text-xs font-semibold uppercase  text-[#096b9f] transition hover:border-[#096b9f] hover:text-[#0c86c3]"
             >
               Email operations
               <span aria-hidden="true" class="text-slate-9000">↗</span>
@@ -264,7 +264,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
               :key="stat.label"
               class="rounded-3xl border border-[#096b9f]/30 bg-white/70 p-5 shadow-inner shadow-[#096b9f]/20"
             >
-              <dt class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-9000">{{ stat.label }}</dt>
+              <dt class="text-xs font-semibold uppercase text-slate-9000">{{ stat.label }}</dt>
               <dd class="mt-3 text-3xl font-semibold text-slate-900">{{ stat.value }}</dd>
               <p class="mt-2 text-sm text-slate-500">{{ stat.helper }}</p>
             </div>
@@ -274,7 +274,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
           <div class="space-y-6">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-9000">Live queue health</p>
+                <p class="text-xs font-semibold uppercase text-slate-9000">Live queue health</p>
                 <p class="mt-2 text-3xl font-semibold text-slate-900">Green · 4 agents</p>
               </div>
               <span class="rounded-full border border-[#0c86c3]/40 bg-[#0c86c3]/10 px-3 py-1 text-xs font-semibold text-[#0c86c3]">Realtime</span>
@@ -291,12 +291,12 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
             </ul>
             <div class="grid gap-4 pt-2 sm:grid-cols-2">
               <div class="rounded-2xl border border-[#096b9f]/30 bg-white/70 p-4">
-                <p class="text-xs uppercase tracking-[0.35em] text-slate-9000">Coverage</p>
+                <p class="text-xs uppercase  text-slate-9000">Coverage</p>
                 <p class="mt-2 text-xl font-semibold text-slate-900">24/7 · GMT+7</p>
                 <p class="text-sm text-slate-500">Follow-the-sun pods</p>
               </div>
               <div class="rounded-2xl border border-[#096b9f]/30 bg-white/70 p-4">
-                <p class="text-xs uppercase tracking-[0.35em] text-slate-9000">Escalations</p>
+                <p class="text-xs uppercase  text-slate-9000">Escalations</p>
                 <p class="mt-2 text-xl font-semibold text-slate-900">P1 in 10 min</p>
                 <p class="text-sm text-slate-500">Ops lead always on</p>
               </div>
@@ -310,9 +310,9 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Channels</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">Channels</p>
             <h2 class="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">Choose your lane.</h2>
-            <p class="mt-2 text-base text-slate-500 sm:text-lg">Every path mirrors the Farmreel FAQ layout—just optimized for C4 Teach Hub workflows.</p>
+            <p class="mt-2 text-base text-slate-500 sm:text-lg">Every path mirrors the C4 TechHub FAQ layout—just optimized for C4 Teach Hub workflows.</p>
           </div>
           <a href="https://status.c4.com" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900">
             View status page
@@ -347,11 +347,11 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
                   <p class="text-sm text-slate-500">{{ channel.response }}</p>
                 </div>
               </div>
-              <span v-if="channel.badge" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900/80">{{ channel.badge }}</span>
+              <span v-if="channel.badge" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase  text-slate-900/80">{{ channel.badge }}</span>
             </div>
             <p class="mt-4 text-base text-slate-600">{{ channel.description }}</p>
             <ul class="mt-5 flex flex-wrap gap-3 text-sm text-slate-700">
-              <li v-for="item in channel.availability" :key="item" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.25em]">{{ item }}</li>
+              <li v-for="item in channel.availability" :key="item" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase">{{ item }}</li>
             </ul>
             <a
               v-if="channel.cta"
@@ -374,7 +374,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
       <div class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
           <div class="mb-8">
-            <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">SLA timeline</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">SLA timeline</p>
             <h3 class="mt-3 text-3xl font-semibold text-slate-900">Expect a response in predictable waves.</h3>
             <p class="mt-2 text-base text-slate-500">Borrowed from the Farmreel FAQ cadence, but tuned to C4 Teach Hub pods.</p>
           </div>
@@ -383,7 +383,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
               <span class="absolute left-0 top-0 flex h-full w-12 items-start justify-center">
                 <span class="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-700 bg-white/70">
                   <svg
-                    class="h-5 w-5 text-emerald-300"
+                    class="h-5 w-5 text-[#096b9f]"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -400,7 +400,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
                   ></span>
                 </span>
               </span>
-              <p class="text-sm font-semibold uppercase tracking-[0.4em] text-slate-500">{{ step.eta }}</p>
+              <p class="text-sm font-semibold uppercase text-slate-500">{{ step.eta }}</p>
               <h4 class="mt-2 text-2xl font-semibold text-slate-900">{{ step.title }}</h4>
               <p class="mt-2 text-base text-slate-600">{{ step.detail }}</p>
             </li>
@@ -409,7 +409,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
         <div class="rounded-[32px] border border-slate-800/80 bg-white from-[#0b1224] via-[#050b1b] to-black p-8">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Escalation desk</p>
+              <p class="text-xs font-semibold uppercase  text-slate-500">Escalation desk</p>
               <h3 class="mt-3 text-3xl font-semibold text-slate-900">Never guess who to ping.</h3>
             </div>
             <span class="rounded-full border border-[#096b9f]/30 bg-[#096b9f]/10 px-3 py-1 text-xs font-semibold text-[#096b9f]">On-call</span>
@@ -440,7 +440,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
                   <p class="text-sm text-slate-500">{{ step.detail }}</p>
                 </div>
               </div>
-              <p class="mt-4 text-sm font-semibold text-emerald-200">{{ step.contact }}</p>
+              <p class="mt-4 text-sm font-semibold text-[#096b9f]">{{ step.contact }}</p>
             </article>
           </div>
         </div>
@@ -452,7 +452,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
         <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
           <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">FAQ</p>
+              <p class="text-xs font-semibold uppercase  text-slate-500">FAQ</p>
               <h3 class="mt-3 text-3xl font-semibold text-slate-900">Answers before you reach out.</h3>
             </div>
             <a href="/docs" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900">
@@ -462,7 +462,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
           </div>
           <div class="divide-y divide-slate-800/70">
             <article v-for="item in faqItems" :key="item.question" class="py-5">
-              <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-9000">{{ item.category }}</p>
+              <p class="text-xs font-semibold uppercase  text-slate-9000">{{ item.category }}</p>
               <h4 class="mt-2 text-2xl font-semibold text-slate-900">{{ item.question }}</h4>
               <p class="mt-2 text-base text-slate-600">{{ item.answer }}</p>
             </article>
@@ -470,7 +470,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
         </div>
         <div class="space-y-6">
           <div class="rounded-[32px] border border-slate-800/80 bg-white from-slate-900/80 via-slate-900/40 to-slate-950/80 p-8">
-            <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Resources</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">Resources</p>
             <h3 class="mt-3 text-3xl font-semibold text-slate-900">Stay ahead of incidents.</h3>
             <p class="mt-2 text-base text-slate-500">Borrow our favourite Farmreel-style quick links.</p>
             <div class="mt-6 space-y-4">
@@ -485,14 +485,14 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
                   <p class="text-sm text-slate-500">{{ resource.description }}</p>
                 </div>
                 <div class="flex flex-col items-end gap-2">
-                  <span v-if="resource.badge" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-900/80">{{ resource.badge }}</span>
+                  <span v-if="resource.badge" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase  text-slate-900/80">{{ resource.badge }}</span>
                   <span aria-hidden="true" class="text-slate-900">→</span>
                 </div>
               </a>
             </div>
           </div>
           <div class="rounded-[32px] border border-slate-800/80 bg-white/60 p-8">
-            <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Office hours</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">Office hours</p>
             <h3 class="mt-3 text-2xl font-semibold text-slate-900">Need a scheduled sync?</h3>
             <p class="mt-2 text-base text-slate-600">Book 15 minutes with an advocate to review onboarding, billing, or policy changes.</p>
             <div class="mt-5 grid gap-4 sm:grid-cols-2">
@@ -516,7 +516,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
 
     <section class="bg-white">
       <div class="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p class="text-xs font-semibold uppercase tracking-[0.55em] text-slate-500">Need immediate help?</p>
+        <p class="text-xs font-semibold uppercase  text-slate-500">Need immediate help?</p>
         <h3 class="text-4xl font-semibold text-slate-900">Ops & success are listening.</h3>
         <p class="max-w-2xl text-base text-slate-600">
           Share context, ticket IDs, or screenshots exactly like the Farmreel FAQ suggests. We will mirror the process, keep you updated, and close the loop with clear documentation.
@@ -525,7 +525,7 @@ const toneClasses: Record<ContactChannel['tone'], { border: string; glow: string
           <a :href="CONTACT_LINK" class="btn-primary" target="_blank" rel="noreferrer">Open support chat</a>
           <a
             :href="CONTACT_LINK"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-800/70 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-700 transition hover:border-slate-200/60"
+            class="inline-flex items-center gap-2 rounded-full border border-slate-800/70 px-6 py-3 text-sm font-semibold uppercase  text-slate-700 transition hover:border-slate-200/60"
           >
             Send context pack
             <span aria-hidden="true">↗</span>
