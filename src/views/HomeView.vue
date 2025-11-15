@@ -31,7 +31,6 @@ interface FeaturedServiceCard {
   title: string;
   tagline: string;
   description: string;
-  price: string;
   image: {
     src: string;
     alt: string;
@@ -161,8 +160,7 @@ const featuredServiceCards = computed<FeaturedServiceCard[]>(() =>
       id: service.id,
       title: service.label,
       tagline: `${service.mainCategory.label} at ${service.category.label}`,
-      description: `Default quantity ${service.defaultQuantity} Â· ${service.price.formatted}`,
-      price: service.price.formatted,
+      description: `Default quantity ${service.defaultQuantity}`,
       image: heroImage,
       iconUrl: service.iconUrl,
       service,
@@ -428,7 +426,6 @@ onBeforeUnmount(() => {
                   <p class="text-sm leading-relaxed text-slate-600">
                     {{ card.description }}
                   </p>
-                  <p class="text-sm font-semibold text-[#0c86c3]">{{ card.price }}</p>
                 </div>
                 <RouterLink
                   :to="{ name: 'service-order', params: { serviceId: card.id } }"
