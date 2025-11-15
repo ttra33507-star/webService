@@ -985,7 +985,7 @@ onBeforeUnmount(() => {
           <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Prepare order</p>
           <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ service.label }}</h1>
           <p class="mt-4 text-sm text-slate-600">{{ service.name }}</p>
-          <dl class="mt-6 grid gap-4 sm:grid-cols-3">
+          <dl class="mt-6 grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
               <dt class="text-[11px] uppercase tracking-[0.35em] text-slate-500">Platform</dt>
               <dd class="mt-2 text-lg font-semibold text-slate-900">{{ service.mainCategory.label }}</dd>
@@ -993,10 +993,6 @@ onBeforeUnmount(() => {
             <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
               <dt class="text-[11px] uppercase tracking-[0.35em] text-slate-500">Category</dt>
               <dd class="mt-2 text-lg font-semibold text-slate-900">{{ service.category.label }}</dd>
-            </div>
-            <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
-              <dt class="text-[11px] uppercase tracking-[0.35em] text-slate-500">Unit price</dt>
-              <dd class="mt-2 text-lg font-semibold text-slate-900">{{ unitPriceDisplay }}</dd>
             </div>
           </dl>
         </header>
