@@ -119,12 +119,19 @@ const normalizeService = (payload: RemoteServiceRecord): ServiceRecord => {
   const symbol = coerceString(payload.currency_symbol, currency === 'USD' ? '$' : '');
   const iconUrl = resolveAssetUrl(payload.icon ?? '');
   const salesCount = coerceNumber(payload.sales_count, 0);
+  const description = coerceString(payload.description, '');
+  const averageTimeText = coerceString(payload.average_time ?? payload.evage_time ?? '');
+  const averageTimeMinutes =
+    payload.average_time_minute == null ? null : coerceNumber(payload.average_time_minute, 0);
 
   return {
     id: payload.id,
     name: coerceString(payload.name, 'Unnamed Service'),
     label: coerceString(payload.label, payload.name),
     iconUrl,
+    description: description || null,
+    averageTime: averageTimeText || null,
+    averageTimeMinutes,
     visible: Boolean(payload.visible),
     defaultQuantity: payload.default_quantity ?? 1,
     price: {

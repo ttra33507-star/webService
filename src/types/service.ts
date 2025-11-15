@@ -3,6 +3,10 @@ export interface RemoteServiceRecord {
   name: string;
   label: string;
   icon?: string | null;
+  description?: string | null;
+  average_time?: string | null;
+  average_time_minute?: number | string | null;
+  evage_time?: string | null;
   category_id: number;
   category_label: string;
   main_category_id: number;
@@ -22,6 +26,8 @@ export interface ServiceRecord {
   label: string;
   iconUrl: string;
   description?: string | null;
+  averageTime?: string | null;
+  averageTimeMinutes?: number | null;
   visible: boolean;
   defaultQuantity: number;
   price: {
