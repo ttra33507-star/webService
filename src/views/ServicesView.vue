@@ -221,9 +221,6 @@ onMounted(() => {
                   </span>
                   <div class="space-y-2">
                     <h3 class="text-xl font-semibold text-slate-900">{{ service.label }}</h3>
-                    <p class="text-sm leading-relaxed text-slate-600">
-                      {{ service.description || service.name }}
-                    </p>
                     <p class="text-sm font-semibold text-[#0c86c3]">{{ service.price.formatted }}</p>
                   </div>
                   <RouterLink
