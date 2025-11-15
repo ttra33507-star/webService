@@ -97,6 +97,78 @@ const totalDisplay = computed(() => formatCurrency(estimateTotal.value));
 
 const sanitizeIdentifier = (value: string) => value.replace(/[^\w-]/g, '');
 
+const formatMinutesToDuration = (minutes: number): string => {
+  const rounded = Math.max(1, Math.round(minutes));
+  const hours = Math.floor(rounded / 60);
+  const remaining = rounded % 60;
+  if (hours && remaining) {
+    return `${hours} hr${hours > 1 ? 's' : ''} ${remaining} min`;
+  }
+  if (hours) {
+    return `${hours} hr${hours > 1 ? 's' : ''}`;
+  }
+  return `${rounded} min`;
+};
+
+const averageTimeDisplay = computed<string | null>(() => {
+  const record = service.value;
+  if (!record) {
+    return null;
+  }
+  const text = record.averageTime?.trim();
+  if (text) {
+    return text;
+  }
+  const minutes = record.averageTimeMinutes;
+  if (typeof minutes === 'number' && Number.isFinite(minutes) && minutes > 0) {
+    return formatMinutesToDuration(minutes);
+  }
+  return null;
+});
+
+const normalizeDescriptionLine = (input: string): string => {
+  const collapsed = input.replace(/\s+/g, ' ').trim();
+  if (!collapsed) {
+    return '';
+  }
+  return collapsed.replace(/\s*:\s*/g, ': ').trim();
+};
+
+const parsedDescription = computed(() => {
+  const raw = service.value?.description ?? '';
+  if (!raw.trim()) {
+    return {
+      bullets: [] as string[],
+      notes: [] as string[],
+    };
+  }
+
+  const lines = raw
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((line) => normalizeDescriptionLine(line))
+    .filter(Boolean);
+
+  const bullets: string[] = [];
+  const notes: string[] = [];
+  let inNotesSection = false;
+
+  lines.forEach((line) => {
+    const detectionTarget = line.replace(/^[^\p{L}\p{N}]+/u, '').toLowerCase();
+    if (!inNotesSection && /^notes?\b/.test(detectionTarget)) {
+      inNotesSection = true;
+      return;
+    }
+    if (inNotesSection) {
+      notes.push(line);
+    } else {
+      bullets.push(line);
+    }
+  });
+
+  return { bullets, notes };
+});
+
 const extractOrderPathFromUrl = (value: string): string | null => {
   try {
     const parsed = new URL(value);
@@ -929,8 +1001,40 @@ onBeforeUnmount(() => {
           </dl>
         </header>
 
+        <section
+          v-if="parsedDescription.bullets.length || parsedDescription.notes.length"
+          class="rounded-[2.5rem] border border-slate-900/60 bg-slate-50/80 p-8 text-sm text-slate-700 shadow-inner shadow-white/40"
+        >
+          <div v-if="parsedDescription.bullets.length">
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Description</p>
+            <ul class="mt-4 space-y-2 leading-relaxed">
+              <li
+                v-for="(line, index) in parsedDescription.bullets"
+                :key="`desc-line-${index}`"
+                class="flex items-start gap-2"
+              >
+                <span class="mt-1 h-1.5 w-1.5 rounded-full bg-[#0c86c3]" aria-hidden="true"></span>
+                <span>{{ line }}</span>
+              </li>
+            </ul>
+          </div>
+          <div v-if="parsedDescription.notes.length" class="mt-6 border-t border-white/40 pt-6">
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Notes</p>
+            <ul class="mt-4 space-y-2 leading-relaxed">
+              <li
+                v-for="(line, index) in parsedDescription.notes"
+                :key="`desc-note-${index}`"
+                class="flex items-start gap-2"
+              >
+                <span class="text-base leading-tight text-[#0c86c3]">•</span>
+                <span>{{ line }}</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
         <form class="space-y-6" @submit.prevent="handleSubmit">
-          <div class="grid gap-6 md:grid-cols-1">
+          <div class="grid gap-6 md:grid-cols-1 ">
             
             <label class="flex flex-col gap-2 text-sm font-medium text-slate-700">
               Link / Username
@@ -956,20 +1060,60 @@ onBeforeUnmount(() => {
                   class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
                 />
                 <span class="text-xs text-slate-500">Minimum of 1. Adjust to match the size of your order.</span>
+                <div
+                  v-if="averageTimeDisplay"
+                  class="flex items-center gap-2 rounded-xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-4 text-xs font-semibold text-[#0c86c3]"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                  <span>Average time {{ averageTimeDisplay }}</span>
+                </div>
                 <span v-if="quantityError" class="text-xs text-red-300">{{ quantityError }}</span>
               </label>
           </div>
 
 
-          <div class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3]">
+          <div class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3] ">
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p class="text-[11px] uppercase tracking-[0.35em] text-[#0c86c3]">Estimated total</p>
                 <p class="mt-2 text-2xl font-semibold text-slate-900">{{ totalDisplay }}</p>
               </div>
-              <div>
+              <div >
                 <p class="text-[11px] uppercase tracking-[0.35em] text-[#0c86c3]">Quantity</p>
                 <p class="mt-2 text-2xl font-semibold text-slate-900">{{ normalizedQuantity }}</p>
+                <div
+                  v-if="averageTimeDisplay"
+                  class="mt-2 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#0c86c3]"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="8.5" />
+                    <path d="M12 8v4l2.5 1.5" />
+                  </svg>
+                  <span>Avg {{ averageTimeDisplay }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -989,17 +1133,17 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <div class="flex flex-wrap items-center gap-4">
+          <div class="flex flex-wrap  gap-4 md:justify-start  justify-center ">
             <button
               type="submit"
-              class="inline-flex items-center justify-center rounded-full bg-[#096b9f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-500"
+              class=" items-center justify-center rounded-full bg-[#096b9f] px-6 py-3 text-sm font-semibold uppercase tracking-[3px]  text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-500"
               :disabled="submitting"
             >
               {{ submitting ? 'Placing order...' : 'Place order' }}
             </button>
             <RouterLink
               to="/services"
-              class="inline-flex items-center justify-center rounded-full border border-slate-700 px-6 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-slate-700 transition hover:border-slate-500 hover:text-slate-900"
+              class=" items-center justify-center rounded-full border border-red-500 bg-red-400 px-6 py-3 text-sm font-semibold uppercase  tracking-[3px] text-white transition"
             >
               Cancel
             </RouterLink>
@@ -1009,4 +1153,3 @@ onBeforeUnmount(() => {
     </section>
   </div>
 </template>
-
