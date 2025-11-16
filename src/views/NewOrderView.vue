@@ -987,11 +987,11 @@ onBeforeUnmount(() => {
           <p class="mt-4 text-sm text-slate-600">{{ service.name }}</p>
           <dl class="mt-6 grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
-              <dt class="text-[11px] uppercase tracking-[0.35em] text-slate-500">Platform</dt>
+              <dt class="text-[11px] uppercase  text-slate-500">Platform</dt>
               <dd class="mt-2 text-lg font-semibold text-slate-900">{{ service.mainCategory.label }}</dd>
             </div>
             <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
-              <dt class="text-[11px] uppercase tracking-[0.35em] text-slate-500">Category</dt>
+              <dt class="text-[11px] uppercase  text-slate-500">Category</dt>
               <dd class="mt-2 text-lg font-semibold text-slate-900">{{ service.category.label }}</dd>
             </div>
           </dl>
@@ -1002,7 +1002,7 @@ onBeforeUnmount(() => {
           class="rounded-[2.5rem] border border-slate-900/60 bg-slate-50/80 p-8 text-sm text-slate-700 shadow-inner shadow-white/40"
         >
           <div v-if="parsedDescription.bullets.length">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Description</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">Description</p>
             <ul class="mt-4 space-y-2 leading-relaxed">
               <li
                 v-for="(line, index) in parsedDescription.bullets"
@@ -1015,7 +1015,7 @@ onBeforeUnmount(() => {
             </ul>
           </div>
           <div v-if="parsedDescription.notes.length" class="mt-6 border-t border-white/40 pt-6">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Notes</p>
+            <p class="text-xs font-semibold uppercase  text-slate-500">Notes</p>
             <ul class="mt-4 space-y-2 leading-relaxed">
               <li
                 v-for="(line, index) in parsedDescription.notes"
@@ -1056,25 +1056,33 @@ onBeforeUnmount(() => {
                   class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
                 />
                 <span class="text-xs text-slate-500">Minimum of 1. Adjust to match the size of your order.</span>
-                <div
-                  v-if="averageTimeDisplay"
-                  class="flex items-center gap-2 rounded-xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-4 text-xs font-semibold text-[#0c86c3]"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4 flex-shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 7v5l3 2" />
-                  </svg>
-                  <span>Average time {{ averageTimeDisplay }}</span>
+                <div v-if="averageTimeDisplay" class="mt-3 flex flex-col gap-2">
+                  <span class="text-xs font-semibold uppercase text-slate-900">Average time</span>
+                  <div class="relative">
+                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0c86c3]">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="9.25" />
+                        <path d="M12 7.25v4.75l3 2" />
+                      </svg>
+                    </span>
+                    <input
+                      :value="averageTimeDisplay"
+                      type="text"
+                      readonly
+                      class="w-full cursor-default rounded-2xl border border-black  py-3 pl-10 pr-3 text-sm font-semibold text-[#0c86c3] placeholder:text-[#0c86c3]/70 focus:outline-none"
+                      aria-label="Average time"
+                    />
+                  </div>
                 </div>
                 <span v-if="quantityError" class="text-xs text-red-300">{{ quantityError }}</span>
               </label>
@@ -1084,13 +1092,13 @@ onBeforeUnmount(() => {
           <div class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3] ">
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p class="text-[11px] uppercase tracking-[0.35em] text-[#0c86c3]">Estimated total</p>
+                <p class="text-[11px] uppercase  text-[#0c86c3]">Estimated total</p>
                 <p class="mt-2 text-2xl font-semibold text-slate-900">{{ totalDisplay }}</p>
               </div>
               <div >
-                <p class="text-[11px] uppercase tracking-[0.35em] text-[#0c86c3]">Quantity</p>
+                <p class="text-[11px] uppercase  text-[#0c86c3]">Quantity</p>
                 <p class="mt-2 text-2xl font-semibold text-slate-900">{{ normalizedQuantity }}</p>
-                <div
+                <!-- <div
                   v-if="averageTimeDisplay"
                   class="mt-2 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#0c86c3]"
                 >
@@ -1109,7 +1117,7 @@ onBeforeUnmount(() => {
                     <path d="M12 8v4l2.5 1.5" />
                   </svg>
                   <span>Avg {{ averageTimeDisplay }}</span>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>

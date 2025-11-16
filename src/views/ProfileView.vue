@@ -59,10 +59,10 @@ watch(
     >
       <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#23bdee]">Signed in as</p>
+          <p class="text-xs font-semibold uppercase  text-[#23bdee]">Signed in as</p>
           <p class="mt-3 text-xl font-semibold text-slate-900">{{ accountName }}</p>
           <p class="mt-1 text-sm text-slate-500">{{ accountEmail }}</p>
-          <p class="mt-2 text-xs uppercase tracking-[0.3em] text-slate-900">
+          <p class="mt-2 text-xs uppercase  text-slate-900">
             Session expires: <span class="text-slate-600">{{ expiresAtLabel }}</span>
           </p>
         </div>
