@@ -388,7 +388,12 @@ onBeforeUnmount(() => {
                   href="https://t.me/c4techhub"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex items-center gap-3 rounded-2xl  px-5 py-4 text-slate-700 transition hover:border-[#0c86c3] hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3] focus:border-[#0c86c3]"
+                  :class="[
+                  'flex items-center gap-2 rounded-2xl px-5 py-4 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
+                  isActive(link)
+                    ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f]'
+                    : 'border-transparent hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f]',
+                ]"
                   @click="closeMobileNav"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
@@ -398,7 +403,12 @@ onBeforeUnmount(() => {
                 </a>
                 <RouterLink
                   to="/faq"
-                  class="flex items-center gap-3 rounded-2xl  px-5 py-4 text-slate-700 transition hover:border-[#0c86c3] hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3] focus:border-[#0c86c3]"
+                  :class="[
+                  'flex items-center gap-2 rounded-2xl px-5 py-4 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
+                  isActive(link)
+                    ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f]'
+                    : 'border-transparent hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f]',
+                ]"
                   @click="closeMobileNav"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
