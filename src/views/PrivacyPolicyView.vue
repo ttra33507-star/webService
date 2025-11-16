@@ -1,9 +1,9 @@
 <template>
-  <main class="min-h-screen text-[#1eafdb] bg-white">
+  <main class="min-h-screen text-slate-900 bg-white">
     <section class="max-w-4xl mx-auto px-6 py-16">
       <h1 class="text-4xl font-bold mb-8">Privacy Policy</h1>
 
-      <div class="space-y-8 text-lg leading-relaxed text-[#1eafdb]/80 ">
+      <div class="space-y-8 text-lg leading-relaxed text-slate-800"> 
         <section>
           <h2 class="text-2xl font-semibold mb-2">1. Information We Collect</h2>
           <p>
@@ -44,7 +44,7 @@
           <h2 class="text-2xl font-semibold mb-2">5. Contact Us</h2>
           <p>
             If you have any questions about this Privacy Policy, please contact us at
-            <span class="font-medium">support@farmreel.com</span>.
+            <span class="font-medium">support@c4techhub.com</span>.
           </p>
         </section>
       </div>

@@ -52,11 +52,11 @@ const toggle = (index: number) => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-white text-[#096b9f]">
+  <main class="min-h-screen bg-white text-slate-900">
     <section class="max-w-4xl mx-auto px-6 py-16">
       <h1 class="text-4xl font-bold mb-8">FAQ</h1>
 
-      <div class="bg-white/60 rounded-2xl shadow-xl border text-[#096b9f]">
+      <div class="bg-white/60 rounded-2xl shadow-xl border text-slate-800">
         <ul class="divide-y text-slate-900">
           <li
             v-for="(item, index) in faqs"
@@ -70,7 +70,7 @@ const toggle = (index: number) => {
             >
               <span
                 class="font-semibold text-lg"
-                :class="openIndex === index ? 'text-[#096b9f]' : 'text-[#096b9f]/70'"
+                :class="openIndex === index ? 'text-black' : 'text-black/70'"
               >
                 {{ item.question }}
               </span>
@@ -82,7 +82,7 @@ const toggle = (index: number) => {
             <transition name="fade">
               <div
                 v-if="openIndex === index"
-                class="pb-5 text-[#096b9f]/50 text-base leading-relaxed"
+                class="pb-5 text-black/50 text-base leading-relaxed"
               >
                 {{ item.answer }}
               </div>

@@ -59,7 +59,6 @@ const router = createRouter({
       { path: '/', name: 'home', component: () => import('../views/HomeView.vue') },
       { path: '/plans', name: 'plans', component: () => import('../views/PricingView.vue') },
       { path: '/services', name: 'services', component: () => import('../views/ServicesView.vue') },
-      { path: '/contact', name: 'contact', component: () => import('../views/ContactView.vue') },
       { path: '/cart', name: 'cart', component: () => import('../views/CartView.vue') },
       { path: '/signin', name: 'login', component: () => import('../views/LoginView.vue') },
       { path: '/signup', name: 'signup', component: () => import('../views/SignupView.vue') },

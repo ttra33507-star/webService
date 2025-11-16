@@ -81,7 +81,7 @@ function getLegalLink(label: string) {
       </div>
       <div>
         <p class="mt-8  text-sm text-slate-500">
-          © 2024 C4TECHHUB. All rights reserved.
+          © 2025 C4TECHHUB. All rights reserved.
         </p>
       </div>
     </div>
