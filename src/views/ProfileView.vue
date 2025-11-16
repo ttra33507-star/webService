@@ -141,7 +141,7 @@ watch(
     >
       <p class="text-sm font-medium">
         You need to sign in to view your account. Please
-        <RouterLink to="/login" class="text-[#23bdee] underline transition hover:text-[#67d1ff]">
+        <RouterLink to="/signin" class="text-[#23bdee] underline transition hover:text-[#67d1ff]">
           continue to login
         </RouterLink>
         first.

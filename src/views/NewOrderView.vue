@@ -92,7 +92,6 @@ const formatCurrency = (amount: number | null): string => {
   return symbol ? `${symbol}${formatted}` : `${formatted} ${currency}`;
 };
 
-const unitPriceDisplay = computed(() => formatCurrency(unitPriceValue.value));
 const totalDisplay = computed(() => formatCurrency(estimateTotal.value));
 
 const sanitizeIdentifier = (value: string) => value.replace(/[^\w-]/g, '');
