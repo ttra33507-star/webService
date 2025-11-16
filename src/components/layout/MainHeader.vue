@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"
-          class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-black uppercase  text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
+          class="inline-flex items-center rounded-full border border-[#096b9f] px-4 py-2 text-xs font-black uppercase  text-[#096b9f] transition hover:border-[#096b9f] "
         >
           Sign in Accounts
         </RouterLink>
