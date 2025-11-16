@@ -61,7 +61,8 @@ const router = createRouter({
       { path: '/services', name: 'services', component: () => import('../views/ServicesView.vue') },
       { path: '/contact', name: 'contact', component: () => import('../views/ContactView.vue') },
       { path: '/cart', name: 'cart', component: () => import('../views/CartView.vue') },
-      { path: '/login', name: 'login', component: () => import('../views/LoginView.vue') },
+      { path: '/signin', name: 'login', component: () => import('../views/LoginView.vue') },
+      { path: '/signup', name: 'signup', component: () => import('../views/SignupView.vue') },
       { path: '/account', name: 'account', component: () => import('../views/ProfileView.vue') },
       {
         path: '/services/:serviceId/order',

@@ -58,7 +58,7 @@ const toggleProfileDropdown = () => {
 
 const redirectToLogin = (redirectPath?: string) => {
   const target = redirectPath && typeof redirectPath === 'string' ? redirectPath : route.fullPath || '/';
-  router.push({ path: '/login', query: { redirect: target } });
+  router.push({ path: '/signin', query: { redirect: target } });
 };
 
 const handleSignOut = () => {
@@ -84,7 +84,7 @@ const handleDashboardRedirect = async () => {
     return;
   }
   if (!isAuthenticated.value) {
-    router.push({ path: '/login', query: { redirect: '/' } });
+    router.push({ path: '/signin', query: { redirect: '/' } });
     return;
   }
 
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
       <div class="hidden items-center md:flex">
         <RouterLink
           v-if="!isAuthenticated"
-          to="/login"
+          to="/signin"
           class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
         >
           Sign in Accounts
@@ -341,7 +341,7 @@ onBeforeUnmount(() => {
           </nav>
           <RouterLink
             v-if="!isAuthenticated"
-            to="/login"
+            to="/signin"
             class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
             @click="closeMobileNav"
           >
