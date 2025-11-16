@@ -287,13 +287,8 @@ onBeforeUnmount(() => {
       <div class="hidden items-center md:flex">
         <RouterLink
           v-if="!isAuthenticated"
-<<<<<<< HEAD
           to="/login"
           class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-black uppercase  text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
-=======
-          to="/signin"
-          class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
->>>>>>> main
         >
           Sign in Accounts
         </RouterLink>
@@ -456,13 +451,8 @@ onBeforeUnmount(() => {
           </nav>
           <RouterLink
             v-if="!isAuthenticated"
-<<<<<<< HEAD
             to="/login"
             class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-black uppercase  text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
-=======
-            to="/signin"
-            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
->>>>>>> main
             @click="closeMobileNav"
           >
             Sign in Accounts
