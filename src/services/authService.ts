@@ -197,28 +197,27 @@ const extractErrorMessage = (error: unknown, fallback: string) => {
 };
 
 export const requestPasswordToken = async (username: string, password: string): Promise<TokenResponse> => {
-  const { clientId, clientSecret, scope } = getClientCredentials();
-
+  // Use server-side signin endpoint which enforces email confirmation.
   try {
-    const form = new URLSearchParams();
-    form.append('grant_type', 'password');
-    form.append('client_id', clientId);
-    form.append('client_secret', clientSecret);
-    form.append('username', username);
-    form.append('password', password);
-    form.append('scope', scope);
-
-    const { data } = await authClient.post<TokenResponse>('/oauth/token', form, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const { data } = await authClient.post('/api/auth/signin', {
+      email: username,
+      password,
     });
 
-    if (!data || typeof data.access_token !== 'string' || !data.access_token.trim()) {
+    // Normalize response to TokenResponse shape expected by callers
+    const tokenResponse: TokenResponse = {
+      access_token: data.token ?? data.access_token ?? '',
+      token_type: data.token_type ?? 'Bearer',
+      expires_in: data.expires_in ?? null,
+      refresh_token: data.refresh_token ?? null,
+      ...data,
+    } as TokenResponse;
+
+    if (!tokenResponse || typeof tokenResponse.access_token !== 'string' || !tokenResponse.access_token.trim()) {
       throw new Error('Authentication response did not include an access token.');
     }
 
-    return data;
+    return tokenResponse;
   } catch (error) {
     throw new Error(extractErrorMessage(error, 'Unable to sign in with the provided credentials.'));
   }
@@ -239,6 +238,17 @@ export const fetchUserProfile = async (accessToken: string): Promise<UserProfile
     return data;
   } catch (error) {
     throw new Error(extractErrorMessage(error, 'Unable to load account information.'));
+  }
+};
+
+export const register = async (payload: { name: string; email: string; password: string; password_confirmation?: string }) => {
+  try {
+    const { data } = await authClient.post('/api/register', payload, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error, 'Unable to register the account.'));
   }
 };
 
