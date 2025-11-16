@@ -107,13 +107,13 @@ onMounted(() => {
         <div class="flex-1 space-y-6">
           <p class="text-xs font-semibold uppercase  text-[#0c86c3]">Services Catalog</p>
           <div>
-            <h1 class="font-display text-4xl font-semibold text-slate-900 sm:text-5xl">Automation services built for scale.</h1>
+            <h1 class="font-display text-3xl font-semibold text-slate-900 sm:text-5xl">Modern Tools & Services Hub</h1>
             <p class="mt-4 text-lg text-slate-600 sm:text-xl">
-              Browse every ready-to-deploy module spanning Facebook, Telegram, TikTok, and more. Pricing is transparent and every offer can be bundled into your next checkout.
+              C4TechHub brings all your digital services and smart tools together in one place. Work faster, manage everything easily, and access powerful features for automation, growth, and daily tasks without any complexity
             </p>
           </div>
         </div>
-        <div class="flex w-full flex-1 flex-col gap-4 rounded-[2.5rem] border border-slate-800/70 bg-white p-6 shadow-[0_45px_120px_rgba(4,12,32,0.85)]">
+        <div class="flex w-full max-w-[350px] flex-col gap-4 rounded-[2.5rem] border border-slate-800/70 bg-white p-6 shadow-2xl lg:w-[350px]">
           <div class="flex items-center justify-between rounded-3xl border border-slate-800/80 bg-white/60 p-4">
             <div>
               <p class="text-xs font-semibold uppercase  text-slate-500">Services</p>
@@ -209,9 +209,6 @@ onMounted(() => {
                       {{ service.mainCategory.label }} at {{ service.category.label }}
                     </p>
                   </div>
-                  <div class="flex items-center justify-between text-sm text-slate-600">
-                    <p>Default qty {{ service.defaultQuantity }} · {{ service.price.formatted }}</p>
-                  </div>
                 </div>
                 <div
                   class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
@@ -221,7 +218,6 @@ onMounted(() => {
                   </span>
                   <div class="space-y-2">
                     <h3 class="text-xl font-semibold text-slate-900">{{ service.label }}</h3>
-                    <p class="text-sm font-semibold text-[#0c86c3]">{{ service.price.formatted }}</p>
                   </div>
                   <RouterLink
                     :to="{ name: 'service-order', params: { serviceId: service.id } }"

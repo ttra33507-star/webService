@@ -24,8 +24,12 @@ const navLinks: NavLink[] = [
 
 const isMobileNavOpen = ref(false);
 const isProfileDropdownOpen = ref(false);
+const isContactDropdownOpen = ref(false);
+const isMobileContactOpen = ref(false);
 const profileMenuRef = ref<HTMLElement | null>(null);
 const profileButtonRef = ref<HTMLElement | null>(null);
+const contactMenuRef = ref<HTMLElement | null>(null);
+const contactButtonRef = ref<HTMLElement | null>(null);
 const { isAuthenticated, signOut, authState } = useAuth();
 let ignoreNextOutsideClick = false;
 
@@ -38,19 +42,37 @@ const isActive = (link: NavLink) => {
 
 const closeMobileNav = () => {
   isMobileNavOpen.value = false;
+  isMobileContactOpen.value = false;
+  closeContactDropdown();
 };
 
 const closeProfileDropdown = () => {
   isProfileDropdownOpen.value = false;
 };
 
+const closeContactDropdown = () => {
+  isContactDropdownOpen.value = false;
+};
+
 const toggleMobileNav = () => {
   isMobileNavOpen.value = !isMobileNavOpen.value;
+  if (isMobileNavOpen.value) {
+    closeContactDropdown();
+    isMobileContactOpen.value = false;
+  }
 };
 
 const toggleProfileDropdown = () => {
   const willOpen = !isProfileDropdownOpen.value;
   isProfileDropdownOpen.value = willOpen;
+  if (willOpen) {
+    ignoreNextOutsideClick = true;
+  }
+};
+
+const toggleContactDropdown = () => {
+  const willOpen = !isContactDropdownOpen.value;
+  isContactDropdownOpen.value = willOpen;
   if (willOpen) {
     ignoreNextOutsideClick = true;
   }
@@ -115,6 +137,7 @@ const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     closeMobileNav();
     closeProfileDropdown();
+    closeContactDropdown();
   }
 };
 
@@ -127,6 +150,12 @@ const handleClickOutside = (event: MouseEvent) => {
     ignoreNextOutsideClick = false;
     return;
   }
+  if (contactButtonRef.value?.contains(target)) {
+    return;
+  }
+  if (contactMenuRef.value?.contains(target)) {
+    return;
+  }
   if (profileButtonRef.value?.contains(target)) {
     return;
   }
@@ -134,6 +163,7 @@ const handleClickOutside = (event: MouseEvent) => {
     return;
   }
   closeProfileDropdown();
+  closeContactDropdown();
 };
 
 watch(isMobileNavOpen, (open) => {
@@ -145,6 +175,7 @@ watch(
   () => {
     closeMobileNav();
     closeProfileDropdown();
+    closeContactDropdown();
   },
 );
 
@@ -168,17 +199,62 @@ onBeforeUnmount(() => {
 
 <template>
   <header
-    class="sticky top-0 z-40 border-b border-white bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgba(15,23,42,0.08)] supports-[backdrop-filter]:bg-white/70"
+    class="sticky top-0 z-40 border-b border-white bg-white/80 font-black backdrop-blur-md shadow-[0_8px_30px_rgba(15,23,42,0.08)] supports-[backdrop-filter]:bg-white/70"
   >
     <nav class="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-5 sm:px-6 lg:px-8">
       <RouterLink to="/" class="flex items-center gap-3">
         <img src="/images/logo C4 TECH HUB 1.png" alt="C4 Teach Hub logo" class="h-[45px] w-[180px] rounded-[3px] p-[1px] object-cover shadow" />
       </RouterLink>
       <div class="hidden flex-1 items-center justify-center md:flex">
-        <div class="flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-sm font-medium text-slate-600 shadow-inner shadow-[#096b9f]/10">
+        <div class="flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-sm font-black text-slate-600 shadow-inner shadow-[#096b9f]/10">
           <template v-for="link in navLinks" :key="link.label">
+            <div v-if="link.target === 'route' && link.to === '/contact'" class="relative">
+              <button
+                ref="contactButtonRef"
+                type="button"
+                class="rounded-full px-4 py-2 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
+                :class="
+                  isContactDropdownOpen
+                    ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f] shadow-sm shadow-[#096b9f]/20'
+                    : 'border-transparent text-slate-600 hover:text-[#096b9f] hover:border-[#0c86c3]/40 hover:bg-white'
+                "
+                aria-haspopup="menu"
+                :aria-expanded="isContactDropdownOpen"
+                @click.stop="toggleContactDropdown"
+              >
+                Contact
+              </button>
+              <div
+                v-if="isContactDropdownOpen"
+                ref="contactMenuRef"
+                class="absolute left-0 z-30 mt-2 w-56 rounded-2xl border border-slate-300 bg-white text-slate-800 shadow-xl"
+              >
+                <a
+                  href="https://t.me/c4techhub"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50"
+                  @click="closeContactDropdown"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 12 17-7-4 14-4-6-5 3z" />
+                  </svg>
+                  Telegram Support
+                </a>
+                <RouterLink
+                  to="/faq"
+                  class="flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50"
+                  @click="closeContactDropdown"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                  </svg>
+                  FAQ
+                </RouterLink>
+              </div>
+            </div>
             <RouterLink
-              v-if="link.target === 'route'"
+              v-else-if="link.target === 'route'"
               :to="link.to"
               :class="[
                 'rounded-full px-4 py-2 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
@@ -212,7 +288,7 @@ onBeforeUnmount(() => {
         <RouterLink
           v-if="!isAuthenticated"
           to="/login"
-          class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
+          class="inline-flex items-center rounded-full border border-[#1eafdb]/40 px-4 py-2 text-xs font-black uppercase  text-[#1eafdb] transition hover:border-[#1eafdb] hover:text-slate-900"
         >
           Sign in Accounts
         </RouterLink>
@@ -220,13 +296,13 @@ onBeforeUnmount(() => {
           <button
             ref="profileButtonRef"
             type="button"
-            class="inline-flex items-center gap-3 rounded-full border border-slate-700 bg-white/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700 transition hover:border-[#23bdee] hover:text-slate-900"
+            class="inline-flex items-center gap-3 rounded-full border border-slate-700 bg-white/60 px-3 py-2 text-xs font-black uppercase  text-slate-700 transition hover:border-[#23bdee] hover:text-slate-900"
             :aria-expanded="isProfileDropdownOpen"
             aria-haspopup="menu"
             @click.stop="toggleProfileDropdown"
           >
             <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-[#23bdee]"
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-black text-[#23bdee]"
             >
               AC
             </span>
@@ -249,7 +325,7 @@ onBeforeUnmount(() => {
           >
             <RouterLink
               to="/account"
-              class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white/60 hover:text-slate-900"
+              class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-white/60 hover:text-slate-900"
               @click="closeProfileDropdown"
             >
               Profile
@@ -259,7 +335,7 @@ onBeforeUnmount(() => {
             </RouterLink>
             <button
               type="button"
-              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold bg-red-500 text-white transition hover:bg-red-500/10 hover:text-slate-900"
+              class="mt-2 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-black bg-red-500 text-white transition hover:bg-red-500/10 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out
@@ -293,7 +369,7 @@ onBeforeUnmount(() => {
           class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-white/95 p-8 text-slate-900 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
         >
           <div class="mb-8 flex items-center justify-between">
-            <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Menu</p>
+            <p class="text-xs font-black uppercase  text-[#0c86c3]">Menu</p>
             <button
               type="button"
               class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:border-slate-500 hover:text-slate-900"
@@ -305,10 +381,34 @@ onBeforeUnmount(() => {
               </svg>
             </button>
           </div>
-          <nav class="space-y-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-700">
+          <nav class="space-y-3 text-sm font-black uppercase  text-slate-700">
             <template v-for="link in navLinks" :key="`mobile-${link.label}`">
+              <div v-if="link.target === 'route' && link.to === '/contact'" class="space-y-[3px]">
+                <a
+                  href="https://t.me/c4techhub"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-3 rounded-2xl  px-5 py-4 text-slate-700 transition hover:border-[#0c86c3] hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3] focus:border-[#0c86c3]"
+                  @click="closeMobileNav"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 12 17-7-4 14-4-6-5 3z" />
+                  </svg>
+                  <span class="font-black uppercase">Telegram Support</span>
+                </a>
+                <RouterLink
+                  to="/faq"
+                  class="flex items-center gap-3 rounded-2xl  px-5 py-4 text-slate-700 transition hover:border-[#0c86c3] hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3] focus:border-[#0c86c3]"
+                  @click="closeMobileNav"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                  </svg>
+                  <span class="font-black uppercase">FAQ</span>
+                </RouterLink>
+              </div>
               <RouterLink
-                v-if="link.target === 'route'"
+                v-else-if="link.target === 'route'"
                 :to="link.to"
                 :class="[
                   'block rounded-2xl px-5 py-4 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
@@ -331,7 +431,7 @@ onBeforeUnmount(() => {
             </template>
             <button
               type="button"
-              class="block w-full rounded-2xl px-5 py-4 border border-transparent text-left transition hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
+              class="block w-full  rounded-2xl px-5 py-4 border border-transparent text-left transition hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
               :class="dashboardRedirecting ? 'cursor-not-allowed opacity-70' : ''"
               :disabled="dashboardRedirecting"
               @click="() => { closeMobileNav(); handleDashboardRedirect(); }"
@@ -342,7 +442,7 @@ onBeforeUnmount(() => {
           <RouterLink
             v-if="!isAuthenticated"
             to="/login"
-            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
+            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-black uppercase  text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
             @click="closeMobileNav"
           >
             Sign in Accounts
@@ -350,14 +450,14 @@ onBeforeUnmount(() => {
           <div v-else class="mt-10 space-y-3">
             <RouterLink
               to="/account"
-              class="flex w-full justify-center rounded-full  px-5 py-3 text-[14px] font-semibold uppercase  text-white bg-[#279dc2] transition hover:border-[#23bdee] hover:text-slate-900"
+              class="flex w-full justify-center rounded-full  px-5 py-3 text-[14px] font-black uppercase  text-white bg-[#279dc2] transition hover:border-[#23bdee] hover:text-slate-900"
               @click="closeMobileNav"
             >
               Accounts Profile
             </RouterLink>
             <button
               type="button"
-              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-[14px] font-semibold uppercase  text-white bg-red-500 transition hover:border-red-300 hover:text-slate-900"
+              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-[14px] font-black uppercase  text-white bg-red-500 transition hover:border-red-300 hover:text-slate-900"
               @click="handleSignOut"
             >
               Sign out

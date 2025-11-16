@@ -47,9 +47,9 @@ const heroSlides: HeroSlide[] = [
     badgeLabel: 'Managed Checkout',
     badgeClasses: 'border-[#096b9f]/35 bg-white/70 text-[#096b9f]',
     gradient: 'from-[#096b9f]/20 via-slate-950/80 to-slate-950',
-    title: 'Creative Facebook automation tools.',
+    title: 'Fast Follower Growth Solutions',
     description:
-      'Create and launch Facebook automation workflows with smart messaging, audience syncing, and creative monitoring in one place.',
+      'Increase your page followers with C4TechHub’s fast, reliable, and modern growth services',
     highlights: [
       {
         text: 'Go live in under 48 hours',
@@ -72,9 +72,9 @@ const heroSlides: HeroSlide[] = [
     badgeLabel: 'Commerce Playbooks',
     badgeClasses: 'border-blue-400/30 bg-white/70 text-blue-200',
     gradient: 'from-blue-500/15 via-slate-950/80 to-slate-950',
-    title: 'Prebuilt campaigns that convert on autopilot.',
+    title: 'C4 Facebook Automation Hub',
     description:
-      'Launch seasonal offers, retarget warm prospects, and run social commerce through automation built for Southeast Asia.',
+      'C4 Facebook Automation Hub gives you smart tools to manage your page faster and more easily. Handle tasks like comments and page actions in one place, reduce manual work, and keep everything running smoothly',
     highlights: [
       {
         text: 'Templates ready to deploy',
@@ -97,9 +97,34 @@ const heroSlides: HeroSlide[] = [
     badgeLabel: 'Real-time Insights',
     badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
     gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: 'Monitor every transaction with mission control.',
+    title: 'C4 Telegram Automation Hub',
     description:
-      'Keep finance and ops aligned with live dashboards, anomaly alerts, and drill-down reporting across all channels.',
+      'C4 Telegram Automation Hub helps you manage your Telegram audience more easily. Add members safely, send messages automatically, and keep your channels active with simple, smart automation tools',
+    highlights: [
+      {
+        text: 'Revenue pulse & trendlines',
+        classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
+        icon: 'trend',
+      },
+      {
+        text: 'Export-ready reports',
+        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
+      },
+    ],
+    image: {
+      src: '/images/C4-Report-Facebook.png',
+      alt: 'Insights dashboard preview',
+      shadow: 'shadow-purple-500/10',
+    },
+  },
+  {
+    id: 'real-time-insights',
+    badgeLabel: 'Real-time Insights',
+    badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
+    gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
+    title: 'C4 TikTok Video Downloader',
+    description:
+      'C4 Download TikTok videos quickly and in high quality with C4TechHub. Just paste the link and save your videos without watermarks, fast and easy',
     highlights: [
       {
         text: 'Revenue pulse & trendlines',
@@ -248,16 +273,16 @@ onBeforeUnmount(() => {
 <template>
   <div>
     <section class="border-y border-white bg-white/60">
-      <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-          <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase  text-[#096b9f]">
+          <!-- <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase  text-[#096b9f]">
             Launch faster
-          </span>
-          <h1 class="mt-6 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl font-display">
-            Everything your brand needs to sell with confidence.
+          </span> -->
+          <h1 class="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl font-display">
+            Modern Solutions for Modern Work
           </h1>
-          <p class="mt-4 text-lg leading-relaxed text-slate-600">
-            Showcase products, automate fulfillment, and delight customers from a single dashboard. Explore how C4 Teach Hub streamlines every touchpoint of your payments journey.
+          <p class="mt-4 text-lg font-medium leading-relaxed text-slate-600">
+            C4TechHub delivers modern services and smart digital tools designed to make your work faster and easier. 
           </p>
         </div>
         <div
@@ -277,15 +302,15 @@ onBeforeUnmount(() => {
               <div class="flex flex-col justify-between gap-6">
                 <div class="space-y-5">
                   <span
-                    class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase"
+                    class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-medium uppercase"
                     :class="slide.badgeClasses"
                   >
                     {{ slide.badgeLabel }}
                   </span>
-                  <h2 class="text-3xl font-semibold text-slate-900 sm:text-4xl font-display">
+                  <h2 class="text-3xl font-black text-slate-900 sm:text-4xl font-display">
                     {{ slide.title }}
                   </h2>
-                  <p class="text-base text-slate-600 sm:text-lg">
+                  <p class="text-base font-medium text-slate-600 sm:text-lg">
                     {{ slide.description }}
                   </p>
                 </div>
@@ -345,10 +370,9 @@ onBeforeUnmount(() => {
       <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h2 class="text-3xl font-semibold text-slate-900 font-display">Bestsellers</h2>
-            <p class="mt-2 text-sm text-slate-900">Curated equipment that teams keep coming back for.</p>
+            <h2 class="text-3xl font-black text-slate-900 font-display">Boost Followers</h2>
           </div>
-          <RouterLink to="/services" class="inline-flex items-center text-sm font-semibold text-[#0c86c3] transition hover:text-[#096b9f]">
+          <RouterLink to="/services" class="inline-flex items-center text-sm font-black text-[#0c86c3] transition hover:text-[#096b9f]">
             View the catalog
             <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h9.586l-3.293-3.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clip-rule="evenodd" />
@@ -359,12 +383,12 @@ onBeforeUnmount(() => {
           <div v-if="servicesError" class="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-100">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p class="text-base font-semibold text-slate-900">Unable to load featured services.</p>
-                <p class="text-sm text-red-100/80">{{ servicesError }}</p>
+                <p class="text-base font-black text-slate-900">Unable to load featured services.</p>
+                <p class="text-sm font-medium text-red-100/80">{{ servicesError }}</p>
               </div>
               <button
                 type="button"
-                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-red-100 transition hover:border-red-300 hover:text-slate-900"
+                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-black uppercase tracking-[0.35em] text-red-100 transition hover:border-red-300 hover:text-slate-900"
                 @click="retryFeaturedServices"
               >
                 Retry
@@ -383,11 +407,11 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div v-else-if="!hasFeaturedServices" class="rounded-2xl border border-slate-900/80 bg-white/40 p-8 text-center text-slate-600">
-            <p class="text-base font-semibold text-slate-900">Services are syncing.</p>
-            <p class="mt-2 text-sm text-slate-900">Visit the catalog to browse every offer from the API.</p>
+            <p class="text-base font-black text-slate-900">Services are syncing.</p>
+            <p class="mt-2 text-sm font-medium text-slate-900">Visit the catalog to browse every offer from the API.</p>
             <RouterLink
               to="/services"
-              class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
+              class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-xs font-black uppercase tracking-[0.35em] text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
             >
               Go to services
             </RouterLink>
@@ -409,8 +433,8 @@ onBeforeUnmount(() => {
               </div>
               <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
                 <div>
-                  <h3 class="text-lg font-semibold text-slate-900">{{ card.title }}</h3>
-                  <p class="mt-2 text-sm text-slate-900">
+                  <h3 class="text-lg font-black text-slate-900">{{ card.title }}</h3>
+                  <p class="mt-2 text-sm font-medium text-slate-900">
                     {{ card.tagline }}
                   </p>
                 </div>
@@ -418,14 +442,11 @@ onBeforeUnmount(() => {
               <div
                 class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
               >
-                <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase text-[#096b9f]">
+                <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-medium uppercase text-[#096b9f]">
                   Quick view
                 </span>
                 <div class="space-y-2">
-                  <h3 class="text-xl font-semibold text-slate-900">{{ card.title }}</h3>
-                  <p class="text-sm leading-relaxed text-slate-600">
-                    {{ card.description }}
-                  </p>
+                  <h3 class="text-xl font-black text-slate-900">{{ card.title }}</h3>
                 </div>
                 <RouterLink
                   :to="{ name: 'service-order', params: { serviceId: card.id } }"
