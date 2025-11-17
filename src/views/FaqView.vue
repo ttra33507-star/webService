@@ -15,7 +15,7 @@ const faqs = ref<FaqItem[]>([
   {
     question: 'How do I get started with C4 TechHub?',
     answer:
-      'Create an account, choose a plan, and follow the onboarding steps inside your dashboard to connect your data and start using the features.',
+      'Create an account, choose a service,  and follow the onboarding steps inside your dashboard to connect your data and start using it.',
   },
   {
     question: 'What payment methods do you accept?',
