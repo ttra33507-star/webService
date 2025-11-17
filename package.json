@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "build:legacy": "npm run build && node scripts/flatten-css.js",
     "build-only": "vite build",
     "preview": "vite preview",
     "build-docker": "docker build -t vatsrey/c4techhub_web:v1.0 .",
