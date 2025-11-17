@@ -98,7 +98,7 @@ const handleSubmit = async () => {
   <section class="flex min-h-screen items-center justify-center bg-white px-4 py-16 text-slate-900">
     <div class="w-full max-w-md rounded-3xl border border-slate-900/80 bg-white/70 p-8 shadow-2xl">
       <header class="text-center">
-        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#0c86c3]">Account access</p>
+        <p class="text-xs font-semibold uppercase  text-[#0c86c3]">Account access</p>
         <h1 class="mt-3 text-3xl font-semibold text-slate-900">Sign in to continue</h1>
         <p class="mt-3 text-sm text-slate-900">
           Use your account to continue ordering. Your session unlocks checkout flows and saved information.
@@ -128,7 +128,7 @@ const handleSubmit = async () => {
         </label>
         <button
           type="submit"
-          class="w-full rounded-full bg-[#0c86c3] px-5 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-900"
+          class="w-full rounded-full bg-[#0c86c3] px-5 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-900"
           :disabled="isSubmitting"
         >
           {{ isSubmitting ? 'Signing in...' : 'Sign in' }}

@@ -11,8 +11,15 @@ type NavLink =
 const route = useRoute();
 const router = useRouter();
 
+const appendPath = (base: string, path: string) => {
+  const normalizedBase = base.replace(/\/+$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
+};
+
 const portalBaseUrl = getPortalBaseUrl();
 const portalFallbackUrl = portalBaseUrl ? portalBaseUrl.replace(/\/+$/, '') : 'https://apps.c4techhub.com';
+const portalSignupUrl = appendPath(portalBaseUrl || portalFallbackUrl, '/signup');
 const dashboardRedirecting = ref(false);
 
 const navLinks: NavLink[] = [
@@ -93,12 +100,6 @@ const handleSignOut = () => {
 
 const resolvePortalRedirectPath = () => {
   return '/orders';
-};
-
-const appendPath = (base: string, path: string) => {
-  const normalizedBase = base.replace(/\/+$/, '');
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
 };
 
 const handleDashboardRedirect = async () => {
@@ -287,11 +288,20 @@ onBeforeUnmount(() => {
       <div class="hidden items-center md:flex">
         <RouterLink
           v-if="!isAuthenticated"
-          to="/login"
+          :to="{ path: '/signin', query: { redirect: '/' } }"
           class="inline-flex items-center rounded-full border border-[#096b9f] px-4 py-2 text-xs font-black uppercase  text-[#096b9f] transition hover:border-[#096b9f] "
         >
-          Sign in Accounts
+          Login
         </RouterLink>
+        <a
+          v-if="!isAuthenticated"
+          :href="portalSignupUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ml-2 inline-flex items-center rounded-full border border-[#096b9f] bg-[#096b9f] px-4 py-2 text-xs font-black uppercase text-white transition hover:border-[#0c86c3] hover:bg-[#0c86c3]"
+        >
+          Register
+        </a>
         <div v-else class="relative">
           <button
             ref="profileButtonRef"
@@ -451,12 +461,22 @@ onBeforeUnmount(() => {
           </nav>
           <RouterLink
             v-if="!isAuthenticated"
-            to="/login"
-            class="mt-10 flex w-full justify-center rounded-full border border-emerald-400/40 px-5 py-3 text-xs font-black uppercase  text-emerald-200 transition hover:border-emerald-300 hover:text-slate-900"
+            :to="{ path: '/signin', query: { redirect: '/' } }"
+            class="mt-10 flex w-full justify-center rounded-full border border-[#096b9f]/40 px-5 py-3 text-xs font-black uppercase tracking-[2px]  bg-[#096b9f] text-white transition hover:border-[#096b9f]/90"
             @click="closeMobileNav"
           >
-            Sign in Accounts
+            Login
           </RouterLink>
+          <a
+            v-if="!isAuthenticated"
+            :href="portalSignupUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-3 flex w-full justify-center rounded-full border border-[#096b9f] bg-[#096b9f] px-5 py-3 text-xs font-black uppercase tracking-[2px] text-white transition hover:border-[#0c86c3] hover:bg-[#0c86c3]"
+            @click="closeMobileNav"
+          >
+            Register 
+          </a>
           <div v-else class="mt-10 space-y-3">
             <RouterLink
               to="/account"
