@@ -79,8 +79,8 @@ function getLegalLink(label: string) {
           </router-link>
         </article>
       </div>
-      <div>
-        <p class="mt-8  text-sm text-slate-500">
+      <div class=" flex items-center justify-center">
+        <p class="mt-8  text-center text-sm text-slate-500">
           © 2025 C4TECHHUB. All rights reserved.
         </p>
       </div>

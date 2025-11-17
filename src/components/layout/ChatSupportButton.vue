@@ -1,7 +1,7 @@
 <template>
   <a
     href="https://t.me/c4techhub"
-    class="fixed lg:bottom-12 lg:right-56 bottom-12 right-6 inline-flex items-center gap-2 rounded-full bg-[#096b9f] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#096b9f]/30 transition hover:bg-[#0c86c3] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0c86c3]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+    class="fixed lg:bottom-8 lg:right-5 bottom-3 right-2 inline-flex items-center gap-2 rounded-full bg-[#096b9f] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#096b9f]/30 transition hover:bg-[#0c86c3] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0c86c3]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Chat support on Telegram"
