@@ -35,7 +35,7 @@
 
       <p v-if="message" class="mt-5 rounded-xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-3 text-center text-sm text-[#0c86c3]">{{ message }}</p>
 
-      <p v-if="error" class="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">{{ error }}</p>
+      <p v-if="error" class="mt-4 rounded-xl border border-red-500/70 bg-red-500/10 px-4 py-3 text-center text-sm text-red-500">{{ error }}</p>
 
       <button
         type="button"
