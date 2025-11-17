@@ -1,9 +1,6 @@
 import axios, { isAxiosError } from 'axios';
 
 const DEFAULT_AUTH_BASE_URL = 'https://api.c4techhub.com';
-const DEFAULT_CLIENT_ID = '019a33e5-4f58-72d7-9d25-d8862a503dc1';
-const DEFAULT_CLIENT_SECRET = 'En4Kv1y04uZIjt8liBbgw4UaHLV4gp8EY85kw8k8';
-const DEFAULT_SCOPE = '*';
 const DEFAULT_PORTAL_BASE_URL = (() => {
   const fallback = (import.meta.env.VITE_DEFAULT_PORTAL_BASE_URL ?? import.meta.env.VITE_PORTAL_BASE_URL ?? '')
     .toString()
@@ -148,25 +145,6 @@ export interface SsoTicketResponse {
   state?: string | null;
 }
 
-const getClientCredentials = () => {
-  const rawClientId = (import.meta.env.VITE_OAUTH_CLIENT_ID ?? '').toString().trim();
-  const rawClientSecret = (import.meta.env.VITE_OAUTH_CLIENT_SECRET ?? '').toString().trim();
-  const rawScope = (import.meta.env.VITE_OAUTH_SCOPE ?? '').toString().trim();
-
-  const clientId = rawClientId || DEFAULT_CLIENT_ID;
-  const clientSecret = rawClientSecret || DEFAULT_CLIENT_SECRET;
-  const scope = rawScope || DEFAULT_SCOPE;
-
-  if (!clientId || !clientSecret) {
-    throw new Error('OAuth client credentials are not configured. Please set VITE_OAUTH_CLIENT_ID and VITE_OAUTH_CLIENT_SECRET.');
-  }
-
-  if (!rawClientId || !rawClientSecret) {
-    console.warn('[Auth] Falling back to bundled OAuth client credentials. Configure VITE_OAUTH_CLIENT_ID and VITE_OAUTH_CLIENT_SECRET to override.');
-  }
-
-  return { clientId, clientSecret, scope };
-};
 
 const extractErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
