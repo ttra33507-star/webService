@@ -200,7 +200,7 @@ onMounted(() => {
                     :alt="`${service.label} visual`"
                     class="h-full w-full object-cover transition duration-500 group-hover:scale-110 group-focus-within:scale-110"
                   />
-                  <div class="absolute inset-0 bg-white from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
+                  <div class="absolute inset-0  from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
                 </div>
                 <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
                   <div>

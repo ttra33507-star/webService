@@ -62,7 +62,7 @@ const heroSlides: HeroSlide[] = [
       },
     ],
     image: {
-      src: '/images/C4-FB-Station.png',
+      src: '/images/Boostt Follower.jpg',
       alt: 'Managed checkout dashboard preview',
       shadow: 'shadow-[#096b9f]/10',
     },
@@ -87,7 +87,7 @@ const heroSlides: HeroSlide[] = [
       },
     ],
     image: {
-      src: '/images/C4-TG-Station.png',
+      src: '/images/Facebook.jpg',
       alt: 'Automated campaign preview',
       shadow: 'shadow-blue-500/10',
     },
@@ -112,7 +112,7 @@ const heroSlides: HeroSlide[] = [
       },
     ],
     image: {
-      src: '/images/C4-Report-Facebook.png',
+      src: '/images/Telegram.jpg',
       alt: 'Insights dashboard preview',
       shadow: 'shadow-purple-500/10',
     },
@@ -137,7 +137,7 @@ const heroSlides: HeroSlide[] = [
       },
     ],
     image: {
-      src: '/images/C4-Report-Facebook.png',
+      src: '/images/Download.jpg',
       alt: 'Insights dashboard preview',
       shadow: 'shadow-purple-500/10',
     },
@@ -300,14 +300,8 @@ onBeforeUnmount(() => {
               :class="[slide.gradient, index === activeHeroSlide ? 'opacity-100' : 'hidden opacity-0']"
             >
               <div class="flex flex-col justify-between gap-6">
-                <div class="space-y-5">
-                  <span
-                    class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-medium uppercase"
-                    :class="slide.badgeClasses"
-                  >
-                    {{ slide.badgeLabel }}
-                  </span>
-                  <h2 class="text-3xl font-black text-slate-900 sm:text-4xl font-display">
+                <div class="space-y-5 py-5">
+                  <h2 class="text-3xl font-black text-slate-900 sm:text-4xl font-display mt-9">
                     {{ slide.title }}
                   </h2>
                   <p class="text-base font-medium text-slate-600 sm:text-lg">
@@ -429,7 +423,7 @@ onBeforeUnmount(() => {
                   :alt="card.image.alt"
                   class="h-full w-full object-cover transition duration-500 group-hover:scale-110 group-focus-within:scale-110"
                 />
-                <div class="absolute inset-0 bg-white from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
+                <div class="absolute inset-0  from-slate-950 via-slate-950/40 to-transparent opacity-70 transition duration-300 group-hover:opacity-60 group-focus-within:opacity-60" />
               </div>
               <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
                 <div>

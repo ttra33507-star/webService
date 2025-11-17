@@ -36,6 +36,14 @@
       <p v-if="message" class="mt-5 rounded-xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-3 text-center text-sm text-[#0c86c3]">{{ message }}</p>
 
       <p v-if="error" class="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">{{ error }}</p>
+
+      <button
+        type="button"
+        class="mt-6 w-full rounded-full border border-[#0c86c3] px-5 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-[#0c86c3] transition hover:bg-[#0c86c3] hover:text-white"
+        @click="goToSignIn"
+      >
+        Sign in
+      </button>
     </div>
   </section>
 </template>
@@ -54,6 +62,10 @@ const message = ref('')
 const error = ref('')
 
 const router = useRouter()
+
+const goToSignIn = () => {
+  router.push({ path: '/signin', query: { redirect: '/' } })
+}
 
 const handleSubmit = async () => {
   if (isSubmitting.value) return
