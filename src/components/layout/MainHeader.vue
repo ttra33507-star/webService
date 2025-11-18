@@ -21,6 +21,10 @@ const portalBaseUrl = getPortalBaseUrl();
 const portalFallbackUrl = portalBaseUrl ? portalBaseUrl.replace(/\/+$/, '') : 'https://apps.c4techhub.com';
 const portalSignupUrl = appendPath(portalBaseUrl || portalFallbackUrl, '/signup');
 const dashboardRedirecting = ref(false);
+const emailSupportAddress = 'c4techhub.info@gmail.com';
+const showEmailSupportModal = ref(false);
+const copyStatus = ref('');
+let copyStatusTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const navLinks: NavLink[] = [
   { label: 'Home', target: 'route', to: '/' },
@@ -102,6 +106,55 @@ const resolvePortalRedirectPath = () => {
   return '/orders';
 };
 
+const openEmailSupportModal = () => {
+  showEmailSupportModal.value = true;
+  copyStatus.value = '';
+  closeContactDropdown();
+  closeMobileNav();
+};
+
+const closeEmailSupportModal = () => {
+  showEmailSupportModal.value = false;
+  if (copyStatusTimeout) {
+    clearTimeout(copyStatusTimeout);
+    copyStatusTimeout = null;
+  }
+};
+
+const copyEmailSupport = async () => {
+  const email = emailSupportAddress;
+  const setCopied = (message: string) => {
+    copyStatus.value = message;
+    if (copyStatusTimeout) clearTimeout(copyStatusTimeout);
+    copyStatusTimeout = setTimeout(() => {
+      copyStatus.value = '';
+    }, 2000);
+  };
+
+  try {
+    await navigator.clipboard.writeText(email);
+    setCopied('Copied to clipboard');
+    return;
+  } catch {
+    // fall back to execCommand for older browsers
+  }
+
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = email;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    setCopied('Copied to clipboard');
+  } catch {
+    setCopied('Unable to copy automatically');
+  }
+};
+
 const handleDashboardRedirect = async () => {
   if (dashboardRedirecting.value) {
     return;
@@ -139,6 +192,7 @@ const handleEscape = (event: KeyboardEvent) => {
     closeMobileNav();
     closeProfileDropdown();
     closeContactDropdown();
+    closeEmailSupportModal();
   }
 };
 
@@ -177,6 +231,7 @@ watch(
     closeMobileNav();
     closeProfileDropdown();
     closeContactDropdown();
+    closeEmailSupportModal();
   },
 );
 
@@ -242,10 +297,10 @@ onBeforeUnmount(() => {
                   </svg>
                   Telegram Support
                 </a>
-                <a
-                  href="mailto:c4techhub.info@gmail.com"
-                  class="flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50"
-                  @click="closeContactDropdown"
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition hover:bg-slate-50"
+                  @click="openEmailSupportModal"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                     <path
@@ -255,7 +310,7 @@ onBeforeUnmount(() => {
                     />
                   </svg>
                   Email Support
-                </a>
+                </button>
                 <RouterLink
                   to="/faq"
                   class="flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50"
@@ -425,15 +480,15 @@ onBeforeUnmount(() => {
                   </svg>
                   <span class="font-black uppercase">Telegram Support</span>
                 </a>
-                <a
-                  href="mailto:c4techhub.info@gmail.com"
+                <button
+                  type="button"
                   :class="[
-                  'flex items-center gap-2 rounded-2xl px-5 py-4 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
+                  'flex w-full items-center gap-2 rounded-2xl px-5 py-4 border transition text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
                   isActive(link)
                     ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f]'
                     : 'border-transparent hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f]',
                 ]"
-                  @click="closeMobileNav"
+                  @click="openEmailSupportModal"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                     <path
@@ -443,7 +498,7 @@ onBeforeUnmount(() => {
                     />
                   </svg>
                   <span class="font-black uppercase">Email Support</span>
-                </a>
+                </button>
                 <RouterLink
                   to="/faq"
                   :class="[
@@ -526,6 +581,55 @@ onBeforeUnmount(() => {
               Sign out
             </button>
           </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div
+        v-if="showEmailSupportModal"
+        class="fixed inset-0 z-[1200] flex items-center justify-center px-4"
+      >
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeEmailSupportModal"></div>
+        <div class="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Email Support</p>
+              <p class="mt-1 text-lg font-black text-slate-900">{{ emailSupportAddress }}</p>
+            </div>
+            <button
+              type="button"
+              class="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
+              aria-label="Close email support dialog"
+              @click="closeEmailSupportModal"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <p class="mt-3 text-sm text-slate-600">
+            Tap copy to quickly email us from your device.
+          </p>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-700">
+              {{ emailSupportAddress }}
+            </div>
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-full border border-[#096b9f] bg-[#096b9f] px-4 py-2 text-sm font-semibold text-white transition hover:border-[#0c86c3] hover:bg-[#0c86c3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
+              @click="copyEmailSupport"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7.5A2.5 2.5 0 0 0 5 7.5v9A2.5 2.5 0 0 0 7.5 19h9a2.5 2.5 0 0 0 2.5-2.5V15" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 5h4v4m0-4L11 13" />
+              </svg>
+              Copy email
+            </button>
+          </div>
+          <p v-if="copyStatus" class="mt-2 text-xs font-semibold text-emerald-600">
+            {{ copyStatus }}
+          </p>
         </div>
       </div>
     </Teleport>
