@@ -9,47 +9,9 @@ const { isAuthenticated, signOut, authState } = useAuth();
 const accountName = computed(() => authState.value?.user?.name ?? 'C4 Teach Hub Member');
 const accountEmail = computed(() => authState.value?.user?.email ?? 'user@c4techhub.com');
 
-const formatDate = (value: unknown): string | null => {
-  if (!value) {
-    return null;
-  }
-  const dateValue =
-    typeof value === 'number' && Number.isFinite(value)
-      ? value
-      : typeof value === 'string' && value.trim()
-        ? Date.parse(value)
-        : null;
-  if (!dateValue || Number.isNaN(dateValue)) {
-    return null;
-  }
-  try {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(
-      new Date(dateValue),
-    );
-  } catch {
-    return null;
-  }
-};
+// Date formatting helper removed — not currently used in this view.
 
-const joinDateLabel = computed(() => {
-  const user = authState.value?.user ?? {};
-  return (
-    formatDate((user as Record<string, unknown>).joinedAt) ||
-    formatDate((user as Record<string, unknown>).joinDate) ||
-    formatDate((user as Record<string, unknown>).createdAt) ||
-    'Not provided'
-  );
-});
-
-const lastLoginLabel = computed(() => {
-  const user = authState.value?.user ?? {};
-  return (
-    formatDate((user as Record<string, unknown>).lastLogin) ||
-    formatDate((user as Record<string, unknown>).lastActive) ||
-    formatDate((user as Record<string, unknown>).lastSeen) ||
-    'Not provided'
-  );
-});
+// NOTE: join/last-login fields intentionally omitted from the view for now.
 
 const expiresAtLabel = computed(() => {
   const expiresAt = authState.value?.expiresAt ?? null;

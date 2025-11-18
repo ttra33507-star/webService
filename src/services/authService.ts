@@ -145,6 +145,10 @@ export interface SsoTicketResponse {
   state?: string | null;
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 const extractErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
     const responseData = error.response?.data;
