@@ -364,7 +364,7 @@ onBeforeUnmount(() => {
       <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h2 class="text-3xl font-black text-slate-900 font-display">Boost Followers</h2>
+            <h2 class="text-3xl font-black text-slate-900 font-display">Our Service</h2>
           </div>
           <RouterLink to="/services" class="inline-flex items-center text-sm font-black text-[#0c86c3] transition hover:text-[#096b9f]">
             View the catalog

@@ -242,6 +242,20 @@ onBeforeUnmount(() => {
                   </svg>
                   Telegram Support
                 </a>
+                <a
+                  href="mailto:c4techhub.info@gmail.com"
+                  class="flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50"
+                  @click="closeContactDropdown"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M21.75 6.75v10.5a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5V6.75m18 0A1.5 1.5 0 0 0 20.25 5.25h-16.5A1.5 1.5 0 0 0 2.25 6.75m18 0v.243a1.5 1.5 0 0 1-.63 1.218l-7.5 5.25a1.5 1.5 0 0 1-1.74 0l-7.5-5.25a1.5 1.5 0 0 1-.63-1.218V6.75"
+                    />
+                  </svg>
+                  Email Support
+                </a>
                 <RouterLink
                   to="/faq"
                   class="flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50"
@@ -411,6 +425,25 @@ onBeforeUnmount(() => {
                   </svg>
                   <span class="font-black uppercase">Telegram Support</span>
                 </a>
+                <a
+                  href="mailto:c4techhub.info@gmail.com"
+                  :class="[
+                  'flex items-center gap-2 rounded-2xl px-5 py-4 border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]',
+                  isActive(link)
+                    ? 'border-[#096b9f] bg-[#096b9f]/10 text-[#096b9f]'
+                    : 'border-transparent hover:border-[#0c86c3]/40 hover:bg-white/70 hover:text-[#096b9f]',
+                ]"
+                  @click="closeMobileNav"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M21.75 6.75v10.5a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5V6.75m18 0A1.5 1.5 0 0 0 20.25 5.25h-16.5A1.5 1.5 0 0 0 2.25 6.75m18 0v.243a1.5 1.5 0 0 1-.63 1.218l-7.5 5.25a1.5 1.5 0 0 1-1.74 0l-7.5-5.25a1.5 1.5 0 0 1-.63-1.218V6.75"
+                    />
+                  </svg>
+                  <span class="font-black uppercase">Email Support</span>
+                </a>
                 <RouterLink
                   to="/faq"
                   :class="[
@@ -480,14 +513,14 @@ onBeforeUnmount(() => {
           <div v-else class="mt-10 space-y-3">
             <RouterLink
               to="/account"
-              class="flex w-full justify-center rounded-full  px-5 py-3 text-[14px] font-black uppercase  text-white bg-[#279dc2] transition hover:border-[#23bdee] hover:text-slate-900"
+              class="flex w-full justify-center rounded-full  px-5 py-3 text-[14px] font-black uppercase  text-white bg-[#279dc2] transition hover:border-[#23bdee]"
               @click="closeMobileNav"
             >
               Accounts Profile
             </RouterLink>
             <button
               type="button"
-              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-[14px] font-black uppercase  text-white bg-red-500 transition hover:border-red-300 hover:text-slate-900"
+              class="w-full rounded-full border border-red-400/40 px-5 py-3 text-[14px] font-black uppercase  text-white bg-red-500 transition hover:border-red-300"
               @click="handleSignOut"
             >
               Sign out
