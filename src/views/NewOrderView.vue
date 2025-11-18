@@ -1030,8 +1030,7 @@ onBeforeUnmount(() => {
 
         <form class="space-y-6" @submit.prevent="handleSubmit">
           <div class="grid gap-6 md:grid-cols-1 ">
-            
-            <label class="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <label v-if="requiresLink" class="flex flex-col gap-2 text-sm font-medium text-slate-700">
               Link / Username
               <input
                 v-model="link"
