@@ -2,7 +2,20 @@ import fs from 'fs';
 import path from 'path';
 import postcss from 'postcss';
 
+const shouldSkip = (process.env.SKIP_LEGACY_CSS ?? '').toLowerCase() === '1' || (process.env.SKIP_LEGACY_CSS ?? '').toLowerCase() === 'true';
+
+if (shouldSkip) {
+  console.log('Skipping legacy CSS flattening because SKIP_LEGACY_CSS is set.');
+  process.exit(0);
+}
+
 const assetsDir = path.resolve('dist', 'assets');
+
+if (!fs.existsSync(assetsDir)) {
+  console.error('dist/assets was not found. Run the build first or set SKIP_LEGACY_CSS=1 to bypass this step.');
+  process.exit(1);
+}
+
 const cssFile = fs.readdirSync(assetsDir).find((file) => file.startsWith('index-') && file.endsWith('.css'));
 
 if (!cssFile) {
