@@ -77,14 +77,6 @@ watch(
           <p class="text-sm font-medium text-slate-900">{{ accountEmail }}</p>
         </div>
         <div class="grid gap-2 rounded-2xl border border-slate-800/60 bg-white/70 p-5 sm:grid-cols-[160px_1fr]">
-          <p class="text-xs font-medium uppercase  text-slate-600">Joined</p>
-          <p class="text-sm font-medium text-slate-900">{{ joinDateLabel }}</p>
-        </div>
-        <div class="grid gap-2 rounded-2xl border border-slate-800/60 bg-white/70 p-5 sm:grid-cols-[160px_1fr]">
-          <p class="text-xs font-medium uppercase  text-slate-600">Last login</p>
-          <p class="text-sm font-medium text-slate-900">{{ lastLoginLabel }}</p>
-        </div>
-        <div class="grid gap-2 rounded-2xl border border-slate-800/60 bg-white/70 p-5 sm:grid-cols-[160px_1fr]">
           <p class="text-xs font-medium uppercase  text-slate-600">Session</p>
           <p class="text-sm font-medium text-slate-900">{{ expiresAtLabel }}</p>
         </div>
