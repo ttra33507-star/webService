@@ -123,6 +123,20 @@ const normalizeService = (payload: RemoteServiceRecord): ServiceRecord => {
   const averageTimeText = coerceString(payload.average_time ?? payload.evage_time ?? '');
   const averageTimeMinutes =
     payload.average_time_minute == null ? null : coerceNumber(payload.average_time_minute, 0);
+  const rawIsTool = payload.is_tool;
+  const isTool = (() => {
+    if (typeof rawIsTool === 'boolean') {
+      return rawIsTool;
+    }
+    if (typeof rawIsTool === 'number') {
+      return rawIsTool === 1;
+    }
+    if (typeof rawIsTool === 'string') {
+      const normalized = rawIsTool.trim().toLowerCase();
+      return ['1', 'true', 'yes', 'on'].includes(normalized);
+    }
+    return false;
+  })();
 
   return {
     id: payload.id,
@@ -132,6 +146,7 @@ const normalizeService = (payload: RemoteServiceRecord): ServiceRecord => {
     description: description || null,
     averageTime: averageTimeText || null,
     averageTimeMinutes,
+    isTool,
     visible: Boolean(payload.visible),
     defaultQuantity: payload.default_quantity ?? 1,
     price: {
