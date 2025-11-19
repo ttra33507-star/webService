@@ -198,6 +198,9 @@ const sortBestsellers = (left: ServiceRecord, right: ServiceRecord) => {
 
 let cachedServices: ServiceRecord[] | null = null;
 let inflightRequest: Promise<ServiceRecord[]> | null = null;
+const includeInvisibleServices = String(import.meta.env.VITE_INCLUDE_INVISIBLE_SERVICES ?? '')
+  .toLowerCase()
+  .trim() === 'true';
 
 export const fetchServiceCatalog = async (options?: { force?: boolean }): Promise<ServiceRecord[]> => {
   if (!options?.force && cachedServices) {
@@ -211,7 +214,9 @@ export const fetchServiceCatalog = async (options?: { force?: boolean }): Promis
   inflightRequest = httpClient
     .get<RemoteServiceRecord[]>(SERVICES_ENDPOINT)
     .then((response) => {
-      const normalized = response.data.map(normalizeService).filter((service) => service.visible);
+      const normalized = response.data
+        .map(normalizeService)
+        .filter((service) => includeInvisibleServices || service.visible);
       normalized.sort(sortServices);
       cachedServices = normalized;
       return normalized;
