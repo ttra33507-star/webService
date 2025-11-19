@@ -29,8 +29,16 @@ const isLocalLikeEnv = () => {
 };
 
 const resolveBaseUrl = () => {
-  const devConfigured = sanitizeBaseUrl(import.meta.env.VITE_DEV_API_BASE_URL);
-  const configured = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_AUTH_BASE_URL);
+  // Accept both *_BASE and *_BASE_URL so either env naming convention works in CI
+  const devConfigured = sanitizeBaseUrl(
+    import.meta.env.VITE_DEV_API_BASE_URL || import.meta.env.VITE_DEV_API_BASE,
+  );
+  const configured = sanitizeBaseUrl(
+    import.meta.env.VITE_API_BASE ||
+      import.meta.env.VITE_API_BASE_URL ||
+      import.meta.env.VITE_AUTH_BASE ||
+      import.meta.env.VITE_AUTH_BASE_URL,
+  );
 
   if (isLocalLikeEnv()) {
     if (devConfigured) {

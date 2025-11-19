@@ -35,8 +35,11 @@ const coerceString = (value: unknown, fallback = ''): string => {
 const DEFAULT_ASSET_BASE_URL = 'https://apps.c4techhub.com';
 
 const resolveApiBaseUrl = () => {
-  const devApi = coerceString(import.meta.env.VITE_DEV_API_BASE_URL);
-  const prodApi = coerceString(import.meta.env.VITE_API_BASE_URL);
+  // Support both *_BASE and *_BASE_URL envs so production builds pick up the configured API
+  const devApi = coerceString(import.meta.env.VITE_DEV_API_BASE_URL ?? import.meta.env.VITE_DEV_API_BASE);
+  const prodApi = coerceString(
+    import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_BASE ?? import.meta.env.VITE_AUTH_BASE_URL,
+  );
 
   if (import.meta.env.DEV && devApi) {
     return devApi.replace(/\/+$/, '');
