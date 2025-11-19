@@ -35,11 +35,8 @@ const coerceString = (value: unknown, fallback = ''): string => {
 const DEFAULT_ASSET_BASE_URL = 'https://apps.c4techhub.com';
 
 const resolveApiBaseUrl = () => {
-  // Support both *_BASE and *_BASE_URL envs so production builds pick up the configured API
-  const devApi = coerceString(import.meta.env.VITE_DEV_API_BASE_URL ?? import.meta.env.VITE_DEV_API_BASE);
-  const prodApi = coerceString(
-    import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_BASE ?? import.meta.env.VITE_AUTH_BASE_URL,
-  );
+  const devApi = coerceString(import.meta.env.VITE_DEV_API_BASE_URL);
+  const prodApi = coerceString(import.meta.env.VITE_API_BASE_URL);
 
   if (import.meta.env.DEV && devApi) {
     return devApi.replace(/\/+$/, '');
@@ -201,6 +198,9 @@ const sortBestsellers = (left: ServiceRecord, right: ServiceRecord) => {
 
 let cachedServices: ServiceRecord[] | null = null;
 let inflightRequest: Promise<ServiceRecord[]> | null = null;
+const includeInvisibleServices = String(import.meta.env.VITE_INCLUDE_INVISIBLE_SERVICES ?? '')
+  .toLowerCase()
+  .trim() === 'true';
 
 export const fetchServiceCatalog = async (options?: { force?: boolean }): Promise<ServiceRecord[]> => {
   if (!options?.force && cachedServices) {
@@ -214,7 +214,9 @@ export const fetchServiceCatalog = async (options?: { force?: boolean }): Promis
   inflightRequest = httpClient
     .get<RemoteServiceRecord[]>(SERVICES_ENDPOINT)
     .then((response) => {
-      const normalized = response.data.map(normalizeService).filter((service) => service.visible);
+      const normalized = response.data
+        .map(normalizeService)
+        .filter((service) => includeInvisibleServices || service.visible);
       normalized.sort(sortServices);
       cachedServices = normalized;
       return normalized;

@@ -3,12 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const proxyTarget = (
-    env.VITE_DEV_PROXY_TARGET ??
-    env.VITE_API_BASE_URL ??
-    env.VITE_API_BASE ??
-    'https://api.c4techhub.com'
-  ).trim()
+  const proxyTarget = (env.VITE_DEV_PROXY_TARGET ?? env.VITE_API_BASE_URL ?? 'https://api.c4techhub.com').trim()
 
   return {
     plugins: [vue()],
