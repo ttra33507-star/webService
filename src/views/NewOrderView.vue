@@ -1043,7 +1043,7 @@ onBeforeUnmount(() => {
               <span v-if="linkError" class="text-xs text-red-300">{{ linkError }}</span>
             </label>
 
-            <label class="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <label v-if="!categoryIsTool" class="flex flex-col gap-2 text-sm font-medium text-slate-700">
                 Quantity
                 <input
                   v-model.number="quantity"
@@ -1086,7 +1086,10 @@ onBeforeUnmount(() => {
           </div>
 
 
-          <div class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3] ">
+          <div
+            v-if="!categoryIsTool"
+            class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3] "
+          >
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p class="text-[11px] uppercase  text-[#0c86c3]">Estimated total</p>
