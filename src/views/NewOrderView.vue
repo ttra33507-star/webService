@@ -48,12 +48,14 @@ const parseNumericId = (value: RouteParam): number | null => {
 
 const serviceId = computed<number | null>(() => parseNumericId(route.params.serviceId as RouteParam));
 
-const requiresLink = computed<boolean>(() => {
-  if (!categoryInfo.value) {
-    return true;
+const categoryIsTool = computed<boolean>(() => {
+  if (categoryInfo.value) {
+    return Boolean(categoryInfo.value.isTool);
   }
-  return !categoryInfo.value.isTool;
+  return Boolean(service.value?.isTool);
 });
+
+const requiresLink = computed<boolean>(() => !categoryIsTool.value);
 
 const normalizedQuantity = computed<number>(() => {
   const raw = Number(quantity.value);
@@ -781,10 +783,7 @@ const handleSubmit = async () => {
   const totalPrice = Number((unitPrice * currentQuantity).toFixed(4));
   const estimateCost = Number((unitPrice * currentQuantity).toFixed(2));
 
-  const metadata =
-    categoryInfo.value?.isTool === true
-      ? { category_is_tool: true }
-      : null;
+  const metadata = categoryIsTool.value ? { category_is_tool: true } : null;
 
   const items = [
     {
@@ -806,7 +805,7 @@ const handleSubmit = async () => {
       platform: service.value.mainCategory.label,
       mainCategory: String(service.value.mainCategory.id),
       category: service.value.category.label,
-      category_is_tool: Boolean(categoryInfo.value?.isTool),
+      category_is_tool: categoryIsTool.value,
       service: service.value.label,
       link: trimmedLink || null,
       quantity: currentQuantity,

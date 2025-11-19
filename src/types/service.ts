@@ -7,6 +7,7 @@ export interface RemoteServiceRecord {
   average_time?: string | null;
   average_time_minute?: number | string | null;
   evage_time?: string | null;
+  is_tool?: boolean | number | string | null;
   category_id: number;
   category_label: string;
   main_category_id: number;
@@ -28,6 +29,7 @@ export interface ServiceRecord {
   description?: string | null;
   averageTime?: string | null;
   averageTimeMinutes?: number | null;
+  isTool: boolean;
   visible: boolean;
   defaultQuantity: number;
   price: {
