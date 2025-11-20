@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isAxiosError } from 'axios';
+import Swal from 'sweetalert2';
 import { useAuth } from '../composables/useAuth';
 import { fetchCategoryById, fetchServiceCatalog } from '../services/catalogService';
 import type { CategoryRecord, ServiceRecord } from '../types/service';
@@ -757,6 +758,45 @@ const resetStatusMessages = () => {
   submitSuccess.value = null;
 };
 
+const showSubmitErrorAlert = async (message: string) => {
+  const messageStr = message?.toString().trim();
+  if (!messageStr) {
+    return;
+  }
+
+  try {
+    if (messageStr.toLowerCase().includes('not enough balance')) {
+      const result = await Swal.fire({
+        icon: 'error',
+        title: 'Not enough balance',
+        text: messageStr,
+        showCancelButton: true,
+        confirmButtonText: 'Top up balance',
+        cancelButtonText: 'Cancel',
+      });
+
+      if (result?.isConfirmed) {
+        try {
+          await router.push('/balance');
+        } catch {
+          if (typeof window !== 'undefined') {
+            window.location.href = '/balance';
+          }
+        }
+      }
+      return;
+    }
+
+    await Swal.fire({
+      icon: 'error',
+      title: 'Order failed',
+      text: messageStr,
+    });
+  } catch (error) {
+    console.warn('[Order] Unable to display SweetAlert notification', error);
+  }
+};
+
 const handleSubmit = async () => {
   if (!service.value) {
     return;
@@ -937,6 +977,12 @@ watch(
     loadServiceDetails();
   },
 );
+
+watch(submitError, (message) => {
+  if (message) {
+    void showSubmitErrorAlert(message);
+  }
+});
 
 watch(quantity, () => {
   quantityError.value = null;
@@ -1123,12 +1169,6 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="space-y-3">
-            <p
-              v-if="submitError"
-              class="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
-            >
-              {{ submitError }}
-            </p>
             <p
               v-if="submitSuccess"
               class="rounded-2xl border border-[#0c86c3]/30 bg-[#0c86c3]/10 px-4 py-3 text-sm text-[#0c86c3]"
