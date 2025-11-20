@@ -650,6 +650,44 @@ const buildPortalUrl = (path: string) => {
   return `${portalBaseUrl}${normalizedPath}`;
 };
 
+const redirectToPortalBalance = async () => {
+  const balancePath = '/balance';
+
+  if (typeof window === 'undefined') {
+    try {
+      await router.push(balancePath);
+    } catch (error) {
+      console.warn('[Order] Unable to navigate to balance page without window context', error);
+    }
+    return;
+  }
+
+  if (disablePortalSsoRedirect) {
+    window.location.href = buildPortalUrl(balancePath);
+    return;
+  }
+
+  try {
+    const user = authState.value?.user ?? null;
+    const ticket = await requestSsoTicket({
+      userId:
+        typeof user?.id === 'number' || typeof user?.id === 'string'
+          ? user.id
+          : undefined,
+      email: typeof user?.email === 'string' ? user.email : undefined,
+      redirectTo: balancePath,
+      state: balancePath,
+    });
+    const targetUrl = buildPortalCallbackUrl(ticket.ticket, balancePath, 'persistent', {
+      hashPath: balancePath,
+    });
+    window.location.href = targetUrl;
+  } catch (error) {
+    console.error('[Order] Failed to redirect to balance with SSO ticket', error);
+    window.location.href = buildPortalUrl(balancePath);
+  }
+};
+
 const redirectToPortalOrders = async (orderIdentifier: string | null, explicitPath?: string | null) => {
   const detailPath = resolveOrderDetailPath(orderIdentifier, explicitPath);
   const baseOrdersPath = '/orders';
@@ -776,13 +814,7 @@ const showSubmitErrorAlert = async (message: string) => {
       });
 
       if (result?.isConfirmed) {
-        try {
-          await router.push('/balance');
-        } catch {
-          if (typeof window !== 'undefined') {
-            window.location.href = '/balance';
-          }
-        }
+        await redirectToPortalBalance();
       }
       return;
     }
