@@ -142,6 +142,31 @@ const heroSlides: HeroSlide[] = [
       shadow: 'shadow-purple-500/10',
     },
   },
+  {
+    id: 'real-time-insights',
+    badgeLabel: 'Real-time Insights',
+    badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
+    gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
+    title: 'Page Management Services',
+    description:
+      'We manage your Facebook Pages and handle boosting for live videos and posts. Our private Facebook group also helps share your content to increase reach. This gives your page more visibility and helps you attract more customers faster.',
+    highlights: [
+      {
+        text: 'Revenue pulse & trendlines',
+        classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
+        icon: 'trend',
+      },
+      {
+        text: 'Export-ready reports',
+        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
+      },
+    ],
+    image: {
+      src: '/images/Handle Pages.jpg',
+      alt: 'Insights dashboard preview',
+      shadow: 'shadow-purple-500/10',
+    },
+  },
 ];
 
 const FEATURED_SERVICE_LIMIT = 6;
