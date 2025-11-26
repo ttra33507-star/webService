@@ -137,7 +137,7 @@ const handleSubmit = async () => {
 
       <p
         v-if="authError"
-        class="mt-5 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200"
+        class="mt-5 rounded-xl border border-red-400 bg-red-100 px-4 py-3 text-center text-sm font-medium text-red-700"
       >
         {{ authError }}
       </p>
