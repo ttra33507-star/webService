@@ -7,7 +7,7 @@ import { useAuth } from '../composables/useAuth';
 import { fetchCategoryById, fetchServiceCatalog } from '../services/catalogService';
 import type { CategoryRecord, ServiceRecord } from '../types/service';
 import { createOrder, fetchRecentOrders } from '../services/orderService';
-import { getPortalBaseUrl, requestSsoTicket, buildPortalCallbackUrl } from '../services/authService';
+import { getPortalBaseUrl } from '../services/authService';
 
 type RouteParam = string | string[] | number | undefined;
 
@@ -15,9 +15,6 @@ const route = useRoute();
 const router = useRouter();
 const { isAuthenticated, signOut, authState } = useAuth();
 const portalBaseUrl = (getPortalBaseUrl() || 'https://apps.c4techhub.com').replace(/\/+$/, '');
-// Allow SSO redirects by default; set VITE_DISABLE_PORTAL_SSO_REDIRECT=true to turn them off.
-const disablePortalSsoRedirect =
-  String(import.meta.env.VITE_DISABLE_PORTAL_SSO_REDIRECT ?? 'false').trim().toLowerCase() === 'true';
 
 const isLoading = ref(true);
 const loadError = ref<string | null>(null);
