@@ -127,6 +127,53 @@ const averageTimeDisplay = computed<string | null>(() => {
   return null;
 });
 
+const readNumericField = (source: Record<string, unknown> | null | undefined, keys: string[]): number | null => {
+  if (!source) {
+    return null;
+  }
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const numeric = Number(value.replace?.(/,/g, '') ?? value);
+      if (Number.isFinite(numeric)) {
+        return numeric;
+      }
+    }
+  }
+  return null;
+};
+
+const userBalance = computed<number | null>(() => {
+  const user = authState.value?.user ?? null;
+  if (!user || typeof user !== 'object') {
+    return null;
+  }
+
+  const fields = [
+    'balance',
+    'wallet_balance',
+    'walletBalance',
+    'available_balance',
+    'availableBalance',
+    'credits',
+    'credit',
+    'funds',
+    'amount',
+  ];
+
+  const value = readNumericField(user as Record<string, unknown>, fields);
+  if (value == null) {
+    return null;
+  }
+  const rounded = Number(value.toFixed(2));
+  return Number.isFinite(rounded) ? rounded : null;
+});
+
+const hasPositiveBalance = computed(() => (userBalance.value ?? 0) > 0);
+
 const normalizeDescriptionLine = (input: string): string => {
   const collapsed = input.replace(/\s+/g, ' ').trim();
   if (!collapsed) {
@@ -651,6 +698,7 @@ const buildPortalUrl = (path: string) => {
 
 const redirectToPortalBalance = async () => {
   const balancePath = '/balance';
+  const balanceUrl = buildPortalUrl(balancePath);
 
   if (typeof window === 'undefined') {
     try {
@@ -661,63 +709,25 @@ const redirectToPortalBalance = async () => {
     return;
   }
 
-  if (disablePortalSsoRedirect) {
-    window.location.href = buildPortalUrl(balancePath);
-    return;
-  }
-
-  try {
-    const user = authState.value?.user ?? null;
-    const ticket = await requestSsoTicket({
-      userId:
-        typeof user?.id === 'number' || typeof user?.id === 'string'
-          ? user.id
-          : undefined,
-      email: typeof user?.email === 'string' ? user.email : undefined,
-      redirectTo: balancePath,
-      state: balancePath,
-    });
-    const targetUrl = buildPortalCallbackUrl(ticket.ticket, balancePath, 'persistent', {
-      hashPath: balancePath,
-    });
-    window.location.href = targetUrl;
-  } catch (error) {
-    console.error('[Order] Failed to redirect to balance with SSO ticket', error);
-    window.location.href = buildPortalUrl(balancePath);
-  }
+  window.location.href = balanceUrl;
 };
 
 const redirectToPortalOrders = async (orderIdentifier: string | null, explicitPath?: string | null) => {
   const detailPath = resolveOrderDetailPath(orderIdentifier, explicitPath);
   const baseOrdersPath = '/orders';
   const redirectPath = detailPath ?? baseOrdersPath;
-  const targetStatePath = redirectPath;
+  const targetUrl = buildPortalUrl(redirectPath);
 
-  if (disablePortalSsoRedirect) {
-    const targetUrl = buildPortalUrl(redirectPath);
-    window.location.href = targetUrl;
+  if (typeof window === 'undefined') {
+    try {
+      await router.push(redirectPath);
+    } catch (error) {
+      console.warn('[Order] Unable to navigate to orders without window context', error);
+    }
     return;
   }
-  try {
-    const user = authState.value?.user ?? null;
-    const ticket = await requestSsoTicket({
-      userId:
-        typeof user?.id === 'number' || typeof user?.id === 'string'
-          ? user.id
-          : undefined,
-      email: typeof user?.email === 'string' ? user.email : undefined,
-      redirectTo: redirectPath,
-      state: targetStatePath,
-    });
-    const targetUrl = buildPortalCallbackUrl(ticket.ticket, redirectPath, 'persistent', {
-      hashPath: targetStatePath,
-    });
-    window.location.href = targetUrl;
-  } catch (error) {
-    console.error('[Order] Failed to redirect with SSO ticket', error);
-    const fallbackPath = targetStatePath.startsWith('/') ? targetStatePath : `/${targetStatePath}`;
-    window.location.href = `${portalBaseUrl}${fallbackPath}`;
-  }
+
+  window.location.href = targetUrl;
 };
 
 const redirectToLogin = () => {
@@ -803,6 +813,25 @@ const showSubmitErrorAlert = async (message: string) => {
 
   try {
     if (messageStr.toLowerCase().includes('not enough balance')) {
+      if (categoryIsTool.value && hasPositiveBalance.value) {
+        const viewResult = await Swal.fire({
+          icon: 'info',
+          title: 'Review order details',
+          text: 'You have balance available. View your order details to continue with payment.',
+          showCancelButton: true,
+          confirmButtonText: 'View details',
+          cancelButtonText: 'Top up',
+          reverseButtons: true,
+        });
+
+        if (viewResult?.isConfirmed) {
+          await redirectToPortalOrders(null);
+        } else if (viewResult?.dismiss === Swal.DismissReason.cancel) {
+          await redirectToPortalBalance();
+        }
+        return;
+      }
+
       const result = await Swal.fire({
         icon: 'error',
         title: 'Not enough balance',
