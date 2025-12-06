@@ -173,13 +173,28 @@ const extractErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-export const requestPasswordToken = async (username: string, password: string): Promise<TokenResponse> => {
+export interface RequestPasswordTokenOptions {
+  turnstileToken?: string | null;
+}
+
+export const requestPasswordToken = async (
+  username: string,
+  password: string,
+  options?: RequestPasswordTokenOptions,
+): Promise<TokenResponse> => {
   // Use server-side signin endpoint which enforces email confirmation.
   try {
-    const { data } = await authClient.post('/api/auth/signin', {
+    const payload: Record<string, unknown> = {
       email: username,
       password,
-    });
+    };
+
+    const tokenValue = options?.turnstileToken?.toString().trim();
+    if (tokenValue) {
+      payload.turnstile_token = tokenValue;
+    }
+
+    const { data } = await authClient.post('/api/auth/signin', payload);
 
     // Normalize response to TokenResponse shape expected by callers
     const tokenResponse: TokenResponse = {
