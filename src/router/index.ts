@@ -67,6 +67,14 @@ const router = createRouter({
           title: 'Automation & Growth Hub',
           description:
             'Grow faster with C4 Tech Hub automation playbooks, managed page services, and streamlined digital tools across Facebook, Telegram, and TikTok.',
+          keywords: [
+            'C4 Tech Hub',
+            'automation services',
+            'digital growth',
+            'Facebook automation',
+            'Telegram automation',
+            'TikTok tools',
+          ],
         },
       },
       {
@@ -76,6 +84,7 @@ const router = createRouter({
         meta: {
           title: 'Pricing & Plans',
           description: 'Simple plans for automation, page management, and support that help you scale efficiently.',
+          keywords: ['C4 Tech Hub pricing', 'automation plans', 'service plans', 'growth pricing'],
         },
       },
       {
@@ -85,6 +94,7 @@ const router = createRouter({
         meta: {
           title: 'Services Catalog',
           description: 'Browse automation playbooks, page management, and growth services tailored to your channels.',
+          keywords: ['automation catalog', 'managed services', 'growth services', 'C4 Tech Hub services'],
         },
       },
       {
