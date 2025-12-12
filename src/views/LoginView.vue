@@ -1,17 +1,20 @@
 ﻿<script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
+import { useTurnstile } from '../composables/useTurnstile';
 import { requestPasswordToken, fetchUserProfile } from '../services/authService';
 
 const email = ref('');
 const password = ref('');
 const isSubmitting = ref(false);
 const authError = ref<string | null>(null);
+const turnstileElement = ref<HTMLElement | null>(null);
 
+const { signIn, isAuthenticated, rememberAccount, recentAccounts } = useAuth();
 const route = useRoute();
 const router = useRouter();
-const { signIn, isAuthenticated, rememberAccount, recentAccounts } = useAuth();
+const { token: turnstileToken, render: renderTurnstile, reset: resetTurnstile, error: turnstileError } = useTurnstile();
 
 if (recentAccounts.value.length > 0) {
   email.value = recentAccounts.value[0] ?? '';
@@ -56,10 +59,17 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   authError.value = null;
 
+  const captchaToken = turnstileToken.value;
+  if (!captchaToken) {
+    authError.value = 'Please complete the CAPTCHA before signing in.';
+    isSubmitting.value = false;
+    return;
+  }
+
   try {
     const username = email.value.trim();
     const userPassword = password.value;
-    const tokenResponse = await requestPasswordToken(username, userPassword);
+    const tokenResponse = await requestPasswordToken(username, userPassword, { turnstileToken: captchaToken });
     const profile = await fetchUserProfile(tokenResponse.access_token);
 
     const expiresAt =
@@ -89,10 +99,18 @@ const handleSubmit = async () => {
     authError.value =
       error instanceof Error ? error.message : 'Unable to sign in. Please try again.';
   } finally {
+    resetTurnstile();
     isSubmitting.value = false;
   }
 };
+
+onMounted(() => {
+  if (turnstileElement.value) {
+    void renderTurnstile(turnstileElement.value);
+  }
+});
 </script>
+
 
 <template>
   <section class="flex min-h-screen items-center justify-center bg-white px-4 py-16 text-slate-900">
@@ -126,6 +144,10 @@ const handleSubmit = async () => {
             required
           />
         </label>
+        <div class="mt-3">
+          <div ref="turnstileElement" class="min-h-[72px]" />
+          <p v-if="turnstileError" class="mt-2 text-xs font-medium text-red-600">{{ turnstileError }}</p>
+        </div>
         <button
           type="submit"
           class="w-full rounded-full bg-[#0c86c3] px-5 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-900"
