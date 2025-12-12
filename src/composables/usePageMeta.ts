@@ -3,6 +3,7 @@ import { onMounted, watchEffect, type Ref } from 'vue';
 export type PageMetaOptions = {
   title?: string;
   description?: string;
+  keywords?: string | string[];
   canonical?: string;
   ogImage?: string;
   noIndex?: boolean;
@@ -11,6 +12,8 @@ export type PageMetaOptions = {
 const SITE_NAME = 'C4 Tech Hub';
 const DEFAULT_DESCRIPTION =
   'C4 Tech Hub delivers automation, managed services, and growth tools for Facebook, Telegram, TikTok, and more.';
+const DEFAULT_KEYWORDS =
+  'C4 Tech Hub, automation services, Facebook automation, Telegram automation, TikTok tools, digital growth, managed services';
 
 const ensureMeta = (selector: string, attributes: Record<string, string>) => {
   let tag = document.querySelector<HTMLMetaElement>(selector);
@@ -48,11 +51,15 @@ export const applyPageMeta = (meta: PageMetaOptions) => {
   const titlePrefix = meta.title?.trim() || 'Automation & Growth Services';
   const fullTitle = `${titlePrefix} | ${SITE_NAME}`;
   const description = meta.description?.trim() || DEFAULT_DESCRIPTION;
+  const keywords = Array.isArray(meta.keywords)
+    ? meta.keywords.join(', ')
+    : meta.keywords?.trim() || DEFAULT_KEYWORDS;
   const canonical = resolveAbsoluteUrl(meta.canonical);
   const ogImage = resolveAbsoluteUrl(meta.ogImage || '/images/C4-FB-Station.png');
 
   document.title = fullTitle;
   ensureMeta('meta[name="description"]', { name: 'description', content: description });
+  ensureMeta('meta[name="keywords"]', { name: 'keywords', content: keywords });
   ensureMeta('meta[property="og:title"]', { property: 'og:title', content: fullTitle });
   ensureMeta('meta[property="og:description"]', { property: 'og:description', content: description });
   ensureMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' });
