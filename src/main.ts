@@ -1,9 +1,51 @@
-import { createApp } from 'vue';
+import { createApp, nextTick, watch } from 'vue';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import App from './App.vue';
 import router from './router';
+import { i18n } from './i18n';
 import './style.css';
 
-createApp(App).use(router).mount('#app');
+const app = createApp(App);
+app.use(router);
+app.use(i18n);
+app.mount('#app');
+
+if (typeof window !== 'undefined') {
+	const prefersReducedMotion =
+		typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+
+	if (!prefersReducedMotion) {
+		const mobileMq = window.matchMedia('(max-width: 639.98px)');
+
+		const initAos = () => {
+			const isMobile = mobileMq.matches;
+			AOS.init({
+				disable: false,
+				once: true,
+				offset: isMobile ? 80 : 120,
+				duration: isMobile ? 580 : 650,
+				easing: 'ease-out-cubic',
+			});
+		};
+
+		initAos();
+		mobileMq.addEventListener('change', initAos);
+
+		router.afterEach(() => {
+			nextTick(() => {
+				AOS.refresh();
+			});
+		});
+	}
+
+	const setHtmlLang = (lang: string) => {
+		document.documentElement.lang = lang;
+	};
+
+	setHtmlLang(i18n.global.locale.value);
+	watch(i18n.global.locale, (lang) => setHtmlLang(lang));
+}
 
 // Version check: compare frontend build version with API /meta.json and prompt reload when changed
 ;(function registerVersionChecker() {

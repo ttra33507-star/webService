@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { fetchServiceCatalog, groupServicesByMainCategory } from '../services/catalogService';
 import type { ServiceCategoryGroup, ServiceRecord } from '../types/service';
 
@@ -10,6 +11,7 @@ const errorMessage = ref<string | null>(null);
 const lastFetchedAt = ref<number | null>(null);
 
 const route = useRoute();
+const { locale, t } = useI18n({ useScope: 'global' });
 const fallbackIcon = '/images/logo C4 TECH HUB 1.png';
 const fallbackServiceIcon = '/images/logo C4 TECH HUB 1.png';
 const highlightedServiceId = ref<number | null>(null);
@@ -50,7 +52,7 @@ const loadServices = async (force = false) => {
     lastFetchedAt.value = Date.now();
   } catch (error) {
     console.error('[Services] Failed to load catalog', error);
-    errorMessage.value = 'Unable to load services right now. Please try again in a moment.';
+    errorMessage.value = t('services.catalog.errors.loadFailed');
   } finally {
     isLoading.value = false;
   }
@@ -68,10 +70,13 @@ const totalServices = computed(() => services.value.length);
 const totalCategories = computed(() => categoryGroups.value.length);
 
 const lastUpdatedDisplay = computed(() => {
+  void locale.value;
   if (!lastFetchedAt.value) {
-    return 'Awaiting sync';
+    return t('services.catalog.status.awaitingSync');
   }
-  return new Intl.DateTimeFormat('en-US', {
+
+  const localeCode = locale.value === 'km' ? 'km-KH' : 'en-US';
+  return new Intl.DateTimeFormat(localeCode, {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(lastFetchedAt.value);
@@ -105,27 +110,27 @@ onMounted(() => {
     <section class="border-b border-white bg-white from-slate-950 via-slate-950/80 to-[#050b1b]">
       <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 lg:flex-row lg:items-center lg:px-8">
         <div class="flex-1 space-y-6">
-          <p class="text-xs font-semibold uppercase  text-[#0c86c3]">Services Catalog</p>
+          <p class="text-xs font-semibold uppercase  text-[#0c86c3]">{{ t('services.catalog.label') }}</p>
           <div>
-            <h1 class="font-display text-3xl font-semibold text-slate-900 sm:text-5xl">Modern Tools & Services Hub</h1>
+            <h1 class="font-display text-3xl font-semibold text-slate-900 sm:text-5xl">{{ t('services.catalog.heroTitle') }}</h1>
             <p class="mt-4 text-lg text-slate-600 sm:text-xl">
-              C4TechHub brings all your digital services and smart tools together in one place. Work faster, manage everything easily, and access powerful features for automation, growth, and daily tasks without any complexity
+              {{ t('services.catalog.heroDescription') }}
             </p>
           </div>
         </div>
-        <div class="flex w-full max-w-[350px] flex-col gap-4 rounded-[2.5rem] border border-slate-800/70 bg-white p-6 shadow-2xl lg:w-[350px]">
+        <div data-aos="fade-left" class="flex w-full max-w-[350px] flex-col gap-4 rounded-[2.5rem] border border-slate-800/70 bg-white p-6 shadow-2xl lg:w-[350px]">
           <div class="flex items-center justify-between rounded-3xl border border-slate-800/80 bg-white/60 p-4">
             <div>
-              <p class="text-xs font-semibold uppercase  text-slate-500">Services</p>
+              <p class="text-xs font-semibold uppercase  text-slate-500">{{ t('services.catalog.stats.services') }}</p>
               <p class="mt-2 text-3xl font-semibold text-slate-900">{{ totalServices }}</p>
             </div>
             <div class="text-right">
-              <p class="text-xs font-semibold uppercase  text-slate-500">Categories</p>
+              <p class="text-xs font-semibold uppercase  text-slate-500">{{ t('services.catalog.stats.categories') }}</p>
               <p class="mt-2 text-3xl font-semibold text-slate-900">{{ totalCategories }}</p>
             </div>
           </div>
           <div class="rounded-3xl border border-[#096b9f]/25 bg-[#096b9f]/5 p-5 text-[#0c86c3]/80">
-            <p class="text-xs font-semibold uppercase  text-[#0c86c3]">Last synced</p>
+            <p class="text-xs font-semibold uppercase  text-[#0c86c3]">{{ t('services.catalog.stats.lastSynced') }}</p>
             <p class="mt-2 text-lg font-semibold text-slate-900">{{ lastUpdatedDisplay }}</p>
           </div>
         </div>
@@ -133,21 +138,21 @@ onMounted(() => {
     </section>
 
     <section class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-      <div v-if="errorMessage" class="rounded-[2.5rem] border border-red-400/30 bg-red-500/10 p-6 text-red-100">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p class="text-lg font-semibold text-slate-900">We hit a snag syncing services.</p>
-            <p class="text-sm text-red-100/80">{{ errorMessage }}</p>
-          </div>
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-sm font-semibold uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-900"
-            @click="handleRetry"
-          >
-            Try again
-          </button>
-        </div>
-      </div>
+	      <div v-if="errorMessage" data-aos="fade-up" class="rounded-[2.5rem] border border-red-400/30 bg-red-500/10 p-6 text-red-100">
+	        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+	          <div>
+	            <p class="text-lg font-semibold text-slate-900">{{ t('services.catalog.errors.title') }}</p>
+	            <p class="text-sm text-red-100/80">{{ errorMessage }}</p>
+	          </div>
+	          <button
+	            type="button"
+	            class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-sm font-semibold uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-900"
+	            @click="handleRetry"
+	          >
+	            {{ t('actions.retry') }}
+	          </button>
+	        </div>
+	      </div>
 
       <div v-else>
         <div v-if="isLoading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -168,13 +173,13 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-else-if="!categoryGroups.length" class="rounded-[2.5rem] border border-slate-900/80 bg-white/30 p-10 text-center">
-          <p class="text-lg font-semibold text-slate-900">No services available yet.</p>
-          <p class="mt-2 text-sm text-slate-500">Once catalog data is published, it will appear here automatically.</p>
-        </div>
+	        <div v-else-if="!categoryGroups.length" data-aos="fade-up" class="rounded-[2.5rem] border border-slate-900/80 bg-white/30 p-10 text-center">
+	          <p class="text-lg font-semibold text-slate-900">{{ t('services.catalog.empty.title') }}</p>
+	          <p class="mt-2 text-sm text-slate-500">{{ t('services.catalog.empty.description') }}</p>
+	        </div>
 
-        <div v-else class="space-y-16">
-          <section v-for="group in categoryGroups" :key="group.id" aria-live="polite">
+	        <div v-else class="space-y-16">
+	          <section v-for="group in categoryGroups" :key="group.id" aria-live="polite">
             <header class="flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-center gap-4">
                 <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800/80 bg-white/80 p-2">
@@ -187,10 +192,12 @@ onMounted(() => {
             </header>
             <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <article
-                v-for="service in group.services"
+                v-for="(service, serviceIndex) in group.services"
                 :key="service.id"
                 :id="`service-${service.id}`"
                 tabindex="0"
+                :data-aos="serviceIndex % 2 === 0 ? 'fade-right' : 'fade-left'"
+                :data-aos-delay="(serviceIndex % 6) * 70"
                 class="group relative overflow-hidden rounded-2xl border border-slate-900/80 bg-white/50 shadow-lg transition hover:border-[#096b9f]/40 hover:shadow-glow focus:border-[#096b9f]/40 focus:shadow-glow focus:outline-none"
                 :class="highlightedServiceId === service.id ? 'border-[#0c86c3]/60 shadow-glow' : ''"
               >
@@ -205,29 +212,29 @@ onMounted(() => {
                 <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
                   <div>
                     <h3 class="text-lg font-semibold text-slate-900">{{ service.label }}</h3>
-                    <p class="mt-2 text-sm text-slate-900">
-                      {{ service.mainCategory.label }} at {{ service.category.label }}
-                    </p>
+	                    <p class="mt-2 text-sm text-slate-900">
+	                      {{ service.mainCategory.label }} {{ t('services.at') }} {{ service.category.label }}
+	                    </p>
                   </div>
                 </div>
                 <div
                   class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
                 >
-                  <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase text-[#096b9f]">
-                    Quick view
-                  </span>
+	                  <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-semibold uppercase text-[#096b9f]">
+	                    {{ t('actions.quickView') }}
+	                  </span>
                   <div class="space-y-2">
                     <h3 class="text-xl font-semibold text-slate-900">{{ service.label }}</h3>
                   </div>
-                  <RouterLink
-                    :to="{ name: 'service-order', params: { serviceId: service.id } }"
-                    class="btn-order-glow"
-                  >
-                    Order Now
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </RouterLink>
+	                  <RouterLink
+	                    :to="{ name: 'service-order', params: { serviceId: service.id } }"
+	                    class="btn-order-glow"
+	                  >
+	                    {{ t('actions.orderNow') }}
+	                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+	                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+	                    </svg>
+	                  </RouterLink>
                 </div>
               </article>
             </div>

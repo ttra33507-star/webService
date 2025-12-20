@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { fetchBestsellerServices } from '../services/catalogService';
 import type { ServiceRecord } from '../types/service';
 
@@ -41,133 +42,134 @@ interface FeaturedServiceCard {
 
 type ServiceImagery = { src: string; alt: string };
 
-const heroSlides: HeroSlide[] = [
+const { locale, t } = useI18n({ useScope: 'global' });
+
+const heroSlides = computed<HeroSlide[]>(() => {
+  void locale.value;
+
+  return [
   {
     id: 'managed-checkout',
-    badgeLabel: 'Managed Checkout',
+    badgeLabel: t('home.heroSlides.badges.managedCheckout'),
     badgeClasses: 'border-[#096b9f]/35 bg-white/70 text-[#096b9f]',
     gradient: 'from-[#096b9f]/20 via-slate-950/80 to-slate-950',
-    title: 'Fast Follower Growth Solutions',
-    description:
-      'Increase your page followers with C4TechHub’s fast, reliable, and modern growth services',
+    title: t('home.heroSlides.managedCheckoutTitle'),
+    description: t('home.heroSlides.managedCheckoutDescription'),
     highlights: [
       {
-        text: 'Go live in under 48 hours',
+        text: t('home.heroSlides.highlights.goLive48Hours'),
         classes: 'rounded-xl border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-2 font-medium text-[#096b9f]',
         icon: 'clock',
       },
       {
-        text: 'No-code customization',
+        text: t('home.heroSlides.highlights.noCodeCustomization'),
         classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
       },
     ],
     image: {
       src: '/images/Boostt Follower.jpg',
-      alt: 'Managed checkout dashboard preview',
+      alt: t('home.heroSlides.managedCheckoutImageAlt'),
       shadow: 'shadow-[#096b9f]/10',
     },
   },
   {
     id: 'commerce-playbooks',
-    badgeLabel: 'Commerce Playbooks',
+    badgeLabel: t('home.heroSlides.badges.commercePlaybooks'),
     badgeClasses: 'border-blue-400/30 bg-white/70 text-blue-200',
     gradient: 'from-blue-500/15 via-slate-950/80 to-slate-950',
-    title: 'C4 Facebook Automation Hub',
-    description:
-      'C4 Facebook Automation Hub gives you smart tools to manage your page faster and more easily. Handle tasks like comments and page actions in one place, reduce manual work, and keep everything running smoothly',
+    title: t('home.heroSlides.facebookAutomationTitle'),
+    description: t('home.heroSlides.facebookAutomationDescription'),
     highlights: [
       {
-        text: 'Templates ready to deploy',
+        text: t('home.heroSlides.highlights.templatesReady'),
         classes: 'rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2 font-medium text-blue-200',
         icon: 'check',
       },
       {
-        text: 'CRM & analytics included',
+        text: t('home.heroSlides.highlights.crmAnalytics'),
         classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
       },
     ],
     image: {
       src: '/images/Facebook.jpg',
-      alt: 'Automated campaign preview',
+      alt: t('home.heroSlides.facebookAutomationImageAlt'),
       shadow: 'shadow-blue-500/10',
     },
   },
   {
-    id: 'real-time-insights',
-    badgeLabel: 'Real-time Insights',
+    id: 'telegram-automation',
+    badgeLabel: t('home.heroSlides.badges.realTimeInsights'),
     badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
     gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: 'C4 Telegram Automation Hub',
-    description:
-      'C4 Telegram Automation Hub helps you manage your Telegram audience more easily. Add members safely, send messages automatically, and keep your channels active with simple, smart automation tools',
+    title: t('home.heroSlides.telegramAutomationTitle'),
+    description: t('home.heroSlides.telegramAutomationDescription'),
     highlights: [
       {
-        text: 'Revenue pulse & trendlines',
+        text: t('home.heroSlides.highlights.revenuePulse'),
         classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
         icon: 'trend',
       },
       {
-        text: 'Export-ready reports',
+        text: t('home.heroSlides.highlights.exportReports'),
         classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
       },
     ],
     image: {
       src: '/images/Telegram.jpg',
-      alt: 'Insights dashboard preview',
+      alt: t('home.heroSlides.telegramAutomationImageAlt'),
       shadow: 'shadow-purple-500/10',
     },
   },
   {
-    id: 'real-time-insights',
-    badgeLabel: 'Real-time Insights',
+    id: 'tiktok-downloader',
+    badgeLabel: t('home.heroSlides.badges.realTimeInsights'),
     badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
     gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: 'C4 TikTok Video Downloader',
-    description:
-      'C4 Download TikTok videos quickly and in high quality with C4TechHub. Just paste the link and save your videos without watermarks, fast and easy',
+    title: t('home.heroSlides.tiktokDownloaderTitle'),
+    description: t('home.heroSlides.tiktokDownloaderDescription'),
     highlights: [
       {
-        text: 'Revenue pulse & trendlines',
+        text: t('home.heroSlides.highlights.revenuePulse'),
         classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
         icon: 'trend',
       },
       {
-        text: 'Export-ready reports',
+        text: t('home.heroSlides.highlights.exportReports'),
         classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
       },
     ],
     image: {
       src: '/images/Download.jpg',
-      alt: 'Insights dashboard preview',
+      alt: t('home.heroSlides.tiktokDownloaderImageAlt'),
       shadow: 'shadow-purple-500/10',
     },
   },
   {
-    id: 'real-time-insights',
-    badgeLabel: 'Real-time Insights',
+    id: 'page-management',
+    badgeLabel: t('home.heroSlides.badges.realTimeInsights'),
     badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
     gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: 'Page Management Services',
-    description:
-      'We manage your Facebook Pages and handle boosting for live videos and posts. Our private Facebook group also helps share your content to increase reach. This gives your page more visibility and helps you attract more customers faster.',
+    title: t('home.heroSlides.pageManagementTitle'),
+    description: t('home.heroSlides.pageManagementDescription'),
     highlights: [
       {
-        text: 'Revenue pulse & trendlines',
+        text: t('home.heroSlides.highlights.revenuePulse'),
         classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
         icon: 'trend',
       },
       {
-        text: 'Export-ready reports',
+        text: t('home.heroSlides.highlights.exportReports'),
         classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
       },
     ],
     image: {
       src: '/images/Handle Pages.jpg',
-      alt: 'Insights dashboard preview',
+      alt: t('home.heroSlides.pageManagementImageAlt'),
       shadow: 'shadow-purple-500/10',
     },
   },
-];
+  ];
+});
 
 const FEATURED_SERVICE_LIMIT = 6;
 const featuredServices = ref<ServiceRecord[]>([]);
@@ -201,22 +203,24 @@ const resolveServiceImagery = (service: ServiceRecord): ServiceImagery => {
   return serviceImageryMap.default;
 };
 
-const featuredServiceCards = computed<FeaturedServiceCard[]>(() =>
-  featuredServices.value.map((service) => {
+const featuredServiceCards = computed<FeaturedServiceCard[]>(() => {
+  void locale.value;
+
+  return featuredServices.value.map((service) => {
     const heroImage = service.iconUrl
       ? { src: service.iconUrl, alt: `${service.label} icon` }
       : resolveServiceImagery(service);
     return {
       id: service.id,
       title: service.label,
-      tagline: `${service.mainCategory.label} at ${service.category.label}`,
+      tagline: `${service.mainCategory.label} ${t('services.at')} ${service.category.label}`,
       description: `Default quantity ${service.defaultQuantity}`,
       image: heroImage,
       iconUrl: service.iconUrl,
       service,
     };
-  }),
-);
+  });
+});
 
 const hasFeaturedServices = computed(() => featuredServiceCards.value.length > 0);
 
@@ -227,7 +231,7 @@ const loadFeaturedServices = async () => {
     featuredServices.value = bestsellers.slice(0, FEATURED_SERVICE_LIMIT);
   } catch (error) {
     console.error('[Home] Failed to load featured services', error);
-    servicesError.value = 'Unable to load services right now. Please try again.';
+    servicesError.value = t('home.featuredServices.errors.loadFailed');
     featuredServices.value = [];
   } finally {
     isServicesLoading.value = false;
@@ -245,12 +249,12 @@ let heroTimer: number | null = null;
 const HERO_INTERVAL_MS = 4000;
 
 const goToSlide = (index: number) => {
-  const total = heroSlides.length;
+  const total = heroSlides.value.length;
   activeHeroSlide.value = ((index % total) + total) % total;
 };
 
 const startAutoSlide = () => {
-  if (heroTimer !== null || heroSlides.length <= 1) {
+  if (heroTimer !== null || heroSlides.value.length <= 1) {
     return;
   }
   heroTimer = window.setInterval(() => {
@@ -303,13 +307,13 @@ onBeforeUnmount(() => {
           <!-- <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase  text-[#096b9f]">
             Launch faster
           </span> -->
-          <h1 class="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl font-display">
-            Modern Solutions for Modern Work
-          </h1>
-          <p class="mt-4 text-lg font-medium leading-relaxed text-slate-600">
-            C4TechHub delivers modern services and smart digital tools designed to make your work faster and easier. 
-          </p>
-        </div>
+	          <h1 class="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl font-display">
+	            {{ t('home.hero.title') }}
+	          </h1>
+	          <p class="mt-4 text-lg font-medium leading-relaxed text-slate-600">
+	            {{ t('home.hero.description') }}
+	          </p>
+	        </div>
         <div
           class="relative"
           @mouseenter="stopAutoSlide"
@@ -317,7 +321,7 @@ onBeforeUnmount(() => {
           @touchstart.passive="stopAutoSlide"
           @touchend="startAutoSlide"
         >
-          <div class="relative overflow-hidden rounded-3xl border border-slate-900/80 bg-white/40 shadow-2xl shadow-[#096b9f]/10">
+          <div data-aos="fade-up" class="relative overflow-hidden rounded-3xl border border-slate-900/80 bg-white/40 shadow-2xl shadow-[#096b9f]/10">
             <article
               v-for="(slide, index) in heroSlides"
               :key="slide.id"
@@ -386,34 +390,34 @@ onBeforeUnmount(() => {
     </section>
 
     <section class="border-t border-white bg-white/40">
-      <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <h2 class="text-3xl font-black text-slate-900 font-display">Our Service</h2>
-          </div>
-          <RouterLink to="/services" class="inline-flex items-center text-sm font-black text-[#0c86c3] transition hover:text-[#096b9f]">
-            View the catalog
-            <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h9.586l-3.293-3.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-            </svg>
-          </RouterLink>
-        </div>
-        <div class="mt-10">
-          <div v-if="servicesError" class="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-100">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p class="text-base font-black text-slate-900">Unable to load featured services.</p>
-                <p class="text-sm font-medium text-red-100/80">{{ servicesError }}</p>
-              </div>
-              <button
-                type="button"
-                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-black uppercase tracking-[0.35em] text-red-100 transition hover:border-red-300 hover:text-slate-900"
-                @click="retryFeaturedServices"
-              >
-                Retry
-              </button>
-            </div>
-          </div>
+	      <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+	        <div class="flex flex-wrap items-end justify-between gap-6">
+	          <div>
+	            <h2 class="text-3xl font-black text-slate-900 font-display">{{ t('home.featuredServices.title') }}</h2>
+	          </div>
+	          <RouterLink to="/services" class="inline-flex items-center text-sm font-black text-[#0c86c3] transition hover:text-[#096b9f]">
+	            {{ t('actions.viewCatalog') }}
+	            <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+	              <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h9.586l-3.293-3.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+	            </svg>
+	          </RouterLink>
+	        </div>
+	        <div class="mt-10">
+	          <div v-if="servicesError" data-aos="fade-up" class="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-100">
+	            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+	              <div>
+	                <p class="text-base font-black text-slate-900">{{ t('home.featuredServices.errors.title') }}</p>
+	                <p class="text-sm font-medium text-red-100/80">{{ servicesError }}</p>
+	              </div>
+	              <button
+	                type="button"
+	                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-black uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-900"
+	                @click="retryFeaturedServices"
+	              >
+	                {{ t('actions.retry') }}
+	              </button>
+	            </div>
+	          </div>
           <div v-else-if="isServicesLoading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div v-for="index in 3" :key="`featured-skeleton-${index}`" class="animate-pulse rounded-2xl border border-slate-900/80 bg-white/40 p-6">
               <div class="h-48 w-full rounded-2xl bg-white/60"></div>
@@ -425,21 +429,23 @@ onBeforeUnmount(() => {
               <div class="mt-4 h-10 w-1/2 rounded-full bg-white"></div>
             </div>
           </div>
-          <div v-else-if="!hasFeaturedServices" class="rounded-2xl border border-slate-900/80 bg-white/40 p-8 text-center text-slate-600">
-            <p class="text-base font-black text-slate-900">Services are syncing.</p>
-            <p class="mt-2 text-sm font-medium text-slate-900">Visit the catalog to browse every offer from the API.</p>
-            <RouterLink
-              to="/services"
-              class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-xs font-black uppercase tracking-[0.35em] text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
-            >
-              Go to services
-            </RouterLink>
-          </div>
+	          <div v-else-if="!hasFeaturedServices" data-aos="fade-up" class="rounded-2xl border border-slate-900/80 bg-white/40 p-8 text-center text-slate-600">
+	            <p class="text-base font-black text-slate-900">{{ t('home.featuredServices.syncing.title') }}</p>
+	            <p class="mt-2 text-sm font-medium text-slate-900">{{ t('home.featuredServices.syncing.description') }}</p>
+	            <RouterLink
+	              to="/services"
+	              class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-xs font-black uppercase  text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
+	            >
+	              {{ t('actions.goToServices') }}
+	            </RouterLink>
+	          </div>
           <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <article
-              v-for="card in featuredServiceCards"
+              v-for="(card, cardIndex) in featuredServiceCards"
               :key="card.id"
               tabindex="0"
+              :data-aos="cardIndex % 2 === 0 ? 'fade-right' : 'fade-left'"
+              :data-aos-delay="(cardIndex % 6) * 70"
               class="group relative overflow-hidden rounded-2xl border border-slate-900/80 bg-white/50 shadow-lg transition hover:border-[#096b9f]/40 hover:shadow-glow focus:border-[#096b9f]/40 focus:shadow-glow focus:outline-none"
             >
               <div class="relative h-48 overflow-hidden">
@@ -460,24 +466,24 @@ onBeforeUnmount(() => {
               </div>
               <div
                 class="pointer-events-none absolute inset-4 flex flex-col gap-4 rounded-2xl border border-[#096b9f]/25 bg-white/95 px-6 py-8 text-center opacity-0 shadow-glow transition-all duration-300 ease-out backdrop-blur-md group-hover:pointer-events-auto group-hover:-translate-y-1 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:-translate-y-1 group-focus-within:opacity-100"
-              >
-                <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-medium uppercase text-[#096b9f]">
-                  Quick view
-                </span>
-                <div class="space-y-2">
-                  <h3 class="text-xl font-black text-slate-900">{{ card.title }}</h3>
-                </div>
-                <RouterLink
-                  :to="{ name: 'service-order', params: { serviceId: card.id } }"
-                  class="btn-order-glow"
-                >
-                  Order Now
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </RouterLink>
-              </div>
-            </article>
+	              >
+	                <span class="self-center rounded-full border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-1 text-[11px] font-medium uppercase text-[#096b9f]">
+	                  {{ t('actions.quickView') }}
+	                </span>
+	                <div class="space-y-2">
+	                  <h3 class="text-xl font-black text-slate-900">{{ card.title }}</h3>
+	                </div>
+	                <RouterLink
+	                  :to="{ name: 'service-order', params: { serviceId: card.id } }"
+	                  class="btn-order-glow"
+	                >
+	                  {{ t('actions.orderNow') }}
+	                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+	                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+	                  </svg>
+	                </RouterLink>
+	              </div>
+	            </article>
           </div>
         </div>
       </div>

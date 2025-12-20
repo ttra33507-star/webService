@@ -1,8 +1,13 @@
 ﻿<script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import AOS from 'aos';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import CartItemsTable from '../components/cart/CartItemsTable.vue';
 import CartSummaryCard from '../components/cart/CartSummaryCard.vue';
 import { fetchCart, type CartData } from '../services/cartService';
+
+const { t } = useI18n({ useScope: 'global' });
 
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
@@ -19,10 +24,16 @@ const loadCart = async () => {
     if (error instanceof Error) {
       errorMessage.value = error.message;
     } else {
-      errorMessage.value = 'Unable to load the cart right now. Please try again shortly.';
+      errorMessage.value = t('cart.errors.loadFailed');
     }
   } finally {
     isLoading.value = false;
+    await nextTick();
+    try {
+      AOS.refreshHard();
+    } catch {
+      // ignore if AOS not initialized (e.g. reduced motion)
+    }
   }
 };
 
@@ -42,14 +53,14 @@ onMounted(() => {
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">
-            Manage orders
+          <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase  text-emerald-200">
+            {{ t('cart.badge') }}
           </span>
           <h1 class="mt-4 text-3xl font-semibold text-slate-900 sm:text-4xl font-display">
-            Cart overview
+            {{ t('cart.title') }}
           </h1>
           <p class="mt-3 max-w-xl text-sm text-slate-900">
-            Review every item currently queued for checkout. Connected directly to the live API so you can monitor quantities, pricing, and order totals in real time.
+            {{ t('cart.description') }}
           </p>
         </div>
         <button
@@ -68,7 +79,7 @@ onMounted(() => {
           >
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9M20 20v-5h-.581m-15.357-2a8.003 8.003 0 0015.357 2" />
           </svg>
-          {{ isLoading ? 'Refreshing...' : 'Refresh cart' }}
+          {{ isLoading ? t('cart.refreshing') : t('cart.refresh') }}
         </button>
       </div>
 
@@ -77,7 +88,7 @@ onMounted(() => {
         <div class="h-48 animate-pulse rounded-2xl bg-white/50 lg:w-80"></div>
       </div>
 
-      <div v-else-if="errorMessage" class="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-5 text-sm text-red-200">
+      <div v-else-if="errorMessage" data-aos="fade-up" class="rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-5 text-sm text-red-200">
         {{ errorMessage }}
       </div>
 
@@ -86,13 +97,16 @@ onMounted(() => {
         <CartSummaryCard :summary="cart!.summary" />
       </div>
 
-      <div v-else class="rounded-2xl border border-slate-900/80 bg-white/40 px-6 py-12 text-center text-sm text-slate-600">
-        <p>No items are currently in the cart.</p>
+      <div v-else data-aos="fade-up" class="rounded-2xl border border-slate-900/80 bg-white/40 px-6 py-12 text-center text-sm text-slate-600">
+        <p>{{ t('cart.empty.title') }}</p>
         <p class="mt-2">
-          Head back to the <a href="/" class="text-emerald-300 underline hover:text-emerald-200">home page</a> to add products.
+          {{ t('cart.empty.ctaPrefix') }}
+          <RouterLink to="/" class="text-emerald-300 underline hover:text-emerald-200">
+            {{ t('cart.empty.homeLink') }}
+          </RouterLink>
+          {{ t('cart.empty.ctaSuffix') }}
         </p>
       </div>
     </div>
   </section>
 </template>
-

@@ -898,8 +898,10 @@ const printReceipt = () => {
 
       <div class="grid gap-8 md:grid-cols-3">
         <article
-          v-for="plan in activePlans"
+          v-for="(plan, planIndex) in activePlans"
           :key="plan.id"
+          :data-aos="planIndex === 0 ? 'fade-right' : planIndex === 1 ? 'zoom-in' : 'fade-left'"
+          :data-aos-delay="(planIndex % 3) * 90"
           class="group relative flex flex-col overflow-hidden rounded-[2.5rem] border border-slate-900/80 bg-white/60 p-8 shadow-[0_35px_90px_rgba(8,47,73,0.35)] transition hover:border-[#096b9f]/50 hover:shadow-[0_45px_130px_rgba(9,107,159,0.35)]"
           :class="[
             plan.highlight ? 'border-[#096b9f] bg-[rgba(9,107,159,0.18)] backdrop-blur' : '',

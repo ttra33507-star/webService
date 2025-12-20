@@ -1,6 +1,6 @@
 <template>
   <section class="flex min-h-screen items-center justify-center bg-white px-4 py-16 text-slate-900">
-    <div class="w-full max-w-md rounded-3xl border border-slate-900/80 bg-white/70 p-8 shadow-2xl">
+    <div data-aos="zoom-in" class="w-full max-w-md rounded-3xl border border-slate-900/80 bg-white/70 p-8 shadow-2xl">
       <header class="text-center">
         <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#0c86c3]">Create account</p>
         <h1 class="mt-3 text-3xl font-semibold text-slate-900">Sign up</h1>
