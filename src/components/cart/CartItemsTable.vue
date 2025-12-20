@@ -1,6 +1,9 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { CartItem } from '../../services/cartService';
+
+const { locale, t } = useI18n({ useScope: 'global' });
 
 const props = defineProps<{
   items: CartItem[];
@@ -12,7 +15,7 @@ const currency = computed(
 );
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', {
+  new Intl.NumberFormat(locale.value === 'km' ? 'km-KH' : 'en-US', {
     style: 'currency',
     currency: currency.value,
     minimumFractionDigits: 2,
@@ -27,14 +30,14 @@ const rows = computed(() =>
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-2xl border border-slate-900/80 bg-white/50 shadow-lg">
+  <div data-aos="fade-right" class="overflow-hidden rounded-2xl border border-slate-900/80 bg-white/50 shadow-lg">
     <table class="min-w-full divide-y divide-slate-800">
       <thead class="bg-white/70 text-left text-xs font-semibold uppercase tracking-[0.35em] text-slate-900">
         <tr>
-          <th scope="col" class="px-6 py-4">Product</th>
-          <th scope="col" class="px-6 py-4">Quantity</th>
-          <th scope="col" class="px-6 py-4 text-right">Unit price</th>
-          <th scope="col" class="px-6 py-4 text-right">Line total</th>
+          <th scope="col" class="px-6 py-4">{{ t('cart.table.product') }}</th>
+          <th scope="col" class="px-6 py-4">{{ t('cart.table.quantity') }}</th>
+          <th scope="col" class="px-6 py-4 text-right">{{ t('cart.table.unitPrice') }}</th>
+          <th scope="col" class="px-6 py-4 text-right">{{ t('cart.table.lineTotal') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-900/80 text-sm text-slate-700">
@@ -57,7 +60,7 @@ const rows = computed(() =>
                   {{ item.description }}
                 </p>
                 <p v-if="item.sku" class="mt-1 text-xs uppercase tracking-wider text-slate-900">
-                  SKU: {{ item.sku }}
+                  {{ t('cart.table.sku') }}: {{ item.sku }}
                 </p>
               </div>
             </div>
@@ -77,7 +80,7 @@ const rows = computed(() =>
       </tbody>
     </table>
     <div v-if="rows.length === 0" class="px-6 py-12 text-center text-sm text-slate-500">
-      No items in the cart yet.
+      {{ t('cart.table.empty') }}
     </div>
   </div>
 </template>

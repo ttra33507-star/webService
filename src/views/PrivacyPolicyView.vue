@@ -1,50 +1,50 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n({ useScope: 'global' });
+
+const supportEmail = 'support@c4techhub.com';
+</script>
+
 <template>
   <main class="min-h-screen text-slate-900 bg-white">
     <section class="max-w-4xl mx-auto px-6 py-16">
-      <h1 class="text-4xl font-bold mb-8">Privacy Policy</h1>
+      <h1 class="text-4xl font-bold mb-8">{{ t('privacy.title') }}</h1>
 
       <div class="space-y-8 text-lg leading-relaxed text-slate-800"> 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">1. Information We Collect</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('privacy.sections.collect.title') }}</h2>
           <p>
-            We collect information you provide directly to us when you create an account,
-            make a purchase, or communicate with us. This may include your name,
-            email address, and payment information.
+            {{ t('privacy.sections.collect.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">2. How We Use Your Information</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('privacy.sections.use.title') }}</h2>
           <p>
-            We use the information we collect to provide, maintain, and improve our
-            services, process your transactions, and communicate with you about your
-            account and our services.
+            {{ t('privacy.sections.use.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">3. Information Sharing</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('privacy.sections.sharing.title') }}</h2>
           <p>
-            We do not sell or rent your personal information to third parties. We may
-            share your information with service providers who assist us in operating
-            our business.
+            {{ t('privacy.sections.sharing.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">4. Data Security</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('privacy.sections.security.title') }}</h2>
           <p>
-            We implement appropriate technical and organizational measures to protect
-            your personal information against unauthorized access, alteration, or
-            destruction.
+            {{ t('privacy.sections.security.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">5. Contact Us</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('privacy.sections.contact.title') }}</h2>
           <p>
-            If you have any questions about this Privacy Policy, please contact us at
-            <span class="font-medium">support@c4techhub.com</span>.
+            {{ t('privacy.sections.contact.bodyPrefix') }}
+            <span class="font-medium">{{ supportEmail }}</span>{{ t('privacy.sections.contact.bodySuffix') }}
           </p>
         </section>
       </div>

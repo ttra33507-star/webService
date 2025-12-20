@@ -1,41 +1,47 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n({ useScope: 'global' });
+</script>
+
 <template>
   <main class="min-h-screen bg-white text-slate-900">
     <section class="max-w-4xl mx-auto px-6 py-16">
-      <h1 class="text-4xl font-bold mb-8">Terms of Servic</h1>
+      <h1 class="text-4xl font-bold mb-8">{{ t('terms.title') }}</h1>
 
       <div class="space-y-8 text-lg leading-relaxed text-slate-800">
         <section>
-          <h2 class="text-2xl font-semibold mb-2">1. Acceptance of Terms</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('terms.sections.acceptance.title') }}</h2>
           <p>
-          By accessing or using C4 TechHub’s services, you agree to these Terms of Service and all applicable laws and regulations.
+            {{ t('terms.sections.acceptance.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">2. Use License</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('terms.sections.license.title') }}</h2>
           <p>
-            We grant you a limited, non-exclusive, non-transferable license to use our services for personal or business purposes, subject to these terms.
+            {{ t('terms.sections.license.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">3. Account Responsibilities</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('terms.sections.responsibilities.title') }}</h2>
           <p>
-            You are responsible for keeping your account credentials secure and for all actions taken under your account.
+            {{ t('terms.sections.responsibilities.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">4. Service Modifications</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('terms.sections.modifications.title') }}</h2>
           <p>
-            We may modify, update, suspend, or discontinue any part of our services at any time without prior notice.
+            {{ t('terms.sections.modifications.body') }}
           </p>
         </section>
 
         <section>
-          <h2 class="text-2xl font-semibold mb-2">5. Termination</h2>
+          <h2 class="text-2xl font-semibold mb-2">{{ t('terms.sections.termination.title') }}</h2>
           <p>
-            We may suspend or terminate your account immediately, without prior notice, if you violate these Terms of Service.
+            {{ t('terms.sections.termination.body') }}
           </p>
         </section>
       </div>

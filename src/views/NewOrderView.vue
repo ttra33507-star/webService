@@ -1070,19 +1070,19 @@ onBeforeUnmount(() => {
         </RouterLink>
       </div>
 
-      <div v-if="isLoading" class="rounded-3xl border border-slate-900/70 bg-white/50 p-10 text-center">
+      <div v-if="isLoading" data-aos="fade-up" class="rounded-3xl border border-slate-900/70 bg-white/50 p-10 text-center">
         <p class="text-sm text-slate-600">Loading service details...</p>
       </div>
 
       <div v-else-if="loadError" class="space-y-6">
-        <div class="rounded-3xl border border-red-500/40 bg-red-500/10 p-8 text-red-100">
+        <div data-aos="fade-up" class="rounded-3xl border border-red-500/40 bg-red-500/10 p-8 text-red-100">
           <h1 class="text-2xl font-semibold text-slate-900">We couldn't load this order form.</h1>
           <p class="mt-2 text-sm text-red-100/80">{{ loadError }}</p>
         </div>
       </div>
 
       <div v-else-if="service" class="space-y-8">
-        <header class="rounded-[2.5rem] border border-slate-900/80 bg-white/60 p-8 shadow-[0_40px_120px_rgba(5,15,35,0.65)]">
+        <header data-aos="fade-up" class="rounded-[2.5rem] border border-slate-900/80 bg-white/60 p-8 shadow-[0_40px_120px_rgba(5,15,35,0.65)]">
           <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Prepare order</p>
           <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ service.label }}</h1>
           <p class="mt-4 text-sm text-slate-600">{{ service.name }}</p>
@@ -1100,6 +1100,8 @@ onBeforeUnmount(() => {
 
         <section
           v-if="parsedDescription.bullets.length || parsedDescription.notes.length"
+          data-aos="fade-up"
+          data-aos-delay="80"
           class="rounded-[2.5rem] border border-slate-900/60 bg-slate-50/80 p-8 text-sm text-slate-700 shadow-inner shadow-white/40"
         >
           <div v-if="parsedDescription.bullets.length">
@@ -1191,6 +1193,7 @@ onBeforeUnmount(() => {
 
           <div
             v-if="!categoryIsTool"
+            data-aos="zoom-in"
             class="rounded-[2rem] border border-[#0c86c3]/30 bg-[#0c86c3]/5 p-6 text-sm text-[#0c86c3] "
           >
             <div class="flex flex-wrap items-center justify-between gap-4">
