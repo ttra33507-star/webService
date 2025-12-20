@@ -1,9 +1,8 @@
 ﻿<script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuth } from '../composables/useAuth';
-import { useTurnstile } from '../composables/useTurnstile';
 import { requestPasswordToken, fetchUserProfile } from '../services/authService';
 import TurnstileWidget from '../components/common/TurnstileWidget.vue';
 
@@ -11,24 +10,14 @@ const email = ref('');
 const password = ref('');
 const isSubmitting = ref(false);
 const authError = ref<string | null>(null);
-<<<<<<< HEAD
 const turnstileToken = ref<string | null>(null);
 const turnstileLoadError = ref(false);
 
 const turnstileSiteKey = (import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').toString().trim();
-=======
-const turnstileElement = ref<HTMLElement | null>(null);
->>>>>>> origin/main
-
-const { signIn, isAuthenticated, rememberAccount, recentAccounts } = useAuth();
 const route = useRoute();
 const router = useRouter();
-<<<<<<< HEAD
 const { t } = useI18n({ useScope: 'global' });
 const { signIn, isAuthenticated, rememberAccount, recentAccounts } = useAuth();
-=======
-const { token: turnstileToken, render: renderTurnstile, reset: resetTurnstile, error: turnstileError } = useTurnstile();
->>>>>>> origin/main
 
 if (recentAccounts.value.length > 0) {
   email.value = recentAccounts.value[0] ?? '';
@@ -84,14 +73,8 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   authError.value = null;
 
-<<<<<<< HEAD
   if (turnstileSiteKey && (!turnstileToken.value || !turnstileToken.value.trim())) {
     authError.value = t('auth.signIn.securityCheck.required');
-=======
-  const captchaToken = turnstileToken.value;
-  if (!captchaToken) {
-    authError.value = 'Please complete the CAPTCHA before signing in.';
->>>>>>> origin/main
     isSubmitting.value = false;
     return;
   }
@@ -99,11 +82,7 @@ const handleSubmit = async () => {
   try {
     const username = email.value.trim();
     const userPassword = password.value;
-<<<<<<< HEAD
-    const tokenResponse = await requestPasswordToken(username, userPassword, turnstileToken.value);
-=======
-    const tokenResponse = await requestPasswordToken(username, userPassword, { turnstileToken: captchaToken });
->>>>>>> origin/main
+    const tokenResponse = await requestPasswordToken(username, userPassword, { turnstileToken: turnstileToken.value });
     const profile = await fetchUserProfile(tokenResponse.access_token);
 
     const expiresAt =
@@ -132,12 +111,10 @@ const handleSubmit = async () => {
   } catch (error) {
     authError.value = error instanceof Error ? normalizeAuthError(error.message) : t('auth.errors.genericSignIn');
   } finally {
-    resetTurnstile();
     isSubmitting.value = false;
   }
 };
 
-<<<<<<< HEAD
 const handleTurnstileToken = (token: string) => {
   turnstileToken.value = token;
   turnstileLoadError.value = false;
@@ -151,13 +128,6 @@ const handleTurnstileError = () => {
   turnstileToken.value = null;
   turnstileLoadError.value = true;
 };
-=======
-onMounted(() => {
-  if (turnstileElement.value) {
-    void renderTurnstile(turnstileElement.value);
-  }
-});
->>>>>>> origin/main
 </script>
 
 
@@ -193,7 +163,6 @@ onMounted(() => {
             required
           />
         </label>
-<<<<<<< HEAD
 
         <div v-if="turnstileSiteKey" class="flex justify-center">
           <TurnstileWidget
@@ -210,12 +179,6 @@ onMounted(() => {
           {{ t('auth.signIn.securityCheck.loadError') }}
         </p>
 
-=======
-        <div class="mt-3">
-          <div ref="turnstileElement" class="min-h-[72px]" />
-          <p v-if="turnstileError" class="mt-2 text-xs font-medium text-red-600">{{ turnstileError }}</p>
-        </div>
->>>>>>> origin/main
         <button
           type="submit"
           class="w-full rounded-full bg-[#0c86c3] px-5 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-[#0fa6ef] disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-900"

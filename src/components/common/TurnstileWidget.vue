@@ -3,27 +3,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 type TurnstileTheme = 'light' | 'dark' | 'auto';
 type TurnstileSize = 'normal' | 'compact';
-type TurnstileAppearance = 'always' | 'interaction-only';
-
-type TurnstileRenderOptions = {
-  sitekey: string;
-  callback?: (token: string) => void;
-  'error-callback'?: () => void;
-  'expired-callback'?: () => void;
-  theme?: TurnstileTheme;
-  size?: TurnstileSize;
-  appearance?: TurnstileAppearance;
-};
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
-      reset: (widgetId?: string) => void;
-      remove: (widgetId?: string) => void;
-    };
-  }
-}
+type TurnstileAppearance = 'always' | 'interaction-only' | 'execute';
 
 const props = withDefaults(
   defineProps<{
@@ -46,7 +26,7 @@ const emit = defineEmits<{
 }>();
 
 const containerRef = ref<HTMLElement | null>(null);
-let widgetId: string | null = null;
+let widgetId: string | number | null = null;
 
 const TURNSTILE_SCRIPT_ID = 'turnstile-api';
 const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
