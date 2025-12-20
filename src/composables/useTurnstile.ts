@@ -51,7 +51,7 @@ export const useTurnstile = () => {
   const token = ref<string | null>(null);
   const error = ref<string | null>(null);
   const isReady = ref(false);
-  const widgetId = ref<number | null>(null);
+  const widgetId = ref<string | number | null>(null);
 
   const siteKey = (import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').toString().trim();
 
