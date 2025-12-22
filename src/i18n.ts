@@ -17,14 +17,12 @@ const normalizeLocale = (input: unknown): AppLocale | null => {
 };
 
 const detectInitialLocale = (): AppLocale => {
-  if (typeof window === 'undefined') return 'en';
+  if (typeof window === 'undefined') return 'km';
 
   const stored = normalizeLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY));
   if (stored) return stored;
 
-  const browser =
-    normalizeLocale(window.navigator.language) || normalizeLocale(window.navigator.languages?.[0]);
-  return browser ?? 'en';
+  return 'km';
 };
 
 export const i18n = createI18n({
