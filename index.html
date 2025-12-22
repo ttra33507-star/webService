@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="km">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,6 +18,24 @@
     <meta name="twitter:description" content="Automation playbooks, managed page services, and digital growth tools to boost your audience with C4 Tech Hub." />
     <meta name="twitter:image" content="https://www.c4techhub.com/images/C4-FB-Station.png" />
     <meta name="theme-color" content="#0c86c3" />
+    <script>
+      (() => {
+        try {
+          const raw = window.localStorage.getItem('app:locale');
+          if (!raw) return;
+          const value = raw.toLowerCase();
+          if (value === 'kh' || value.startsWith('km')) {
+            document.documentElement.lang = 'km';
+            return;
+          }
+          if (value.startsWith('en')) {
+            document.documentElement.lang = 'en';
+          }
+        } catch {
+          // ignore storage errors (private mode, blocked storage, etc.)
+        }
+      })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@100..900&family=Poppins:wght@100..900&family=Roboto:ital,wdth,wght@0,75..100,100..900;1,75..100,100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://drive.google.com/uc?export=view&id=12emdSpcYBx4NyOm-siW-OnDy0HEpdR-4">
