@@ -56,16 +56,16 @@ onMounted(() => {
           <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase  text-emerald-200">
             {{ t('cart.badge') }}
           </span>
-          <h1 class="mt-4 text-3xl font-semibold text-slate-900 sm:text-4xl font-display">
+          <h1 class="mt-4 text-3xl font-semibold text-slate-700 sm:text-4xl font-display">
             {{ t('cart.title') }}
           </h1>
-          <p class="mt-3 max-w-xl text-sm text-slate-900">
+          <p class="mt-3 max-w-xl text-sm text-slate-700">
             {{ t('cart.description') }}
           </p>
         </div>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-400/60 hover:text-slate-900"
+          class="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-400/60 hover:text-slate-700"
           :disabled="isLoading"
           @click="refresh"
         >

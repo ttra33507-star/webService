@@ -1059,7 +1059,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white text-slate-900">
+  <div class="min-h-screen bg-white text-slate-700">
     <section class="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div class="mb-6">
         <RouterLink
@@ -1076,7 +1076,7 @@ onBeforeUnmount(() => {
 
       <div v-else-if="loadError" class="space-y-6">
         <div data-aos="fade-up" class="rounded-3xl border border-red-500/40 bg-red-500/10 p-8 text-red-100">
-          <h1 class="text-2xl font-semibold text-slate-900">We couldn't load this order form.</h1>
+          <h1 class="text-2xl font-semibold text-slate-700">We couldn't load this order form.</h1>
           <p class="mt-2 text-sm text-red-100/80">{{ loadError }}</p>
         </div>
       </div>
@@ -1084,16 +1084,16 @@ onBeforeUnmount(() => {
       <div v-else-if="service" class="space-y-8">
         <header data-aos="fade-up" class="rounded-[2.5rem] border border-slate-900/80 bg-white/60 p-8 shadow-[0_40px_120px_rgba(5,15,35,0.65)]">
           <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#0c86c3]">Prepare order</p>
-          <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ service.label }}</h1>
+          <h1 class="mt-3 text-3xl font-semibold text-slate-700">{{ service.label }}</h1>
           <p class="mt-4 text-sm text-slate-600">{{ service.name }}</p>
           <dl class="mt-6 grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
               <dt class="text-[11px] uppercase  text-slate-500">Platform</dt>
-              <dd class="mt-2 text-lg font-semibold text-slate-900">{{ service.mainCategory.label }}</dd>
+              <dd class="mt-2 text-lg font-semibold text-slate-700">{{ service.mainCategory.label }}</dd>
             </div>
             <div class="rounded-2xl border border-slate-800/80 bg-white/60 p-4">
               <dt class="text-[11px] uppercase  text-slate-500">Category</dt>
-              <dd class="mt-2 text-lg font-semibold text-slate-900">{{ service.category.label }}</dd>
+              <dd class="mt-2 text-lg font-semibold text-slate-700">{{ service.category.label }}</dd>
             </div>
           </dl>
         </header>
@@ -1140,7 +1140,7 @@ onBeforeUnmount(() => {
                 v-model="link"
                 type="text"
                 :placeholder="requiresLink ? 'https://example.com/handle' : 'Optional for tool-based services'"
-                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
+                class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-700 placeholder:text-slate-700 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
               />
               <span class="text-xs text-slate-500">
                 {{ requiresLink ? 'Provide the profile or content URL we should process.' : 'Optional input for software tools.' }}
@@ -1155,11 +1155,11 @@ onBeforeUnmount(() => {
                   type="number"
                   min="1"
                   step="1"
-                  class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-900 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
+                  class="rounded-2xl border border-slate-800 bg-white/70 px-4 py-3 text-slate-700 placeholder:text-slate-700 focus:border-[#0c86c3] focus:outline-none focus:ring-2 focus:ring-[#0c86c3]/40"
                 />
                 <span class="text-xs text-slate-500">Minimum of 1. Adjust to match the size of your order.</span>
                 <div v-if="averageTimeDisplay" class="mt-3 flex flex-col gap-2">
-                  <span class="text-xs font-semibold uppercase text-slate-900">Average time</span>
+                  <span class="text-xs font-semibold uppercase text-slate-700">Average time</span>
                   <div class="relative">
                     <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0c86c3]">
                       <svg
@@ -1199,11 +1199,11 @@ onBeforeUnmount(() => {
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p class="text-[11px] uppercase  text-[#0c86c3]">Estimated total</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">{{ totalDisplay }}</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-700">{{ totalDisplay }}</p>
               </div>
               <div >
                 <p class="text-[11px] uppercase  text-[#0c86c3]">Quantity</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">{{ normalizedQuantity }}</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-700">{{ normalizedQuantity }}</p>
                 <!-- <div
                   v-if="averageTimeDisplay"
                   class="mt-2 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#0c86c3]"

@@ -42,7 +42,16 @@ h3,
 h4,
 h5,
 h6 {
-  font-weight: 900;
+  font-weight: 700;
+}
+
+h1[class*="font-"],
+h2[class*="font-"],
+h3[class*="font-"],
+h4[class*="font-"],
+h5[class*="font-"],
+h6[class*="font-"] {
+  font-weight: 500;
 }
 
 .btn-order-glow {

@@ -54,18 +54,18 @@ watch(
 <template>
   <section class="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 py-16">
     <header class="text-center">
-      <h1 class="mt-4 text-3xl font-black text-slate-900">{{ t('account.title') }}</h1>
+      <h1 class="mt-4 text-3xl font-black text-slate-700">{{ t('account.title') }}</h1>
     </header>
 
 	    <div
 	      v-if="isAuthenticated"
 	      data-aos="fade-up"
-	      class="rounded-[10px] border border-slate-800 bg-white/60 p-10 text-slate-900 shadow-lg"
+	      class="rounded-[10px] border border-slate-800 bg-white/60 p-10 text-slate-700 shadow-lg"
 	    >
 	      <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
 	        <div class="space-y-2">
 	          <p class="text-xs font-medium uppercase  text-[#23bdee]">{{ t('account.labels.name') }}</p>
-	          <p class="text-2xl font-black text-slate-900">{{ accountName }}</p>
+	          <p class="text-2xl font-black text-slate-700">{{ accountName }}</p>
 	        </div>
 	        <button
 	          type="button"
@@ -79,15 +79,15 @@ watch(
 	      <div class="mt-8 grid gap-4">
 	        <div data-aos="fade-up" data-aos-delay="80" class="grid gap-2 rounded-2xl border border-slate-800/60 bg-white/70 p-5 sm:grid-cols-[160px_1fr]">
 	          <p class="text-xs font-medium uppercase  text-slate-600">{{ t('account.labels.email') }}</p>
-	          <p class="text-sm font-medium text-slate-900">{{ accountEmail }}</p>
+	          <p class="text-sm font-medium text-slate-700">{{ accountEmail }}</p>
 	        </div>
 	        <div data-aos="fade-up" data-aos-delay="140" class="grid gap-2 rounded-2xl border border-slate-800/60 bg-white/70 p-5 sm:grid-cols-[160px_1fr]">
 	          <p class="text-xs font-medium uppercase  text-slate-600">{{ t('account.labels.session') }}</p>
-	          <p class="text-sm font-medium text-slate-900">{{ expiresAtLabel }}</p>
+	          <p class="text-sm font-medium text-slate-700">{{ expiresAtLabel }}</p>
 	        </div>
 	        <div data-aos="fade-up" data-aos-delay="200" class="grid gap-2 rounded-2xl border border-slate-800/60 bg-white/70 p-5 sm:grid-cols-[160px_1fr]">
 	          <p class="text-xs font-medium uppercase  text-slate-600">{{ t('account.labels.support') }}</p>
-	          <div class="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-900">
+	          <div class="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-700">
 	            <a
 	              href="https://t.me/c4techhub"
 	              target="_blank"
