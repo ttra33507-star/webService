@@ -32,7 +32,7 @@ const rows = computed(() =>
 <template>
   <div data-aos="fade-right" class="overflow-hidden rounded-2xl border border-slate-900/80 bg-white/50 shadow-lg">
     <table class="min-w-full divide-y divide-slate-800">
-      <thead class="bg-white/70 text-left text-xs font-semibold uppercase tracking-[0.35em] text-slate-700">
+      <thead class="bg-white/70 text-left text-xs font-semibold uppercase tracking-[0.35em] text-slate-800">
         <tr>
           <th scope="col" class="px-6 py-4">{{ t('cart.table.product') }}</th>
           <th scope="col" class="px-6 py-4">{{ t('cart.table.quantity') }}</th>
@@ -40,7 +40,7 @@ const rows = computed(() =>
           <th scope="col" class="px-6 py-4 text-right">{{ t('cart.table.lineTotal') }}</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-slate-900/80 text-sm text-slate-700">
+      <tbody class="divide-y divide-slate-900/80 text-sm text-slate-800">
         <tr
           v-for="item in rows"
           :key="item.id"
@@ -55,25 +55,25 @@ const rows = computed(() =>
                 class="h-14 w-14 flex-shrink-0 rounded-xl border border-slate-800/70 object-cover"
               />
               <div>
-                <p class="font-medium text-slate-700">{{ item.name }}</p>
+                <p class="font-medium text-slate-800">{{ item.name }}</p>
                 <p v-if="item.description" class="mt-1 text-xs text-slate-500">
                   {{ item.description }}
                 </p>
-                <p v-if="item.sku" class="mt-1 text-xs uppercase tracking-wider text-slate-700">
+                <p v-if="item.sku" class="mt-1 text-xs uppercase tracking-wider text-slate-800">
                   {{ t('cart.table.sku') }}: {{ item.sku }}
                 </p>
               </div>
             </div>
           </td>
           <td class="px-6 py-5 align-top">
-            <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700">
+            <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-800">
               {{ item.quantity }}
             </span>
           </td>
           <td class="px-6 py-5 text-right align-top">
             <span>{{ formatCurrency(item.price) }}</span>
           </td>
-          <td class="px-6 py-5 text-right align-top text-slate-700 font-semibold">
+          <td class="px-6 py-5 text-right align-top text-slate-800 font-semibold">
             {{ formatCurrency(item.lineTotal) }}
           </td>
         </tr>

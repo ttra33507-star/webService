@@ -854,14 +854,14 @@ const printReceipt = () => {
 </script>
 
 <template>
-<section class="relative overflow-hidden bg-white text-slate-700">
+<section class="relative overflow-hidden bg-white text-slate-800">
     <div
       class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(9,107,159,0.2),_transparent_60%),radial-gradient(circle_at_center,_rgba(9,107,159,0.15),_transparent_55%)]"
     ></div>
     <div class="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-12 px-4 py-16 sm:px-6 lg:px-8">
       <header class="text-center">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-300">Pricing</p>
-        <h1 class="mt-4 text-4xl font-bold leading-tight text-slate-700 sm:text-5xl">
+        <h1 class="mt-4 text-4xl font-bold leading-tight text-slate-800 sm:text-5xl">
           Choose Your Perfect Plan
         </h1>
         <p class="mx-auto mt-4 max-w-2xl text-base text-slate-600">
@@ -915,8 +915,8 @@ const printReceipt = () => {
             Most Popular
           </div>
           <div class="mt-6 flex flex-col gap-4 text-center">
-            <h2 class="text-2xl font-semibold text-slate-700">{{ plan.name }}</h2>
-            <div class="text-4xl font-bold text-slate-700">
+            <h2 class="text-2xl font-semibold text-slate-800">{{ plan.name }}</h2>
+            <div class="text-4xl font-bold text-slate-800">
               {{ formatPrice(plan.amount, plan.currency) }}
               <span class="text-base font-medium text-slate-600">{{ plan.cadence }}</span>
             </div>
@@ -924,7 +924,7 @@ const printReceipt = () => {
               {{ plan.tagline }}
             </p>
           </div>
-          <ul class="mt-8 flex-1 space-y-3 text-sm text-slate-700">
+          <ul class="mt-8 flex-1 space-y-3 text-sm text-slate-800">
             <li
               v-for="feature in plan.features"
               :key="feature"
@@ -953,11 +953,11 @@ const printReceipt = () => {
       <div v-if="isPaymentModalOpen" class="fixed inset-0 z-50 flex items-center justify-center px-4">
         <div class="absolute inset-0 bg-white/75 backdrop-blur" @click="closePaymentModal"></div>
         <div
-          class="relative w-full max-w-lg rounded-[2.5rem] border border-slate-800 bg-white px-10 py-12 text-slate-700 shadow-[0_40px_120px_rgba(8,18,38,0.65)]"
+          class="relative w-full max-w-lg rounded-[2.5rem] border border-slate-800 bg-white px-10 py-12 text-slate-800 shadow-[0_40px_120px_rgba(8,18,38,0.65)]"
         >
           <button
             type="button"
-            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/80 text-slate-500 transition hover:text-slate-700"
+            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/80 text-slate-500 transition hover:text-slate-800"
             aria-label="Close payment modal"
             @click="closePaymentModal"
           >
@@ -967,14 +967,14 @@ const printReceipt = () => {
           </button>
           <header class="text-center">
             <p class="text-xs font-semibold uppercase text-[#23bdee]">Choose Payment Method</p>
-            <h2 class="mt-4 text-2xl font-semibold text-slate-700">Select your preferred payment method to complete the purchase.</h2>
+            <h2 class="mt-4 text-2xl font-semibold text-slate-800">Select your preferred payment method to complete the purchase.</h2>
           </header>
           <div
             v-if="selectedPlan"
             class="mt-8 rounded-[1.5rem] border border-[#23bdee]/30 bg-white/70 px-6 py-6 text-center shadow-inner shadow-[#23bdee]/10"
           >
             <p class="text-xs font-semibold uppercase tracking-[0.45em] text-[#23bdee]">{{ selectedPlan.name }}</p>
-            <p class="mt-4 text-4xl font-bold text-slate-700">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
+            <p class="mt-4 text-4xl font-bold text-slate-800">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
             <p class="text-sm text-slate-500">{{ selectedPlan.cadence }}</p>
           </div>
           <p v-if="paymentError" class="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -1004,7 +1004,7 @@ const printReceipt = () => {
       >
         <div class="absolute inset-0 bg-white/70 backdrop-blur-sm" @click="closeQrModal"></div>
         <div
-          class="relative w-full max-w-md rounded-[2.75rem] border border-[#23bdee]/40 bg-white px-8 py-10 text-slate-700 shadow-[0_35px_120px_rgba(8,47,73,0.45)]"
+          class="relative w-full max-w-md rounded-[2.75rem] border border-[#23bdee]/40 bg-white px-8 py-10 text-slate-800 shadow-[0_35px_120px_rgba(8,47,73,0.45)]"
         >
           <button
             type="button"
@@ -1018,14 +1018,14 @@ const printReceipt = () => {
           </button>
           <div class="text-center">
             <h2 class="text-4xl font-bold text-red-600 mb-2">KHQR</h2>
-            <p class="text-xl font-semibold text-slate-700">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
+            <p class="text-xl font-semibold text-slate-800">{{ formatPrice(selectedPlan.amount, selectedPlan.currency) }}</p>
           </div>
           
           <div class="mt-6 text-center">
-            <div class="mx-auto h-16 mb-4 bg-blue-500 text-slate-700 flex items-center justify-center rounded-lg">
+            <div class="mx-auto h-16 mb-4 bg-blue-500 text-slate-800 flex items-center justify-center rounded-lg">
               KHQR
             </div>
-            <h3 class="text-xl font-bold text-slate-700 mb-4">{{ merchantName }}</h3>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">{{ merchantName }}</h3>
           </div>
 
           <div class="mt-4">
@@ -1036,14 +1036,14 @@ const printReceipt = () => {
                 class="mx-auto w-full"
               />
               <div class="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-slate-700 font-bold">$</div>
+                <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-slate-800 font-bold">$</div>
               </div>
             </div>
           </div>
 
           <div class="mt-8 text-center">
-            <h3 class="text-xl font-bold text-slate-700 mb-2">{{ merchantName }}</h3>
-            <p class="text-sm text-slate-700">{{ countdownLabel }}</p>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">{{ merchantName }}</h3>
+            <p class="text-sm text-slate-800">{{ countdownLabel }}</p>
             <p class="text-sm font-medium mt-2" :class="statusLabelClass">{{ statusLabel }}</p>
             <p v-if="lastCheckedLabel" class="mt-1 text-xs text-slate-500">
               {{ lastCheckedLabel }}
@@ -1056,8 +1056,8 @@ const printReceipt = () => {
             type="button"
             class="mt-8 w-full rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] transition"
             :class="paymentStatus === 'PAID'
-              ? 'bg-emerald-500 text-slate-700 hover:bg-emerald-400'
-              : 'bg-white text-slate-700 cursor-not-allowed'"
+              ? 'bg-emerald-500 text-slate-800 hover:bg-emerald-400'
+              : 'bg-white text-slate-800 cursor-not-allowed'"
             :disabled="paymentStatus !== 'PAID'"
             @click="continueToCheckout"
           >
@@ -1075,11 +1075,11 @@ const printReceipt = () => {
       >
         <div class="absolute inset-0 bg-white/75 backdrop-blur" />
         <div
-          class="relative w-full max-w-xl rounded-[2.75rem] border border-[#1d2b4f] bg-white px-10 py-12 text-slate-700 shadow-[0_45px_120px_rgba(4,12,32,0.85)]"
+          class="relative w-full max-w-xl rounded-[2.75rem] border border-[#1d2b4f] bg-white px-10 py-12 text-slate-800 shadow-[0_45px_120px_rgba(4,12,32,0.85)]"
         >
           <button
             type="button"
-            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:text-slate-700"
+            class="absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:text-slate-800"
             aria-label="Close receipt modal"
             @click="closeReceiptModal"
           >
@@ -1088,14 +1088,14 @@ const printReceipt = () => {
             </svg>
           </button>
 
-          <div ref="receiptContentRef" class="rounded-[2.5rem] border border-[#2a3c68] bg-white p-9 text-slate-700 shadow-[0_25px_80px_rgba(7,20,56,0.55)]">
+          <div ref="receiptContentRef" class="rounded-[2.5rem] border border-[#2a3c68] bg-white p-9 text-slate-800 shadow-[0_25px_80px_rgba(7,20,56,0.55)]">
             <div class="flex flex-wrap items-center gap-4">
-              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-lg font-bold text-slate-700 shadow-inner shadow-red-500/40">
+              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-lg font-bold text-slate-800 shadow-inner shadow-red-500/40">
                 KH
               </div>
               <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.45em] text-slate-600/90">KHQR Receipt</p>
-                <p class="mt-1 text-lg font-semibold text-slate-700">{{ receiptDetails.merchantName }}</p>
+                <p class="mt-1 text-lg font-semibold text-slate-800">{{ receiptDetails.merchantName }}</p>
                 <p class="text-2xl font-bold text-red-600">{{ receiptDetails.amountPaidLabel }}</p>
               </div>
             </div>
@@ -1105,41 +1105,41 @@ const printReceipt = () => {
             <div class="grid grid-cols-[auto,1fr] gap-y-4 gap-x-8 text-sm">
               <template v-if="receiptDetails.planName">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Plan</span>
-                <span class="font-semibold text-slate-700">{{ receiptDetails.planName }}</span>
+                <span class="font-semibold text-slate-800">{{ receiptDetails.planName }}</span>
               </template>
               <template v-if="receiptDetails.planAmountLabel">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Plan amount</span>
-                <span class="font-semibold text-slate-700">{{ receiptDetails.planAmountLabel }}</span>
+                <span class="font-semibold text-slate-800">{{ receiptDetails.planAmountLabel }}</span>
               </template>
               <template v-if="receiptDetails.reference">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Reference</span>
-                <span class="max-w-[260px] break-all font-medium text-slate-700/90">{{ receiptDetails.reference }}</span>
+                <span class="max-w-[260px] break-all font-medium text-slate-800/90">{{ receiptDetails.reference }}</span>
               </template>
               <template v-if="receiptDetails.transactionHash">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Transaction hash</span>
-                <span class="max-w-[260px] break-all font-medium text-slate-700/90">{{ receiptDetails.transactionHash }}</span>
+                <span class="max-w-[260px] break-all font-medium text-slate-800/90">{{ receiptDetails.transactionHash }}</span>
               </template>
               <template v-if="receiptDetails.paidAtLabel">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Completed at</span>
-                <span class="font-medium text-slate-700/90">{{ receiptDetails.paidAtLabel }}</span>
+                <span class="font-medium text-slate-800/90">{{ receiptDetails.paidAtLabel }}</span>
               </template>
               <template v-if="receiptDetails.customerName">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Customer</span>
-                <span class="font-medium text-slate-700/90">{{ receiptDetails.customerName }}</span>
+                <span class="font-medium text-slate-800/90">{{ receiptDetails.customerName }}</span>
               </template>
               <template v-if="receiptDetails.customerPhone">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Phone</span>
-                <span class="font-medium text-slate-700/90">{{ receiptDetails.customerPhone }}</span>
+                <span class="font-medium text-slate-800/90">{{ receiptDetails.customerPhone }}</span>
               </template>
               <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Merchant</span>
-              <span class="font-medium text-slate-700/90">{{ receiptDetails.merchantName }}</span>
+              <span class="font-medium text-slate-800/90">{{ receiptDetails.merchantName }}</span>
               <template v-if="receiptDetails.merchantBank">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Receiving bank</span>
-                <span class="font-medium text-slate-700/90">{{ receiptDetails.merchantBank }}</span>
+                <span class="font-medium text-slate-800/90">{{ receiptDetails.merchantBank }}</span>
               </template>
               <template v-if="receiptDetails.feeLabel">
                 <span class="font-medium uppercase tracking-[0.2em] text-slate-600/90">Fee</span>
-                <span class="font-medium text-slate-700/90">{{ receiptDetails.feeLabel }}</span>
+                <span class="font-medium text-slate-800/90">{{ receiptDetails.feeLabel }}</span>
               </template>
             </div>
 
@@ -1150,24 +1150,24 @@ const printReceipt = () => {
             </p>
           </div>
 
-          <div class="mt-8 flex flex-col gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-700 sm:flex-row">
+          <div class="mt-8 flex flex-col gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-800 sm:flex-row">
             <button
               type="button"
-              class="flex-1 rounded-full border border-slate-600 bg-white/20 px-5 py-3 text-[#23bdee] transition hover:bg-white/30 hover:text-slate-700"
+              class="flex-1 rounded-full border border-slate-600 bg-white/20 px-5 py-3 text-[#23bdee] transition hover:bg-white/30 hover:text-slate-800"
               @click="downloadReceipt"
             >
               Download Receipt
             </button>
             <button
               type="button"
-              class="flex-1 rounded-full border border-slate-600 bg-white/60 px-5 py-3 text-slate-700 transition hover:bg-white/70 hover:text-slate-700"
+              class="flex-1 rounded-full border border-slate-600 bg-white/60 px-5 py-3 text-slate-800 transition hover:bg-white/70 hover:text-slate-800"
               @click="printReceipt"
             >
               Print
             </button>
             <button
               type="button"
-              class="flex-1 rounded-full border border-slate-700 bg-transparent px-5 py-3 text-slate-600 transition hover:bg-white/60 hover:text-slate-700"
+              class="flex-1 rounded-full border border-slate-700 bg-transparent px-5 py-3 text-slate-600 transition hover:bg-white/60 hover:text-slate-800"
               @click="closeReceiptModal"
             >
               Close

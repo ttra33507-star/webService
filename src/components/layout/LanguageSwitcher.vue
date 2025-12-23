@@ -72,7 +72,7 @@ onBeforeUnmount(() => {
       :class="
         isOpen
           ? 'border-slate-700/70 bg-slate-700/80 text-white'
-          : 'border-slate-700/40 bg-white/70 text-slate-700 hover:border-slate-700/60'
+          : 'border-slate-700/40 bg-white/70 text-slate-800 hover:border-slate-700/60'
       "
       aria-haspopup="menu"
       :aria-expanded="isOpen"

@@ -106,13 +106,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-white text-slate-700">
+  <div class="bg-white text-slate-800">
     <section class="border-b border-white bg-white from-slate-950 via-slate-950/80 to-[#050b1b]">
       <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 lg:flex-row lg:items-center lg:px-8">
         <div class="flex-1 space-y-6">
           <p class="text-xs font-semibold uppercase  text-[#0c86c3]">{{ t('services.catalog.label') }}</p>
           <div>
-            <h1 class="font-display text-3xl font-semibold text-slate-700 sm:text-5xl">{{ t('services.catalog.heroTitle') }}</h1>
+            <h1 class="font-display text-3xl font-semibold text-slate-800 sm:text-5xl">{{ t('services.catalog.heroTitle') }}</h1>
             <p class="mt-4 text-lg text-slate-600 sm:text-xl">
               {{ t('services.catalog.heroDescription') }}
             </p>
@@ -122,16 +122,16 @@ onMounted(() => {
           <div class="flex items-center justify-between rounded-3xl border border-slate-800/80 bg-white/60 p-4">
             <div>
               <p class="text-xs font-semibold uppercase  text-slate-500">{{ t('services.catalog.stats.services') }}</p>
-              <p class="mt-2 text-3xl font-semibold text-slate-700">{{ totalServices }}</p>
+              <p class="mt-2 text-3xl font-semibold text-slate-800">{{ totalServices }}</p>
             </div>
             <div class="text-right">
               <p class="text-xs font-semibold uppercase  text-slate-500">{{ t('services.catalog.stats.categories') }}</p>
-              <p class="mt-2 text-3xl font-semibold text-slate-700">{{ totalCategories }}</p>
+              <p class="mt-2 text-3xl font-semibold text-slate-800">{{ totalCategories }}</p>
             </div>
           </div>
           <div class="rounded-3xl border border-[#096b9f]/25 bg-[#096b9f]/5 p-5 text-[#0c86c3]/80">
             <p class="text-xs font-semibold uppercase  text-[#0c86c3]">{{ t('services.catalog.stats.lastSynced') }}</p>
-            <p class="mt-2 text-lg font-semibold text-slate-700">{{ lastUpdatedDisplay }}</p>
+            <p class="mt-2 text-lg font-semibold text-slate-800">{{ lastUpdatedDisplay }}</p>
           </div>
         </div>
       </div>
@@ -141,12 +141,12 @@ onMounted(() => {
 	      <div v-if="errorMessage" data-aos="fade-up" class="rounded-[2.5rem] border border-red-400/30 bg-red-500/10 p-6 text-red-100">
 	        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 	          <div>
-	            <p class="text-lg font-semibold text-slate-700">{{ t('services.catalog.errors.title') }}</p>
+	            <p class="text-lg font-semibold text-slate-800">{{ t('services.catalog.errors.title') }}</p>
 	            <p class="text-sm text-red-100/80">{{ errorMessage }}</p>
 	          </div>
 	          <button
 	            type="button"
-	            class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-sm font-semibold uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-700"
+	            class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-6 py-3 text-sm font-semibold uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-800"
 	            @click="handleRetry"
 	          >
 	            {{ t('actions.retry') }}
@@ -174,7 +174,7 @@ onMounted(() => {
         </div>
 
 	        <div v-else-if="!categoryGroups.length" data-aos="fade-up" class="rounded-[2.5rem] border border-slate-900/80 bg-white/30 p-10 text-center">
-	          <p class="text-lg font-semibold text-slate-700">{{ t('services.catalog.empty.title') }}</p>
+	          <p class="text-lg font-semibold text-slate-800">{{ t('services.catalog.empty.title') }}</p>
 	          <p class="mt-2 text-sm text-slate-500">{{ t('services.catalog.empty.description') }}</p>
 	        </div>
 
@@ -186,7 +186,7 @@ onMounted(() => {
                   <img :src="getIconForGroup(group)" :alt="`${group.label} icon`" class="h-full w-full object-contain" />
                 </span>
                 <div>
-                  <h2 class="text-2xl font-semibold text-slate-700">{{ group.label }}</h2>
+                  <h2 class="text-2xl font-semibold text-slate-800">{{ group.label }}</h2>
                 </div>
               </div>
             </header>
@@ -211,8 +211,8 @@ onMounted(() => {
                 </div>
                 <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-700">{{ service.label }}</h3>
-	                    <p class="mt-2 text-sm text-slate-700">
+                    <h3 class="text-lg font-semibold text-slate-800">{{ service.label }}</h3>
+	                    <p class="mt-2 text-sm text-slate-800">
 	                      {{ service.mainCategory.label }} {{ t('services.at') }} {{ service.category.label }}
 	                    </p>
                   </div>
@@ -224,7 +224,7 @@ onMounted(() => {
 	                    {{ t('actions.quickView') }}
 	                  </span>
                   <div class="space-y-2">
-                    <h3 class="text-xl font-semibold text-slate-700">{{ service.label }}</h3>
+                    <h3 class="text-xl font-semibold text-slate-800">{{ service.label }}</h3>
                   </div>
 	                  <RouterLink
 	                    :to="{ name: 'service-order', params: { serviceId: service.id } }"
