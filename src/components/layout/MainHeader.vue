@@ -575,7 +575,7 @@ onBeforeUnmount(() => {
       <div class="hidden flex-1 items-center justify-center md:flex">
         <div
           ref="desktopNavPillRef"
-          class="relative flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-sm font-black text-slate-600 shadow-inner shadow-[#096b9f]/10"
+          class="relative flex items-center gap-1 rounded-full border border-[#096b9f]/30 bg-white/80 p-1 text-[18px] font-black text-slate-600 shadow-inner shadow-[#096b9f]/10"
           @mouseleave="clearNavHover"
           @focusout="handleDesktopNavFocusOut"
         >
