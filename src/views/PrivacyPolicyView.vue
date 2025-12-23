@@ -7,7 +7,7 @@ const supportEmail = 'support@c4techhub.com';
 </script>
 
 <template>
-  <main class="min-h-screen text-slate-700 bg-white">
+  <main class="min-h-screen text-slate-800 bg-white">
     <section class="max-w-4xl mx-auto px-6 py-16">
       <h1 class="text-4xl font-bold mb-8">{{ t('privacy.title') }}</h1>
 

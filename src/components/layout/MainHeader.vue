@@ -715,7 +715,7 @@ onBeforeUnmount(() => {
 	          <button
 	            ref="profileButtonRef"
 	            type="button"
-	            class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-white/60 px-3 py-2 text-xs font-black uppercase  text-slate-700 transition hover:border-[#23bdee] hover:text-slate-700"
+	            class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-white/60 px-3 py-2 text-xs font-black uppercase  text-slate-800 transition hover:border-[#23bdee] hover:text-slate-800"
 	            :aria-expanded="isProfileDropdownOpen"
 	            :aria-label="t('header.accounts')"
 	            aria-haspopup="menu"
@@ -752,7 +752,7 @@ onBeforeUnmount(() => {
             >
               <RouterLink
                 to="/account"
-                class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-white/60 hover:text-slate-700"
+                class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-black text-slate-800 transition hover:bg-white/60 hover:text-slate-800"
                 @click="closeProfileDropdown"
               >
                 {{ t('header.profile') }}
@@ -762,7 +762,7 @@ onBeforeUnmount(() => {
               </RouterLink>
               <button
                 type="button"
-                class="mt-2 flex w-full items-center justify-between rounded-2xl bg-red-500 px-4 py-3 text-sm font-black text-white transition hover:bg-red-500/10 hover:text-slate-700"
+                class="mt-2 flex w-full items-center justify-between rounded-2xl bg-red-500 px-4 py-3 text-sm font-black text-white transition hover:bg-red-500/10 hover:text-slate-800"
                 @click="handleSignOut"
               >
                 {{ t('header.signOut') }}
@@ -776,7 +776,7 @@ onBeforeUnmount(() => {
       </div>
 	      <button
 	        type="button"
-	        class="ml-auto inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-700 md:hidden"
+	        class="ml-auto inline-flex items-center rounded-xl border border-slate-700 bg-white/80 p-2 text-slate-800 md:hidden"
 	        :aria-label="t('header.toggleMenu')"
 	        :aria-expanded="isMobileNavOpen"
 	        @click="toggleMobileNav"
@@ -820,7 +820,7 @@ onBeforeUnmount(() => {
           >
             <div
               v-if="isMobileNavOpen"
-              class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-white/95 p-8 text-slate-700 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
+              class="relative w-full max-w-sm overflow-hidden rounded-[2.75rem] border border-slate-800/60 bg-white/95 p-8 text-slate-800 shadow-[0_45px_120px_rgba(3,12,33,0.85)]"
             >
 	          <div class="mb-8 flex items-center justify-between">
 	            <p class="text-xs font-black uppercase  text-[#0c86c3]">{{ t('header.menu') }}</p>
@@ -828,7 +828,7 @@ onBeforeUnmount(() => {
 	              <LanguageSwitcher />
 	              <button
 	                type="button"
-	                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:border-slate-500 hover:text-slate-700"
+	                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white/70 text-slate-600 transition hover:border-slate-500 hover:text-slate-800"
 	                :aria-label="t('header.closeMenu')"
 	                @click="closeMobileNav"
 	              >
@@ -838,7 +838,7 @@ onBeforeUnmount(() => {
 	              </button>
 	            </div>
 	          </div>
-          <nav class="text-sm font-black uppercase text-slate-700">
+          <nav class="text-sm font-black uppercase text-slate-800">
             <div
               ref="mobileNavListRef"
               class="relative"
@@ -1010,11 +1010,11 @@ onBeforeUnmount(() => {
 	          <div class="flex items-start justify-between gap-3">
 	            <div>
 	              <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">{{ t('header.emailSupport') }}</p>
-	              <p class="mt-1 text-lg font-black text-slate-700">{{ emailSupportAddress }}</p>
+	              <p class="mt-1 text-lg font-black text-slate-800">{{ emailSupportAddress }}</p>
 	            </div>
 	            <button
               type="button"
-              class="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
+              class="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0c86c3]"
 	              :aria-label="t('header.closeEmailSupportDialog')"
 	              @click="closeEmailSupportModal"
 	            >
@@ -1027,7 +1027,7 @@ onBeforeUnmount(() => {
 	            {{ t('header.tapCopyToEmail') }}
 	          </p>
           <div class="mt-4 flex flex-wrap items-center gap-3">
-            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-700">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800">
               {{ emailSupportAddress }}
             </div>
             <button

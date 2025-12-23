@@ -50,12 +50,12 @@ const toggle = (index: number) => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-white text-slate-700">
+  <main class="min-h-screen bg-white text-slate-800">
     <section class="max-w-4xl mx-auto px-6 py-16">
       <h1 class="text-4xl font-bold mb-8">{{ t('faq.title') }}</h1>
 
       <div data-aos="fade-up" class="bg-white/60 rounded-2xl shadow-xl border text-slate-800">
-        <ul class="divide-y text-slate-700">
+        <ul class="divide-y text-slate-800">
           <li
             v-for="(item, index) in faqs"
             :key="item.id"

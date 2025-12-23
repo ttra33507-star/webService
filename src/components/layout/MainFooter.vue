@@ -71,7 +71,7 @@ const iconPaths: Record<LegalCard['icon'], string> = {
                 <path :d="iconPaths[card.icon]" />
               </svg>
             </span>
-            <p class="mt-3 text-base font-semibold text-slate-700">{{ t(card.labelKey) }}</p>
+            <p class="mt-3 text-base font-semibold text-slate-800">{{ t(card.labelKey) }}</p>
             <p class="mt-1 text-xs text-slate-500">{{ t(card.descriptionKey) }}</p>
           </router-link>
         </article>
