@@ -28,7 +28,7 @@ const rows = computed(() => {
 
 <template>
   <div data-aos="fade-left" class="rounded-2xl border border-emerald-500/30 bg-white/80 p-6 shadow-emerald-500/10 shadow-xl">
-    <h2 class="text-lg font-semibold text-slate-900">{{ t('cart.summary.title') }}</h2>
+    <h2 class="text-lg font-semibold text-slate-700">{{ t('cart.summary.title') }}</h2>
     <dl class="mt-4 space-y-3 text-sm text-slate-600">
       <div v-for="row in rows" :key="row.id" class="flex items-center justify-between">
         <dt>{{ row.label }}</dt>
@@ -36,7 +36,7 @@ const rows = computed(() => {
           {{ formatCurrency(row.value) }}
         </dd>
       </div>
-      <div class="flex items-center justify-between border-t border-emerald-500/30 pt-4 text-base font-semibold text-slate-900">
+      <div class="flex items-center justify-between border-t border-emerald-500/30 pt-4 text-base font-semibold text-slate-700">
         <dt>{{ t('cart.summary.total') }}</dt>
         <dd>{{ formatCurrency(summary.total) }}</dd>
       </div>

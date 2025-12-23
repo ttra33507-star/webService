@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
           <!-- <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase  text-[#096b9f]">
             Launch faster
           </span> -->
-	          <h1 class="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl font-display">
+	          <h1 class="mt-6 text-4xl font-black tracking-tight text-slate-700 sm:text-5xl font-display">
 	            {{ t('home.hero.title') }}
 	          </h1>
 	          <p class="mt-4 text-lg font-medium leading-relaxed text-slate-600">
@@ -330,7 +330,7 @@ onBeforeUnmount(() => {
             >
               <div class="flex flex-col justify-between gap-6">
                 <div class="space-y-5 py-5">
-                  <h2 class="text-3xl font-black text-slate-900 sm:text-4xl font-display mt-9">
+                  <h2 class="text-3xl font-black text-slate-700 sm:text-4xl font-display mt-9">
                     {{ slide.title }}
                   </h2>
                   <p class="text-base font-medium text-slate-600 sm:text-lg">
@@ -351,7 +351,7 @@ onBeforeUnmount(() => {
           </div>
           <button
             type="button"
-            class="absolute left-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-slate-800/80 bg-white/80 p-3 text-slate-700 shadow-lg transition hover:text-slate-900 lg:flex"
+            class="absolute left-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-slate-800/80 bg-white/80 p-3 text-slate-700 shadow-lg transition hover:text-slate-700 lg:flex"
             aria-label="Show previous slide"
             @click="handlePrev"
           >
@@ -361,7 +361,7 @@ onBeforeUnmount(() => {
           </button>
           <button
             type="button"
-            class="absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-slate-800/80 bg-white/80 p-3 text-slate-700 shadow-lg transition hover:text-slate-900 lg:flex"
+            class="absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-slate-800/80 bg-white/80 p-3 text-slate-700 shadow-lg transition hover:text-slate-700 lg:flex"
             aria-label="Show next slide"
             @click="handleNext"
           >
@@ -393,7 +393,7 @@ onBeforeUnmount(() => {
 	      <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
 	        <div class="flex flex-wrap items-end justify-between gap-6">
 	          <div>
-	            <h2 class="text-3xl font-black text-slate-900 font-display">{{ t('home.featuredServices.title') }}</h2>
+	            <h2 class="text-3xl font-black text-slate-700 font-display">{{ t('home.featuredServices.title') }}</h2>
 	          </div>
 	          <RouterLink to="/services" class="inline-flex items-center text-sm font-black text-[#0c86c3] transition hover:text-[#096b9f]">
 	            {{ t('actions.viewCatalog') }}
@@ -406,12 +406,12 @@ onBeforeUnmount(() => {
 	          <div v-if="servicesError" data-aos="fade-up" class="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-100">
 	            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 	              <div>
-	                <p class="text-base font-black text-slate-900">{{ t('home.featuredServices.errors.title') }}</p>
+	                <p class="text-base font-black text-slate-700">{{ t('home.featuredServices.errors.title') }}</p>
 	                <p class="text-sm font-medium text-red-100/80">{{ servicesError }}</p>
 	              </div>
 	              <button
 	                type="button"
-	                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-black uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-900"
+	                class="inline-flex items-center justify-center rounded-full border border-red-400/40 px-5 py-2 text-xs font-black uppercase  text-red-100 transition hover:border-red-300 hover:text-slate-700"
 	                @click="retryFeaturedServices"
 	              >
 	                {{ t('actions.retry') }}
@@ -430,11 +430,11 @@ onBeforeUnmount(() => {
             </div>
           </div>
 	          <div v-else-if="!hasFeaturedServices" data-aos="fade-up" class="rounded-2xl border border-slate-900/80 bg-white/40 p-8 text-center text-slate-600">
-	            <p class="text-base font-black text-slate-900">{{ t('home.featuredServices.syncing.title') }}</p>
-	            <p class="mt-2 text-sm font-medium text-slate-900">{{ t('home.featuredServices.syncing.description') }}</p>
+	            <p class="text-base font-black text-slate-700">{{ t('home.featuredServices.syncing.title') }}</p>
+	            <p class="mt-2 text-sm font-medium text-slate-700">{{ t('home.featuredServices.syncing.description') }}</p>
 	            <RouterLink
 	              to="/services"
-	              class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-xs font-black uppercase  text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-900"
+	              class="mt-6 inline-flex items-center justify-center rounded-full border border-[#096b9f]/40 px-6 py-3 text-xs font-black uppercase  text-[#096b9f] transition hover:border-[#0fa6ef] hover:text-slate-700"
 	            >
 	              {{ t('actions.goToServices') }}
 	            </RouterLink>
@@ -458,8 +458,8 @@ onBeforeUnmount(() => {
               </div>
               <div class="relative space-y-4 p-6 transition duration-300 group-hover:translate-y-4 group-hover:opacity-0 group-focus-within:translate-y-4 group-focus-within:opacity-0">
                 <div>
-                  <h3 class="text-lg font-black text-slate-900">{{ card.title }}</h3>
-                  <p class="mt-2 text-sm font-medium text-slate-900">
+                  <h3 class="text-lg font-black text-slate-700">{{ card.title }}</h3>
+                  <p class="mt-2 text-sm font-medium text-slate-700">
                     {{ card.tagline }}
                   </p>
                 </div>
@@ -471,7 +471,7 @@ onBeforeUnmount(() => {
 	                  {{ t('actions.quickView') }}
 	                </span>
 	                <div class="space-y-2">
-	                  <h3 class="text-xl font-black text-slate-900">{{ card.title }}</h3>
+	                  <h3 class="text-xl font-black text-slate-700">{{ card.title }}</h3>
 	                </div>
 	                <RouterLink
 	                  :to="{ name: 'service-order', params: { serviceId: card.id } }"
