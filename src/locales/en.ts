@@ -54,6 +54,12 @@ const en = {
       description:
         'C4TechHub delivers modern services and smart digital tools designed to make your work faster and easier.',
     },
+    statsCards: {
+      ordersCompleted: 'Order Completed',
+      activeServices: 'Active Services',
+      activeUsers: 'Active Users',
+      smmPanelWorldwide: 'Smm Panel World Wide',
+    },
     heroSlides: {
       badges: {
         managedCheckout: 'Managed Checkout',
@@ -160,6 +166,10 @@ const en = {
       title: 'Sign in to continue',
       subtitle:
         'Use your account to continue ordering. Your session unlocks checkout flows and saved information.',
+      rememberMe: 'Remember me',
+      forgotPassword: 'Forgot password?',
+      noAccountPrompt: 'Do not have an account?',
+      noAccountAction: 'Sign up',
       email: 'Email',
       password: 'Password',
       cta: 'Sign in',

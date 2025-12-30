@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { LOCALE_STORAGE_KEY, type AppLocale } from '../../i18n';
+import { LOCALE_STORAGE_KEY, LOCALE_USER_SET_KEY, type AppLocale } from '../../i18n';
 import flagKm from '../../assets/Flag_of_Cambodia.svg.png';
 import flagEn from '../../assets/Flag_of_the_United.png';
 
@@ -15,9 +15,16 @@ const setLocale = (next: AppLocale) => {
   try {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      window.localStorage.setItem(LOCALE_USER_SET_KEY, '1');
     }
   } catch {
     // ignore storage errors (private mode, blocked storage, etc.)
+  }
+
+  try {
+    document.documentElement.lang = next;
+  } catch {
+    // ignore
   }
 };
 
