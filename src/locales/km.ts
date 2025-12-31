@@ -54,6 +54,12 @@ const km = {
       description:
         'C4 TECH HUB ផ្តល់ជូនសេវាកម្មជាច្រើន និងធូលឌីជីថលឆ្លាតវៃ ដែលរចនាឡើងដើម្បីជួយឲ្យការងាររបស់អ្នក លឿនជាងមុន និងងាយស្រួលជាងមុន',
     },
+    statsCards: {
+      ordersCompleted: 'ការបញ្ជាទិញបានបញ្ចប់',
+      activeServices: 'សេវាកម្មសកម្ម',
+      activeUsers: 'អ្នកប្រើប្រាស់សកម្ម',
+      smmPanelWorldwide: 'SMM Panel ទូទាំងពិភពលោក',
+    },
     heroSlides: {
       badges: {
         managedCheckout: 'ការទូទាត់គ្រប់គ្រង',
@@ -160,6 +166,10 @@ const km = {
       title: 'ចូលដើម្បីបន្ត',
       subtitle:
         'ប្រើគណនីរបស់អ្នកដើម្បីបន្តការបញ្ជាទិញ។ ការចូលប្រើរបស់អ្នកនឹងអនុញ្ញាតឲ្យធ្វើការទូទាត់ និងរក្សាទុកព័ត៌មាន។',
+      rememberMe: 'ចងចាំខ្ញុំ',
+      forgotPassword: 'ភ្លេចពាក្យសម្ងាត់?',
+      noAccountPrompt: 'មិនមានគណនីទេ?',
+      noAccountAction: 'ចុះឈ្មោះ',
       email: 'អ៊ីមែល',
       password: 'ពាក្យសម្ងាត់',
       cta: 'ចូល',

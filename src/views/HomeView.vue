@@ -1,31 +1,10 @@
 ﻿<script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { fetchBestsellerServices } from '../services/catalogService';
 import type { ServiceRecord } from '../types/service';
-
-type HeroHighlightIcon = 'clock' | 'check' | 'trend';
-
-interface HeroHighlight {
-  text: string;
-  classes: string;
-  icon?: HeroHighlightIcon;
-}
-
-interface HeroSlide {
-  id: string;
-  badgeLabel: string;
-  badgeClasses: string;
-  gradient: string;
-  title: string;
-  description: string;
-  highlights: HeroHighlight[];
-  image: {
-    src: string;
-    alt: string;
-    shadow: string;
-  };
-}
+import SignInSection from '../components/auth/SignInSection.vue';
+import { useAuth } from '../composables/useAuth';
 
 interface FeaturedServiceCard {
   id: number;
@@ -43,135 +22,9 @@ interface FeaturedServiceCard {
 type ServiceImagery = { src: string; alt: string };
 
 const { locale, t } = useI18n({ useScope: 'global' });
+const { isAuthenticated } = useAuth();
 
-const heroSlides = computed<HeroSlide[]>(() => {
-  void locale.value;
-
-  return [
-  {
-    id: 'managed-checkout',
-    badgeLabel: t('home.heroSlides.badges.managedCheckout'),
-    badgeClasses: 'border-[#096b9f]/35 bg-white/70 text-[#096b9f]',
-    gradient: 'from-[#096b9f]/20 via-slate-950/80 to-slate-950',
-    title: t('home.heroSlides.managedCheckoutTitle'),
-    description: t('home.heroSlides.managedCheckoutDescription'),
-    highlights: [
-      {
-        text: t('home.heroSlides.highlights.goLive48Hours'),
-        classes: 'rounded-xl border border-[#096b9f]/35 bg-[#096b9f]/10 px-3 py-2 font-medium text-[#096b9f]',
-        icon: 'clock',
-      },
-      {
-        text: t('home.heroSlides.highlights.noCodeCustomization'),
-        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
-      },
-    ],
-    image: {
-      src: '/images/Boostt Follower.jpg',
-      alt: t('home.heroSlides.managedCheckoutImageAlt'),
-      shadow: 'shadow-[#096b9f]/10',
-    },
-  },
-  {
-    id: 'commerce-playbooks',
-    badgeLabel: t('home.heroSlides.badges.commercePlaybooks'),
-    badgeClasses: 'border-blue-400/30 bg-white/70 text-blue-200',
-    gradient: 'from-blue-500/15 via-slate-950/80 to-slate-950',
-    title: t('home.heroSlides.facebookAutomationTitle'),
-    description: t('home.heroSlides.facebookAutomationDescription'),
-    highlights: [
-      {
-        text: t('home.heroSlides.highlights.templatesReady'),
-        classes: 'rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2 font-medium text-blue-200',
-        icon: 'check',
-      },
-      {
-        text: t('home.heroSlides.highlights.crmAnalytics'),
-        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
-      },
-    ],
-    image: {
-      src: '/images/Facebook.jpg',
-      alt: t('home.heroSlides.facebookAutomationImageAlt'),
-      shadow: 'shadow-blue-500/10',
-    },
-  },
-  {
-    id: 'telegram-automation',
-    badgeLabel: t('home.heroSlides.badges.realTimeInsights'),
-    badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
-    gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: t('home.heroSlides.telegramAutomationTitle'),
-    description: t('home.heroSlides.telegramAutomationDescription'),
-    highlights: [
-      {
-        text: t('home.heroSlides.highlights.revenuePulse'),
-        classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
-        icon: 'trend',
-      },
-      {
-        text: t('home.heroSlides.highlights.exportReports'),
-        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
-      },
-    ],
-    image: {
-      src: '/images/Telegram.jpg',
-      alt: t('home.heroSlides.telegramAutomationImageAlt'),
-      shadow: 'shadow-purple-500/10',
-    },
-  },
-  {
-    id: 'tiktok-downloader',
-    badgeLabel: t('home.heroSlides.badges.realTimeInsights'),
-    badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
-    gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: t('home.heroSlides.tiktokDownloaderTitle'),
-    description: t('home.heroSlides.tiktokDownloaderDescription'),
-    highlights: [
-      {
-        text: t('home.heroSlides.highlights.revenuePulse'),
-        classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
-        icon: 'trend',
-      },
-      {
-        text: t('home.heroSlides.highlights.exportReports'),
-        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
-      },
-    ],
-    image: {
-      src: '/images/Download.jpg',
-      alt: t('home.heroSlides.tiktokDownloaderImageAlt'),
-      shadow: 'shadow-purple-500/10',
-    },
-  },
-  {
-    id: 'page-management',
-    badgeLabel: t('home.heroSlides.badges.realTimeInsights'),
-    badgeClasses: 'border-purple-400/30 bg-white/70 text-purple-200',
-    gradient: 'from-purple-500/15 via-slate-950/80 to-slate-950',
-    title: t('home.heroSlides.pageManagementTitle'),
-    description: t('home.heroSlides.pageManagementDescription'),
-    highlights: [
-      {
-        text: t('home.heroSlides.highlights.revenuePulse'),
-        classes: 'rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 font-medium text-purple-200',
-        icon: 'trend',
-      },
-      {
-        text: t('home.heroSlides.highlights.exportReports'),
-        classes: 'rounded-xl border border-slate-800 bg-white/70 px-3 py-2',
-      },
-    ],
-    image: {
-      src: '/images/Handle Pages.jpg',
-      alt: t('home.heroSlides.pageManagementImageAlt'),
-      shadow: 'shadow-purple-500/10',
-    },
-  },
-  ];
-});
-
-const FEATURED_SERVICE_LIMIT = 6;
+const FEATURED_SERVICE_LIMIT = 12;
 const featuredServices = ref<ServiceRecord[]>([]);
 const isServicesLoading = ref(true);
 const servicesError = ref<string | null>(null);
@@ -243,151 +96,14 @@ const retryFeaturedServices = () => {
   return loadFeaturedServices();
 };
 
-const activeHeroSlide = ref(0);
-
-let heroTimer: number | null = null;
-const HERO_INTERVAL_MS = 4000;
-
-const goToSlide = (index: number) => {
-  const total = heroSlides.value.length;
-  activeHeroSlide.value = ((index % total) + total) % total;
-};
-
-const startAutoSlide = () => {
-  if (heroTimer !== null || heroSlides.value.length <= 1) {
-    return;
-  }
-  heroTimer = window.setInterval(() => {
-    goToSlide(activeHeroSlide.value + 1);
-  }, HERO_INTERVAL_MS);
-};
-
-const stopAutoSlide = () => {
-  if (heroTimer !== null) {
-    window.clearInterval(heroTimer);
-    heroTimer = null;
-  }
-};
-
-const restartAutoSlide = () => {
-  stopAutoSlide();
-  startAutoSlide();
-};
-
-const handlePrev = () => {
-  goToSlide(activeHeroSlide.value - 1);
-  restartAutoSlide();
-};
-
-const handleNext = () => {
-  goToSlide(activeHeroSlide.value + 1);
-  restartAutoSlide();
-};
-
-const handleSelectSlide = (index: number) => {
-  goToSlide(index);
-  restartAutoSlide();
-};
-
 onMounted(() => {
-  startAutoSlide();
   loadFeaturedServices();
-});
-
-onBeforeUnmount(() => {
-  stopAutoSlide();
 });
 </script>
 
 <template>
   <div>
-    <section class="border-y border-white bg-white/60">
-      <div class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8">
-        <div class="max-w-3xl">
-          <!-- <span class="inline-flex items-center gap-2 rounded-full border border-[#096b9f]/40 bg-[#096b9f]/10 px-4 py-2 text-xs font-semibold uppercase  text-[#096b9f]">
-            Launch faster
-          </span> -->
-	          <h1 class="mt-6 text-4xl font-black tracking-tight text-slate-800 sm:text-5xl font-display">
-	            {{ t('home.hero.title') }}
-	          </h1>
-	          <p class="mt-4 text-lg font-medium leading-relaxed text-slate-600">
-	            {{ t('home.hero.description') }}
-	          </p>
-	        </div>
-        <div
-          class="relative"
-          @mouseenter="stopAutoSlide"
-          @mouseleave="startAutoSlide"
-          @touchstart.passive="stopAutoSlide"
-          @touchend="startAutoSlide"
-        >
-          <div data-aos="fade-up" class="relative overflow-hidden rounded-3xl border border-slate-900/80 bg-white/40 shadow-2xl shadow-[#096b9f]/10">
-            <article
-              v-for="(slide, index) in heroSlides"
-              :key="slide.id"
-              class="grid min-h-[22rem] gap-8 bg-white px-8 py-10 transition duration-500 sm:grid-cols-[1.1fr_0.9fr] sm:px-12 sm:py-14"
-              :class="[slide.gradient, index === activeHeroSlide ? 'opacity-100' : 'hidden opacity-0']"
-            >
-              <div class="flex flex-col justify-between gap-6">
-                <div class="space-y-5 py-5">
-                  <h2 class="text-3xl font-black text-slate-800 sm:text-4xl font-display mt-9">
-                    {{ slide.title }}
-                  </h2>
-                  <p class="text-base font-medium text-slate-600 sm:text-lg">
-                    {{ slide.description }}
-                  </p>
-                </div>
-                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600"></div>
-              </div>
-              <div class="relative flex items-center justify-center">
-                <img
-                  :src="slide.image.src"
-                  :alt="slide.image.alt"
-                  class="h-full max-h-[18rem] w-full max-w-[20rem] rounded-2xl border border-slate-800/80 bg-white/70 object-cover shadow-lg"
-                  :class="slide.image.shadow"
-                />
-              </div>
-            </article>
-          </div>
-          <button
-            type="button"
-            class="absolute left-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-slate-800/80 bg-white/80 p-3 text-slate-800 shadow-lg transition hover:text-slate-800 lg:flex"
-            aria-label="Show previous slide"
-            @click="handlePrev"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 6l-6 6 6 6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-full border border-slate-800/80 bg-white/80 p-3 text-slate-800 shadow-lg transition hover:text-slate-800 lg:flex"
-            aria-label="Show next slide"
-            @click="handleNext"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 6l6 6-6 6" />
-            </svg>
-          </button>
-          <div class="mt-6 flex justify-center gap-3">
-            <button
-              v-for="(slide, index) in heroSlides"
-              :key="`dot-${slide.id}`"
-              type="button"
-              class="h-3 w-3 rounded-full border transition"
-              :class="
-                index === activeHeroSlide
-                  ? 'border-[#096b9f]/60 bg-[#096b9f]'
-                  : 'border-slate-700 bg-white/80 hover:border-[#0fa6ef]/60 hover:bg-white'
-              "
-              :aria-label="`Show slide ${index + 1}`"
-              :aria-selected="index === activeHeroSlide"
-              @click="handleSelectSlide(index)"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
+    <SignInSection v-if="!isAuthenticated" />
 
     <section class="border-t border-white bg-white/40">
 	      <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
